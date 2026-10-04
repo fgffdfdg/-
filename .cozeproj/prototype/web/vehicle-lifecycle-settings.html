@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary:              #1A2A4A;
+      --color-primary-container:    #E8EDF6;
+      --color-on-primary:           #ffffff;
+      --color-accent:               #F48120;
+      --color-accent-container:     #FEEFDF;
+      --color-on-accent:            #ffffff;
+      --color-background:                 #F6F8FB;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EEF1F6;
+      --color-surface-container-high:     #E6EAF2;
+      --color-surface-container-highest:  #DBE1EC;
+      --color-on-surface:           #152033;
+      --color-on-surface-variant:   #637089;
+      --color-success:  #16A37B;
+      --color-error:    #DC2626;
+      --color-warning:  #F59E0B;
+      --color-info:     #3B82F6;
+      --color-outline:          #CBD3E1;
+      --color-outline-variant:  #E6EAF2;
+      --radius-sm:   0.25rem;
+      --radius-md:   0.375rem;
+      --radius-lg:   0.5rem;
+      --radius-xl:   0.75rem;
+      --radius-2xl:  1rem;
+      --radius-full: 9999px;
+      --shadow-card:   0 1px 3px rgba(21,32,51,0.08), 0 1px 2px rgba(21,32,51,0.04);
+      --shadow-float:  0 10px 25px rgba(21,32,51,0.10);
+      --shadow-dialog: 0 25px 50px rgba(21,32,51,0.18);
+      --font-sans: "Inter", "Noto Sans SC", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- @nav:start -->
+  <header class="bg-surface sticky top-0 z-40 h-16 flex items-center justify-between px-6 border-b border-outline-variant/30">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+        <i data-lucide="car-front" class="w-4.5 h-4.5 text-on-primary"></i>
+      </div>
+      <span class="font-bold text-base text-on-surface">ExportDrive</span>
+      <span class="w-px h-5 bg-outline-variant"></span>
+      <span class="text-sm text-on-surface-variant font-medium">车辆生命周期管理</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors">
+        <i data-lucide="bell" class="w-4.5 h-4.5"></i>
+      </button>
+      <div class="flex items-center gap-2 pl-3 border-l border-outline-variant/30">
+        <div class="w-8 h-8 rounded-full bg-primary-container text-primary flex items-center justify-center text-sm font-semibold">初</div>
+        <span class="text-sm font-medium text-on-surface">小初</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex" style="height: calc(100vh - 4rem)">
+    <aside class="w-60 shrink-0 bg-surface border-r border-outline-variant/30 overflow-y-auto">
+      <div class="p-3 space-y-0.5">
+        <div class="px-3 pt-2 pb-1.5 text-xs font-semibold text-on-surface-variant/70 tracking-wide">车辆生命周期</div>
+        <a href="vehicle-lifecycle.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="route" class="w-4 h-4"></i>车辆总览
+        </a>
+        <a href="vehicle-lifecycle-new.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="file-plus" class="w-4 h-4"></i>新建建档
+        </a>
+        <a href="vehicle-lifecycle-settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md bg-primary/10 text-primary font-medium text-sm" aria-current="page">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>阶段字段设置
+        </a>
+      </div>
+    </aside>
+    <!-- @nav:end -->
+
+    <!-- @main-content:start -->
+    <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6">
+
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-on-surface">阶段字段设置</h1>
+        <p class="text-sm text-on-surface-variant mt-1">自定义每个阶段的固定填写字段，车辆进入阶段后按此模板录入</p>
+      </div>
+
+      <div class="bg-info/10 rounded-xl p-4 flex items-start gap-3 mb-6">
+        <i data-lucide="info" class="w-4.5 h-4.5 text-info shrink-0 mt-0.5"></i>
+        <p class="text-sm text-on-surface leading-relaxed">每个阶段默认保留「阶段纪要」自由文本区，固定字段与纪要可同时使用。修改字段配置后，新进入该阶段的车辆按新模板执行，已有数据不受影响。</p>
+      </div>
+
+      <div class="grid grid-cols-12 gap-6">
+
+        <div class="col-span-3">
+          <div class="bg-surface rounded-xl shadow-card p-2 space-y-0.5">
+            <button class="stage-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors text-on-surface-variant hover:bg-surface-container" data-stage="1" data-name="建立车辆档案">
+              <span class="stage-num w-6 h-6 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center text-xs font-semibold shrink-0">1</span>
+              <span class="flex-1 text-left truncate">建立车辆档案</span>
+              <span class="stage-count text-xs opacity-70 shrink-0">5 字段</span>
+            </button>
+            <button class="stage-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors text-on-surface-variant hover:bg-surface-container" data-stage="2" data-name="制作形式发票">
+              <span class="stage-num w-6 h-6 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center text-xs font-semibold shrink-0">2</span>
+              <span class="flex-1 text-left truncate">制作形式发票</span>
+              <span class="stage-count text-xs opacity-70 shrink-0">6 字段</span>
+            </button>
+            <button class="stage-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors text-on-surface-variant hover:bg-surface-container" data-stage="3" data-name="完成车辆采购">
+              <span class="stage-num w-6 h-6 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center text-xs font-semibold shrink-0">3</span>
+              <span class="flex-1 text-left truncate">完成车辆采购</span>
+              <span class="stage-count text-xs opacity-70 shrink-0">6 字段</span>
+            </button>
+            <button class="stage-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors text-on-surface-variant hover:bg-surface-container" data-stage="4" data-name="出口待转移">
+              <span class="stage-num w-6 h-6 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center text-xs font-semibold shrink-0">4</span>
+              <span class="flex-1 text-left truncate">出口待转移</span>
+              <span class="stage-count text-xs opacity-70 shrink-0">4 字段</span>
+            </button>
+            <button class="stage-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors text-on-surface-variant hover:bg-surface-container" data-stage="5" data-name="合同/发票/装箱单">
+              <span class="stage-num w-6 h-6 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center text-xs font-semibold shrink-0">5</span>
+              <span class="flex-1 text-left truncate">合同/发票/装箱单</span>
+              <span class="stage-count text-xs opacity-70 shrink-0">7 字段</span>
+            </button>
+            <button class="stage-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors bg-primary/10 text-primary font-medium" data-stage="6" data-name="制定出口许可证">
+              <span class="stage-num w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-semibold shrink-0">6</span>
+              <span class="flex-1 text-left truncate">制定出口许可证</span>
+              <span class="stage-count text-xs opacity-70 shrink-0">8 字段</span>
+            </button>
+            <button class="stage-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors text-on-surface-variant hover:bg-surface-container" data-stage="7" data-name="出口报关单">
+              <span class="stage-num w-6 h-6 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center text-xs font-semibold shrink-0">7</span>
+              <span class="flex-1 text-left truncate">出口报关单</span>
+              <span class="stage-count text-xs opacity-70 shrink-0">6 字段</span>
+            </button>
+            <button class="stage-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors text-on-surface-variant hover:bg-surface-container" data-stage="8" data-name="提单">
+              <span class="stage-num w-6 h-6 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center text-xs font-semibold shrink-0">8</span>
+              <span class="flex-1 text-left truncate">提单</span>
+              <span class="stage-count text-xs opacity-70 shrink-0">5 字段</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="col-span-9 min-w-0">
+
+          <div class="flex items-center justify-between mb-4">
+            <h2 id="stage-title" class="text-base font-semibold text-on-surface">制定出口许可证 · 字段配置</h2>
+            <div class="flex items-center gap-2.5">
+              <span class="text-sm text-on-surface-variant">保留阶段纪要</span>
+              <button id="toggle-notes" class="w-10 h-6 rounded-full bg-success relative transition-colors" title="切换阶段纪要开关">
+                <span class="toggle-dot absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white shadow transition-all"></span>
+              </button>
+              <span id="toggle-notes-label" class="text-xs text-success font-medium w-9">已开启</span>
+            </div>
+          </div>
+
+          <div id="panels-wrap">
+          <!-- 面板 1：建立车辆档案 -->
+          <div id="panel-1" class="stage-panel hidden">
+            <div class="bg-surface rounded-xl shadow-card overflow-hidden">
+              <div class="grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+                <span>排序</span><span>字段名</span><span>类型</span><span>必填</span><span>说明</span><span>操作</span>
+              </div>
+              <div class="panel-rows divide-y divide-outline-variant/20">
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">车牌号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">初次登记日期</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/10 text-warning w-fit">日期</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">表显里程</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-info/10 text-info w-fit">数字</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">单位 km</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">车源渠道</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/10 text-success w-fit">下拉选择</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">拍卖 / 车商采购 / 个人收购</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">车辆照片</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent w-fit">附件</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-surface-container text-on-surface-variant w-fit" title="点击切换必填/选填">选填</button>
+                  <span class="text-sm text-on-surface-variant truncate">外观四角 + 内饰</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 面板 2：制作形式发票 -->
+          <div id="panel-2" class="stage-panel hidden">
+            <div class="bg-surface rounded-xl shadow-card overflow-hidden">
+              <div class="grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+                <span>排序</span><span>字段名</span><span>类型</span><span>必填</span><span>说明</span><span>操作</span>
+              </div>
+              <div class="panel-rows divide-y divide-outline-variant/20">
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">发票编号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">PI 编号</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">买方名称</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">贸易条款</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/10 text-success w-fit">下拉选择</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">FOB / CIF / CFR</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">发票金额</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-info/10 text-info w-fit">金额</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">币种另选</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">币种</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/10 text-success w-fit">下拉选择</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">USD / EUR / AED</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">发票日期</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/10 text-warning w-fit">日期</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 面板 3：完成车辆采购 -->
+          <div id="panel-3" class="stage-panel hidden">
+            <div class="bg-surface rounded-xl shadow-card overflow-hidden">
+              <div class="grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+                <span>排序</span><span>字段名</span><span>类型</span><span>必填</span><span>说明</span><span>操作</span>
+              </div>
+              <div class="panel-rows divide-y divide-outline-variant/20">
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">采购合同编号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">卖方名称</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">采购价格</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-info/10 text-info w-fit">金额</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">绿本取得</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent w-fit">附件</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">机动车登记证书</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">行驶证</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent w-fit">附件</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">付款凭证</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent w-fit">附件</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-surface-container text-on-surface-variant w-fit" title="点击切换必填/选填">选填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 面板 4：出口待转移 -->
+          <div id="panel-4" class="stage-panel hidden">
+            <div class="bg-surface rounded-xl shadow-card overflow-hidden">
+              <div class="grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+                <span>排序</span><span>字段名</span><span>类型</span><span>必填</span><span>说明</span><span>操作</span>
+              </div>
+              <div class="panel-rows divide-y divide-outline-variant/20">
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">转移登记日期</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/10 text-warning w-fit">日期</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">临时牌照号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">监管仓名称</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-surface-container text-on-surface-variant w-fit" title="点击切换必填/选填">选填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">交易发票</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent w-fit">附件</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 面板 5：合同/发票/装箱单 -->
+          <div id="panel-5" class="stage-panel hidden">
+            <div class="bg-surface rounded-xl shadow-card overflow-hidden">
+              <div class="grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+                <span>排序</span><span>字段名</span><span>类型</span><span>必填</span><span>说明</span><span>操作</span>
+              </div>
+              <div class="panel-rows divide-y divide-outline-variant/20">
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">销售合同编号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">商业发票号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">装箱单号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">装运方式</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/10 text-success w-fit">下拉选择</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">滚装 / 集装箱 / 框架箱</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">起运港</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/10 text-success w-fit">下拉选择</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">上海 / 深圳 / 天津 / 青岛</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">目的港</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">合同扫描件</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent w-fit">附件</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-surface-container text-on-surface-variant w-fit" title="点击切换必填/选填">选填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 面板 6：制定出口许可证 -->
+          <div id="panel-6" class="stage-panel">
+            <div class="bg-surface rounded-xl shadow-card overflow-hidden">
+              <div class="grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+                <span>排序</span><span>字段名</span><span>类型</span><span>必填</span><span>说明</span><span>操作</span>
+              </div>
+              <div class="panel-rows divide-y divide-outline-variant/20">
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">许可证编号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">商务部许可证编号</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">出口商名称</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">与营业执照一致</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">目的国</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/10 text-success w-fit">下拉选择</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">选项：阿联酋 / 沙特 / 尼日利亚 / 巴西 / 俄罗斯</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">合同编号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">关联销售合同</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">车辆数量</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-info/10 text-info w-fit">数字</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">本批次出口车辆数</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">许可证签发日期</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/10 text-warning w-fit">日期</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-surface-container text-on-surface-variant w-fit" title="点击切换必填/选填">选填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">目的国准入证明</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent w-fit">附件</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">GSO / GCC 等认证文件</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">备注</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-surface-container text-on-surface-variant w-fit" title="点击切换必填/选填">选填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 面板 7：出口报关单 -->
+          <div id="panel-7" class="stage-panel hidden">
+            <div class="bg-surface rounded-xl shadow-card overflow-hidden">
+              <div class="grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+                <span>排序</span><span>字段名</span><span>类型</span><span>必填</span><span>说明</span><span>操作</span>
+              </div>
+              <div class="panel-rows divide-y divide-outline-variant/20">
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">报关单号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">海关编号</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">报关行</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">申报日期</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/10 text-warning w-fit">日期</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">申报金额</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-info/10 text-info w-fit">金额</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">监管方式</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/10 text-success w-fit">下拉选择</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">一般贸易 / 其他</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">报关委托书</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent w-fit">附件</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 面板 8：提单 -->
+          <div id="panel-8" class="stage-panel hidden">
+            <div class="bg-surface rounded-xl shadow-card overflow-hidden">
+              <div class="grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+                <span>排序</span><span>字段名</span><span>类型</span><span>必填</span><span>说明</span><span>操作</span>
+              </div>
+              <div class="panel-rows divide-y divide-outline-variant/20">
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">提单号</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">B/L No.</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">船公司</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">船名航次</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">单行文本</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">开船日期</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/10 text-warning w-fit">日期</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">ETD</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+                <div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">
+                  <div class="flex items-center gap-1">
+                    <button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>
+                    <button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>
+                  </div>
+                  <span class="field-name text-sm font-medium text-on-surface">提单扫描件</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-accent/10 text-accent w-fit">附件</span>
+                  <button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error w-fit" title="点击切换必填/选填">必填</button>
+                  <span class="text-sm text-on-surface-variant truncate">—</span>
+                  <div class="flex items-center gap-2">
+                    <button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <div class="bg-surface rounded-xl shadow-card p-5 mt-6">
+            <h3 class="text-base font-semibold text-on-surface mb-4">新增字段</h3>
+            <div class="flex items-center gap-3 flex-wrap">
+              <input id="new-field-name" class="w-48 bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" placeholder="如：检测报告编号" />
+              <select id="new-field-type" class="bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors">
+                <option value="单行文本">单行文本</option>
+                <option value="多行文本">多行文本</option>
+                <option value="数字">数字</option>
+                <option value="金额">金额</option>
+                <option value="日期">日期</option>
+                <option value="下拉选择">下拉选择</option>
+                <option value="附件">附件</option>
+              </select>
+              <label class="flex items-center gap-2 text-sm text-on-surface cursor-pointer select-none">
+                <input id="new-field-required" type="checkbox" class="w-4 h-4 accent-primary" />必填
+              </label>
+              <input id="new-field-desc" class="flex-1 min-w-40 bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" placeholder="字段说明（选填）" />
+              <button id="btn-add-field" class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>添加字段
+              </button>
+            </div>
+            <p id="add-field-error" class="hidden text-xs text-error mt-2">请输入字段名后再添加</p>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+    <!-- @main-content:end -->
+  </div>
+
+  <script>
+    $(function () {
+      var activeStage = 6;
+
+      var TYPE_CLS = {
+        '单行文本': 'bg-primary/10 text-primary',
+        '多行文本': 'bg-primary/10 text-primary',
+        '数字': 'bg-info/10 text-info',
+        '金额': 'bg-info/10 text-info',
+        '日期': 'bg-warning/10 text-warning',
+        '下拉选择': 'bg-success/10 text-success',
+        '附件': 'bg-accent/10 text-accent'
+      };
+
+      function updateCount($panel) {
+        var stage = $panel.attr('id').replace('panel-', '');
+        var n = $panel.find('.field-row').length;
+        $('.stage-item[data-stage="' + stage + '"]').find('.stage-count').text(n + ' 字段');
+      }
+
+      // 阶段切换
+      $('.stage-item').on('click', function () {
+        var $item = $(this);
+        activeStage = parseInt($item.data('stage'), 10);
+        $('.stage-item').removeClass('bg-primary/10 text-primary font-medium').addClass('text-on-surface-variant hover:bg-surface-container');
+        $('.stage-num').removeClass('bg-primary text-on-primary').addClass('bg-surface-container text-on-surface-variant');
+        $item.removeClass('text-on-surface-variant hover:bg-surface-container').addClass('bg-primary/10 text-primary font-medium');
+        $item.find('.stage-num').removeClass('bg-surface-container text-on-surface-variant').addClass('bg-primary text-on-primary');
+        $('.stage-panel').addClass('hidden');
+        $('#panel-' + activeStage).removeClass('hidden');
+        $('#stage-title').text($item.data('name') + ' · 字段配置');
+      });
+
+      // 上移 / 下移
+      $('#panels-wrap').on('click', '.btn-up', function () {
+        var $row = $(this).closest('.field-row');
+        var $prev = $row.prev('.field-row');
+        if ($prev.length) { $row.insertBefore($prev); }
+      });
+      $('#panels-wrap').on('click', '.btn-down', function () {
+        var $row = $(this).closest('.field-row');
+        var $next = $row.next('.field-row');
+        if ($next.length) { $row.insertAfter($next); }
+      });
+
+      // 删除字段
+      $('#panels-wrap').on('click', '.btn-del', function () {
+        var $panel = $(this).closest('.stage-panel');
+        $(this).closest('.field-row').remove();
+        updateCount($panel);
+      });
+
+      // 必填 / 选填切换
+      $('#panels-wrap').on('click', '.badge-required', function () {
+        var $b = $(this);
+        if ($b.text().trim() === '必填') {
+          $b.text('选填').removeClass('bg-error/10 text-error').addClass('bg-surface-container text-on-surface-variant');
+        } else {
+          $b.text('必填').removeClass('bg-surface-container text-on-surface-variant').addClass('bg-error/10 text-error');
+        }
+      });
+
+      // 编辑按钮 —— 完整交互说明（原型仅保留入口）：
+      // 1. 点击后该行「字段名 / 类型 / 说明」就地替换为对应输入控件（input / select），并自动聚焦字段名输入框
+      // 2. 行尾出现「保存 / 取消」按钮：保存时校验字段名非空，写回单元格文本；取消则还原原值
+      // 3. 若字段类型变更（如文本→下拉选择），应同时展开「选项值」编辑区供维护下拉选项
+      // 4. 保存后前端即时生效，实际产品中需调用后端接口持久化字段配置
+      $('#panels-wrap').on('click', '.btn-edit', function () {
+        var name = $(this).closest('.field-row').find('.field-name').text();
+        console.log('编辑字段:', name);
+      });
+
+      // 保留阶段纪要开关
+      $('#toggle-notes').on('click', function () {
+        var $dot = $(this).find('.toggle-dot');
+        if ($(this).hasClass('bg-success')) {
+          $(this).removeClass('bg-success').addClass('bg-surface-container-highest');
+          $dot.removeClass('right-0.5').addClass('left-0.5');
+          $('#toggle-notes-label').text('已关闭').removeClass('text-success').addClass('text-on-surface-variant');
+        } else {
+          $(this).removeClass('bg-surface-container-highest').addClass('bg-success');
+          $dot.removeClass('left-0.5').addClass('right-0.5');
+          $('#toggle-notes-label').text('已开启').removeClass('text-on-surface-variant').addClass('text-success');
+        }
+      });
+
+      // 新增字段
+      $('#btn-add-field').on('click', function () {
+        var name = $.trim($('#new-field-name').val());
+        if (!name) {
+          $('#add-field-error').removeClass('hidden');
+          return;
+        }
+        $('#add-field-error').addClass('hidden');
+        var type = $('#new-field-type').val();
+        var required = $('#new-field-required').is(':checked');
+        var desc = $.trim($('#new-field-desc').val()) || '—';
+        var typeCls = TYPE_CLS[type] || 'bg-primary/10 text-primary';
+        var reqCls = required ? 'bg-error/10 text-error' : 'bg-surface-container text-on-surface-variant';
+        var reqText = required ? '必填' : '选填';
+        var row = '<div class="field-row grid grid-cols-[4rem,1.1fr,6.5rem,5rem,1.4fr,4.5rem] gap-2 items-center px-4 py-3 hover:bg-surface-container/50 transition-colors">'
+          + '<div class="flex items-center gap-1">'
+          + '<button class="btn-up w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="上移"><i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></button>'
+          + '<button class="btn-down w-6 h-6 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="下移"><i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></button>'
+          + '</div>'
+          + '<span class="field-name text-sm font-medium text-on-surface">' + name + '</span>'
+          + '<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium ' + typeCls + ' w-fit">' + type + '</span>'
+          + '<button class="badge-required inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium ' + reqCls + ' w-fit" title="点击切换必填/选填">' + reqText + '</button>'
+          + '<span class="text-sm text-on-surface-variant truncate">' + desc + '</span>'
+          + '<div class="flex items-center gap-2">'
+          + '<button class="btn-edit text-on-surface-variant hover:text-primary transition-colors" title="编辑"><i data-lucide="pencil" class="w-4 h-4"></i></button>'
+          + '<button class="btn-del text-on-surface-variant hover:text-error transition-colors" title="删除"><i data-lucide="trash-2" class="w-4 h-4"></i></button>'
+          + '</div></div>';
+        var $panel = $('#panel-' + activeStage);
+        $panel.find('.panel-rows').append(row);
+        lucide.createIcons();
+        updateCount($panel);
+        $('#new-field-name').val('');
+        $('#new-field-desc').val('');
+        $('#new-field-required').prop('checked', false);
+      });
+
+      $('#new-field-name').on('input', function () {
+        if ($.trim($(this).val())) { $('#add-field-error').addClass('hidden'); }
+      });
+    });
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

@@ -1,0 +1,44 @@
+{
+  "elements": [
+    {
+      "type": "html",
+      "options": {
+        "path": ".cozeproj/prototype/web/vehicle-lifecycle.html"
+      },
+      "title": "车辆生命周期总览",
+      "size": "web"
+    },
+    {
+      "type": "html",
+      "options": {
+        "path": ".cozeproj/prototype/web/vehicle-lifecycle-detail.html"
+      },
+      "title": "车辆生命周期详情",
+      "size": "web"
+    },
+    {
+      "type": "html",
+      "options": {
+        "path": ".cozeproj/prototype/web/vehicle-lifecycle-new.html"
+      },
+      "title": "新建车辆建档",
+      "size": "web"
+    },
+    {
+      "type": "html",
+      "options": {
+        "path": ".cozeproj/prototype/web/vehicle-lifecycle-stage.html"
+      },
+      "title": "阶段信息填写",
+      "size": "web"
+    },
+    {
+      "type": "html",
+      "options": {
+        "path": ".cozeproj/prototype/web/vehicle-lifecycle-settings.html"
+      },
+      "title": "阶段字段设置",
+      "size": "web"
+    }
+  ]
+}

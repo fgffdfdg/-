@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>组织设置 - ExportDrive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://lf-code-agent.coze.cn/obj/x-ai-cn/fonts/google/google-all-fonts.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary: #0C2D48;
+      --color-primary-light: #1A5276;
+      --color-accent: #E67E22;
+      --color-accent-light: #F39C12;
+      --color-success: #27AE60;
+      --color-danger: #E74C3C;
+      --color-warning: #F39C12;
+      --color-info: #3498DB;
+      --color-bg: #F7F9FC;
+      --color-card: #FFFFFF;
+      --color-border: #E2E8F0;
+      --color-text: #2C3E50;
+      --color-text-secondary: #7F8C8D;
+      --color-text-muted: #95A5A6;
+      --font-sans: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    @layer base {
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--font-sans);
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.6;
+      }
+    }
+
+    @layer components {
+      .sidebar {
+        @apply w-60 bg-primary text-white min-h-screen flex flex-col fixed left-0 top-0 z-30;
+      }
+      .sidebar-logo {
+        @apply px-5 py-5 border-b border-white/10 flex items-center gap-3;
+      }
+      .sidebar-nav {
+        @apply flex-1 py-4 overflow-y-auto;
+      }
+      .sidebar-link {
+        @apply flex items-center gap-3 px-5 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors cursor-pointer;
+      }
+      .sidebar-link[aria-current="page"] {
+        @apply text-white bg-white/10 border-r-2 border-accent;
+      }
+      .sidebar-section-title {
+        @apply px-5 py-2 text-xs text-white/40 uppercase tracking-wider font-medium;
+      }
+      .main-content {
+        @apply ml-60 min-h-screen;
+      }
+      .top-bar {
+        @apply bg-card border-b border-border px-6 py-3 flex items-center justify-between sticky top-0 z-20;
+      }
+      .page-header {
+        @apply px-6 py-5 border-b border-border bg-card;
+      }
+      .settings-section {
+        @apply bg-card rounded-lg border border-border p-6 mb-6;
+      }
+      .settings-title {
+        @apply text-lg font-semibold text-text mb-1;
+      }
+      .settings-desc {
+        @apply text-sm text-text-secondary mb-5;
+      }
+      .form-label {
+        @apply block text-sm font-medium text-text mb-1.5;
+      }
+      .form-input {
+        @apply w-full px-3 py-2 border border-border rounded-md text-sm bg-card text-text focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors;
+      }
+      .form-input:disabled {
+        @apply bg-bg text-text-secondary cursor-not-allowed;
+      }
+      .btn-primary {
+        @apply inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-primary-light transition-colors cursor-pointer;
+      }
+      .btn-secondary {
+        @apply inline-flex items-center gap-2 px-4 py-2 bg-card border border-border text-text text-sm font-medium rounded-md hover:bg-bg transition-colors cursor-pointer;
+      }
+      .btn-danger {
+        @apply inline-flex items-center gap-2 px-4 py-2 bg-danger text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors cursor-pointer;
+      }
+      .btn-accent {
+        @apply inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-md hover:bg-accent-light transition-colors cursor-pointer;
+      }
+      .badge {
+        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+      }
+      .badge-success {
+        @apply bg-green-100 text-green-800;
+      }
+      .badge-warning {
+        @apply bg-yellow-100 text-yellow-800;
+      }
+      .badge-info {
+        @apply bg-blue-100 text-blue-800;
+      }
+      .badge-danger {
+        @apply bg-red-100 text-red-800;
+      }
+      .toggle-switch {
+        @apply relative w-10 h-5 bg-border rounded-full cursor-pointer transition-colors;
+      }
+      .toggle-switch.active {
+        @apply bg-success;
+      }
+      .toggle-switch::after {
+        content: '';
+        @apply absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow;
+      }
+      .toggle-switch.active::after {
+        @apply translate-x-5;
+      }
+      .tab-item {
+        @apply px-4 py-2.5 text-sm font-medium text-text-secondary border-b-2 border-transparent cursor-pointer hover:text-text transition-colors;
+      }
+      .tab-item.active {
+        @apply text-primary border-primary;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- @nav:start -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <i data-lucide="ship" class="w-7 h-7 text-accent"></i>
+      <div>
+        <div class="text-base font-bold text-white leading-tight">ExportDrive</div>
+        <div class="text-xs text-white/50">二手车出口平台</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-title">主要功能</div>
+      <a href="home.html" class="sidebar-link">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <span>工作台</span>
+      </a>
+      <a href="vehicle-check.html" class="sidebar-link">
+        <i data-lucide="car" class="w-4 h-4"></i>
+        <span>车辆核验</span>
+      </a>
+      <a href="documents.html" class="sidebar-link">
+        <i data-lucide="file-text" class="w-4 h-4"></i>
+        <span>单证模板</span>
+      </a>
+      <a href="compliance-declaration.html" class="sidebar-link">
+        <i data-lucide="shield-check" class="w-4 h-4"></i>
+        <span>准入声明</span>
+      </a>
+      <a href="proforma-invoice.html" class="sidebar-link">
+        <i data-lucide="receipt" class="w-4 h-4"></i>
+        <span>形式发票</span>
+      </a>
+      <a href="shipping.html" class="sidebar-link">
+        <i data-lucide="calculator" class="w-4 h-4"></i>
+        <span>运费测算</span>
+      </a>
+      <a href="tracking.html" class="sidebar-link">
+        <i data-lucide="map-pin" class="w-4 h-4"></i>
+        <span>海运跟踪</span>
+      </a>
+      <div class="sidebar-section-title">信息与合规</div>
+      <a href="policies.html" class="sidebar-link">
+        <i data-lucide="globe" class="w-4 h-4"></i>
+        <span>准入政策</span>
+      </a>
+      <a href="compliance.html" class="sidebar-link">
+        <i data-lucide="scale" class="w-4 h-4"></i>
+        <span>合规文件</span>
+      </a>
+      <a href="customers.html" class="sidebar-link">
+        <i data-lucide="users" class="w-4 h-4"></i>
+        <span>客户管理</span>
+      </a>
+      <a href="my-records.html" class="sidebar-link">
+        <i data-lucide="folder-open" class="w-4 h-4"></i>
+        <span>我的记录</span>
+      </a>
+      <div class="sidebar-section-title">系统</div>
+      <a href="blog-admin.html" class="sidebar-link">
+        <i data-lucide="pen-square" class="w-4 h-4"></i>
+        <span>博客管理</span>
+      </a>
+      <a href="org-settings.html" class="sidebar-link" aria-current="page">
+        <i data-lucide="settings" class="w-4 h-4"></i>
+        <span>组织设置</span>
+      </a>
+    </nav>
+    <div class="px-5 py-4 border-t border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-bold">李</div>
+        <div>
+          <div class="text-sm text-white font-medium">李明远</div>
+          <div class="text-xs text-white/50">管理员</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <!-- @nav:end -->
+
+  <div class="main-content" id="main-content">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="flex items-center gap-3">
+        <h1 class="text-base font-semibold text-text">组织设置</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <button class="relative p-2 text-text-secondary hover:text-text transition-colors" id="btn-notifications">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+        </button>
+        <button class="p-2 text-text-secondary hover:text-text transition-colors" id="btn-help">
+          <i data-lucide="help-circle" class="w-5 h-5"></i>
+        </button>
+        <div class="h-6 w-px bg-border"></div>
+        <div class="flex items-center gap-2 cursor-pointer" id="btn-user-menu">
+          <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">李</div>
+          <span class="text-sm text-text font-medium">李明远</span>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-text-secondary"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-text">组织设置</h2>
+          <p class="text-sm text-text-secondary mt-1">管理您的企业信息、团队成员、安全设置和系统偏好</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="btn-secondary" id="btn-export-config">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            导出配置
+          </button>
+          <button class="btn-primary" id="btn-save-all">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            保存所有更改
+          </button>
+        </div>
+      </div>
+      <!-- Tabs -->
+      <div class="flex gap-1 mt-5 border-b border-border" id="settings-tabs">
+        <div class="tab-item active" data-tab="company">
+          <span class="flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4"></i>企业信息</span>
+        </div>
+        <div class="tab-item" data-tab="members">
+          <span class="flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i>团队成员</span>
+        </div>
+        <div class="tab-item" data-tab="security">
+          <span class="flex items-center gap-2"><i data-lucide="shield" class="w-4 h-4"></i>安全设置</span>
+        </div>
+        <div class="tab-item" data-tab="notifications">
+          <span class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4"></i>通知偏好</span>
+        </div>
+        <div class="tab-item" data-tab="api">
+          <span class="flex items-center gap-2"><i data-lucide="key" class="w-4 h-4"></i>API 密钥</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="p-6">
+
+      <!-- ==================== Tab: 企业信息 ==================== -->
+      <div id="tab-company" class="tab-content">
+        <!-- Section: 基本信息 -->
+        <div class="settings-section">
+          <h3 class="settings-title">基本信息</h3>
+          <p class="settings-desc">这些基本信息将显示在您的单证、发票和合规文件中</p>
+          <div class="grid grid-cols-2 gap-5">
+            <div>
+              <label class="form-label">企业名称 <span class="text-danger">*</span></label>
+              <input type="text" class="form-input" id="input-company-name" value="深圳市远航二手车出口有限公司">
+            </div>
+            <div>
+              <label class="form-label">统一社会信用代码</label>
+              <input type="text" class="form-input" id="input-credit-code" value="91440300MA5FJK1234" style="font-family: var(--font-mono);">
+            </div>
+            <div>
+              <label class="form-label">企业类型</label>
+              <select class="form-input" id="select-company-type">
+                <option value="trading" selected>外贸经销企业</option>
+                <option value="manufacturer">生产企业</option>
+                <option value="broker">经纪公司</option>
+                <option value="auction">拍卖企业</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">所属行业</label>
+              <select class="form-input" id="select-industry">
+                <option value="auto-export" selected>二手车出口</option>
+                <option value="auto-trade">汽车贸易</option>
+                <option value="general-trade">综合贸易</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">联系电话</label>
+              <input type="tel" class="form-input" id="input-phone" value="0755-8888-6666">
+            </div>
+            <div>
+              <label class="form-label">企业邮箱</label>
+              <input type="email" class="form-input" id="input-email" value="contact@yuanhang-export.com">
+            </div>
+            <div class="col-span-2">
+              <label class="form-label">注册地址</label>
+              <input type="text" class="form-input" id="input-address" value="深圳市南山区粤海街道科技园南路88号远航大厦15楼">
+            </div>
+            <div>
+              <label class="form-label">海关注册编码</label>
+              <input type="text" class="form-input" id="input-customs-code" value="4403960XXX" style="font-family: var(--font-mono);">
+            </div>
+            <div>
+              <label class="form-label">对外贸易经营者备案编号</label>
+              <input type="text" class="form-input" id="input-trade-license" value="04123456" style="font-family: var(--font-mono);">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: 企业 Logo -->
+        <div class="settings-section">
+          <h3 class="settings-title">企业标识</h3>
+          <p class="settings-desc">企业 Logo 将显示在发票、声明等导出文件中</p>
+          <div class="flex items-start gap-6">
+            <div class="w-32 h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-bg" id="logo-preview">
+              <div class="text-center">
+                <i data-lucide="image" class="w-8 h-8 text-text-muted mx-auto mb-2"></i>
+                <span class="text-xs text-text-muted">企业 Logo</span>
+              </div>
+            </div>
+            <div class="flex-1">
+              <div class="flex gap-3 mb-3">
+                <button class="btn-secondary" id="btn-upload-logo">
+                  <i data-lucide="upload" class="w-4 h-4"></i>
+                  上传 Logo
+                </button>
+                <button class="btn-secondary" id="btn-remove-logo">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  移除
+                </button>
+              </div>
+              <p class="text-xs text-text-secondary">支持 PNG、JPG 格式，建议尺寸 200×200px，文件大小不超过 2MB</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: 业务偏好 -->
+        <div class="settings-section">
+          <h3 class="settings-title">业务偏好</h3>
+          <p class="settings-desc">设置默认业务参数，提高日常操作效率</p>
+          <div class="grid grid-cols-2 gap-5">
+            <div>
+              <label class="form-label">默认货币</label>
+              <select class="form-input" id="select-currency">
+                <option value="USD" selected>美元 (USD)</option>
+                <option value="EUR">欧元 (EUR)</option>
+                <option value="CNY">人民币 (CNY)</option>
+                <option value="AED">迪拉姆 (AED)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">默认贸易条款</label>
+              <select class="form-input" id="select-trade-terms">
+                <option value="FOB" selected>FOB - 离岸价</option>
+                <option value="CIF">CIF - 到岸价</option>
+                <option value="CFR">CFR - 成本加运费</option>
+                <option value="EXW">EXW - 工厂交货</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">默认装运港</label>
+              <select class="form-input" id="select-port">
+                <option value="shekou" selected>蛇口港 (深圳)</option>
+                <option value="yantai">烟台港</option>
+                <option value="shanghai">上海港</option>
+                <option value="guangzhou">广州港</option>
+                <option value="tianjin">天津港</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">发票编号前缀</label>
+              <input type="text" class="form-input" id="input-invoice-prefix" value="YH" style="font-family: var(--font-mono);">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Tab: 团队成员 ==================== -->
+      <div id="tab-members" class="tab-content hidden">
+        <!-- Section: 成员列表 -->
+        <div class="settings-section">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h3 class="settings-title mb-0">团队成员</h3>
+              <p class="settings-desc mb-0 mt-1">管理组织内的成员及其权限</p>
+            </div>
+            <button class="btn-accent" id="btn-invite-member">
+              <i data-lucide="user-plus" class="w-4 h-4"></i>
+              邀请成员
+            </button>
+          </div>
+
+          <!-- Search & Filter -->
+          <div class="flex items-center gap-3 mb-4">
+            <div class="relative flex-1 max-w-xs">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"></i>
+              <input type="text" class="form-input pl-9" id="input-search-member" placeholder="搜索成员姓名或邮箱...">
+            </div>
+            <select class="form-input w-36" id="select-role-filter">
+              <option value="all">全部角色</option>
+              <option value="admin">管理员</option>
+              <option value="editor">编辑者</option>
+              <option value="viewer">查看者</option>
+            </select>
+          </div>
+
+          <!-- Members Table -->
+          <div class="border border-border rounded-lg overflow-hidden">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-bg border-b border-border">
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">成员</th>
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">角色</th>
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">部门</th>
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">状态</th>
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">最近活跃</th>
+                  <th class="text-right px-4 py-3 font-medium text-text-secondary">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- 成员1: 管理员 -->
+                <tr class="border-b border-border hover:bg-bg/50 transition-colors" id="member-row-1">
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">李</div>
+                      <div>
+                        <div class="font-medium text-text">李明远</div>
+                        <div class="text-xs text-text-secondary">limingyuan@yuanhang-export.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="badge badge-danger">超级管理员</span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary">管理层</td>
+                  <td class="px-4 py-3">
+                    <span class="flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                      <span class="text-success text-xs">在线</span>
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">刚刚</td>
+                  <td class="px-4 py-3 text-right">
+                    <button class="text-text-muted hover:text-text p-1" id="btn-member-action-1">
+                      <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+                <!-- 成员2: 运营经理 -->
+                <tr class="border-b border-border hover:bg-bg/50 transition-colors" id="member-row-2">
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-info text-white flex items-center justify-center text-xs font-bold">王</div>
+                      <div>
+                        <div class="font-medium text-text">王晓燕</div>
+                        <div class="text-xs text-text-secondary">wangxiaoyan@yuanhang-export.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="badge badge-info">管理员</span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary">运营部</td>
+                  <td class="px-4 py-3">
+                    <span class="flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                      <span class="text-success text-xs">在线</span>
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">5 分钟前</td>
+                  <td class="px-4 py-3 text-right">
+                    <button class="text-text-muted hover:text-text p-1" id="btn-member-action-2">
+                      <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+                <!-- 成员3: 单证专员 -->
+                <tr class="border-b border-border hover:bg-bg/50 transition-colors" id="member-row-3">
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-success text-white flex items-center justify-center text-xs font-bold">张</div>
+                      <div>
+                        <div class="font-medium text-text">张伟</div>
+                        <div class="text-xs text-text-secondary">zhangwei@yuanhang-export.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="badge badge-warning">编辑者</span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary">单证部</td>
+                  <td class="px-4 py-3">
+                    <span class="flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-text-muted"></span>
+                      <span class="text-text-muted text-xs">离线</span>
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">2 小时前</td>
+                  <td class="px-4 py-3 text-right">
+                    <button class="text-text-muted hover:text-text p-1" id="btn-member-action-3">
+                      <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+                <!-- 成员4: 财务 -->
+                <tr class="border-b border-border hover:bg-bg/50 transition-colors" id="member-row-4">
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center text-xs font-bold">陈</div>
+                      <div>
+                        <div class="font-medium text-text">陈思雨</div>
+                        <div class="text-xs text-text-secondary">chensiyu@yuanhang-export.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="badge badge-warning">编辑者</span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary">财务部</td>
+                  <td class="px-4 py-3">
+                    <span class="flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                      <span class="text-success text-xs">在线</span>
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">30 分钟前</td>
+                  <td class="px-4 py-3 text-right">
+                    <button class="text-text-muted hover:text-text p-1" id="btn-member-action-4">
+                      <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+                <!-- 成员5: 待接受邀请 -->
+                <tr class="border-b border-border hover:bg-bg/50 transition-colors" id="member-row-5">
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-border text-text-secondary flex items-center justify-center text-xs font-bold">赵</div>
+                      <div>
+                        <div class="font-medium text-text">赵鹏飞</div>
+                        <div class="text-xs text-text-secondary">zhaopengfei@yuanhang-export.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="badge badge-info">查看者</span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary">物流部</td>
+                  <td class="px-4 py-3">
+                    <span class="flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+                      <span class="text-warning text-xs">待激活</span>
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">未登录</td>
+                  <td class="px-4 py-3 text-right">
+                    <button class="text-text-muted hover:text-text p-1" id="btn-member-action-5">
+                      <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex items-center justify-between mt-4">
+            <span class="text-xs text-text-secondary">显示 5 位成员，共 5 位</span>
+            <div class="flex items-center gap-2">
+              <button class="btn-secondary text-xs px-3 py-1.5" disabled>上一页</button>
+              <button class="btn-secondary text-xs px-3 py-1.5">1</button>
+              <button class="btn-secondary text-xs px-3 py-1.5" disabled>下一页</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: 角色权限说明 -->
+        <div class="settings-section">
+          <h3 class="settings-title">角色权限说明</h3>
+          <p class="settings-desc">不同角色拥有不同的系统操作权限</p>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="border border-border rounded-lg p-4">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="badge badge-danger">超级管理员</span>
+              </div>
+              <ul class="text-xs text-text-secondary space-y-1.5">
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>全部操作权限</li>
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>管理团队成员</li>
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>修改组织设置</li>
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>管理 API 密钥</li>
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>查看操作日志</li>
+              </ul>
+            </div>
+            <div class="border border-border rounded-lg p-4">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="badge badge-warning">编辑者</span>
+              </div>
+              <ul class="text-xs text-text-secondary space-y-1.5">
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>创建和编辑单证</li>
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>管理客户信息</li>
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>查看运费测算</li>
+                <li class="flex items-center gap-2"><i data-lucide="x" class="w-3 h-3 text-danger"></i>不可管理成员</li>
+                <li class="flex items-center gap-2"><i data-lucide="x" class="w-3 h-3 text-danger"></i>不可修改组织设置</li>
+              </ul>
+            </div>
+            <div class="border border-border rounded-lg p-4">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="badge badge-info">查看者</span>
+              </div>
+              <ul class="text-xs text-text-secondary space-y-1.5">
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>查看所有数据</li>
+                <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-success"></i>导出单证文件</li>
+                <li class="flex items-center gap-2"><i data-lucide="x" class="w-3 h-3 text-danger"></i>不可编辑数据</li>
+                <li class="flex items-center gap-2"><i data-lucide="x" class="w-3 h-3 text-danger"></i>不可删除记录</li>
+                <li class="flex items-center gap-2"><i data-lucide="x" class="w-3 h-3 text-danger"></i>不可管理设置</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Tab: 安全设置 ==================== -->
+      <div id="tab-security" class="tab-content hidden">
+        <!-- Section: 密码修改 -->
+        <div class="settings-section">
+          <h3 class="settings-title">修改密码</h3>
+          <p class="settings-desc">建议每 90 天更换一次密码，密码长度不少于 8 位</p>
+          <div class="max-w-md space-y-4">
+            <div>
+              <label class="form-label">当前密码</label>
+              <input type="password" class="form-input" id="input-current-password" placeholder="请输入当前密码">
+            </div>
+            <div>
+              <label class="form-label">新密码</label>
+              <input type="password" class="form-input" id="input-new-password" placeholder="请输入新密码（至少8位）">
+              <div class="flex items-center gap-2 mt-2">
+                <span class="w-8 h-1 rounded-full bg-success"></span>
+                <span class="w-8 h-1 rounded-full bg-success"></span>
+                <span class="w-8 h-1 rounded-full bg-success"></span>
+                <span class="w-8 h-1 rounded-full bg-border"></span>
+                <span class="text-xs text-success ml-1">强度：较强</span>
+              </div>
+            </div>
+            <div>
+              <label class="form-label">确认新密码</label>
+              <input type="password" class="form-input" id="input-confirm-password" placeholder="请再次输入新密码">
+            </div>
+            <button class="btn-primary" id="btn-change-password">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+              更新密码
+            </button>
+          </div>
+        </div>
+
+        <!-- Section: 两步验证 -->
+        <div class="settings-section">
+          <h3 class="settings-title">两步验证 (2FA)</h3>
+          <p class="settings-desc">启用两步验证可以显著提升账户安全性</p>
+          <div class="flex items-center justify-between p-4 border border-border rounded-lg">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+                <i data-lucide="smartphone" class="w-5 h-5 text-success"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-text">验证器应用</div>
+                <div class="text-xs text-text-secondary">使用 Google Authenticator 或类似应用</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="badge badge-success">已启用</span>
+              <div class="toggle-switch active" id="toggle-2fa"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between p-4 border border-border rounded-lg mt-3">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-lg bg-bg flex items-center justify-center">
+                <i data-lucide="mail" class="w-5 h-5 text-text-secondary"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-text">短信验证</div>
+                <div class="text-xs text-text-secondary">通过手机短信接收验证码</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-text-muted">未启用</span>
+              <div class="toggle-switch" id="toggle-sms-2fa"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: 登录会话 -->
+        <div class="settings-section">
+          <h3 class="settings-title">活跃会话</h3>
+          <p class="settings-desc">当前登录到账户的设备列表</p>
+          <div class="space-y-3">
+            <!-- 会话1: 当前设备 -->
+            <div class="flex items-center justify-between p-4 border border-success/30 bg-success/5 rounded-lg">
+              <div class="flex items-center gap-4">
+                <i data-lucide="monitor" class="w-5 h-5 text-primary"></i>
+                <div>
+                  <div class="text-sm font-medium text-text flex items-center gap-2">
+                    Chrome · macOS
+                    <span class="badge badge-success text-xs">当前设备</span>
+                  </div>
+                  <div class="text-xs text-text-secondary">深圳市 · 192.168.1.*** · 当前活跃</div>
+                </div>
+              </div>
+            </div>
+            <!-- 会话2 -->
+            <div class="flex items-center justify-between p-4 border border-border rounded-lg">
+              <div class="flex items-center gap-4">
+                <i data-lucide="smartphone" class="w-5 h-5 text-text-secondary"></i>
+                <div>
+                  <div class="text-sm font-medium text-text">Safari · iPhone 15</div>
+                  <div class="text-xs text-text-secondary">深圳市 · 最后活跃: 1小时前</div>
+                </div>
+              </div>
+              <button class="btn-secondary text-xs px-3 py-1.5" id="btn-revoke-session-2">
+                <i data-lucide="log-out" class="w-3 h-3"></i>
+                撤销
+              </button>
+            </div>
+            <!-- 会话3 -->
+            <div class="flex items-center justify-between p-4 border border-border rounded-lg">
+              <div class="flex items-center gap-4">
+                <i data-lucide="monitor" class="w-5 h-5 text-text-secondary"></i>
+                <div>
+                  <div class="text-sm font-medium text-text">Edge · Windows 11</div>
+                  <div class="text-xs text-text-secondary">广州市 · 最后活跃: 3天前</div>
+                </div>
+              </div>
+              <button class="btn-secondary text-xs px-3 py-1.5" id="btn-revoke-session-3">
+                <i data-lucide="log-out" class="w-3 h-3"></i>
+                撤销
+              </button>
+            </div>
+          </div>
+          <div class="mt-4">
+            <button class="btn-danger text-xs" id="btn-revoke-all-sessions">
+              <i data-lucide="log-out" class="w-3 h-3"></i>
+              撤销所有其他会话
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Tab: 通知偏好 ==================== -->
+      <div id="tab-notifications" class="tab-content hidden">
+        <!-- Section: 邮件通知 -->
+        <div class="settings-section">
+          <h3 class="settings-title">邮件通知</h3>
+          <p class="settings-desc">选择您希望通过邮件接收的通知类型</p>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-text">新订单通知</div>
+                <div class="text-xs text-text-secondary">当有新的形式发票或准入声明创建时通知</div>
+              </div>
+              <div class="toggle-switch active" id="toggle-email-order"></div>
+            </div>
+            <div class="border-t border-border"></div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-text">物流状态更新</div>
+                <div class="text-xs text-text-secondary">海运跟踪状态变更时发送通知</div>
+              </div>
+              <div class="toggle-switch active" id="toggle-email-shipping"></div>
+            </div>
+            <div class="border-t border-border"></div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-text">政策变更提醒</div>
+                <div class="text-xs text-text-secondary">目标市场准入政策发生变更时通知</div>
+              </div>
+              <div class="toggle-switch active" id="toggle-email-policy"></div>
+            </div>
+            <div class="border-t border-border"></div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-text">团队成员动态</div>
+                <div class="text-xs text-text-secondary">成员加入、离开或角色变更时通知</div>
+              </div>
+              <div class="toggle-switch" id="toggle-email-team"></div>
+            </div>
+            <div class="border-t border-border"></div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-text">系统公告</div>
+                <div class="text-xs text-text-secondary">平台功能更新、维护通知等</div>
+              </div>
+              <div class="toggle-switch active" id="toggle-email-system"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: 站内通知 -->
+        <div class="settings-section">
+          <h3 class="settings-title">站内通知</h3>
+          <p class="settings-desc">配置平台内的通知提醒方式</p>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-text">浏览器推送通知</div>
+                <div class="text-xs text-text-secondary">允许浏览器弹出桌面通知</div>
+              </div>
+              <div class="toggle-switch active" id="toggle-push-notify"></div>
+            </div>
+            <div class="border-t border-border"></div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-text">通知声音</div>
+                <div class="text-xs text-text-secondary">收到新通知时播放提示音</div>
+              </div>
+              <div class="toggle-switch" id="toggle-notify-sound"></div>
+            </div>
+            <div class="border-t border-border"></div>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="text-sm font-medium text-text">免打扰时段</div>
+                <div class="text-xs text-text-secondary">在指定时段内暂停所有通知</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="time" class="form-input w-28 text-xs py-1.5" id="input-dnd-start" value="22:00">
+                <span class="text-text-secondary text-xs">至</span>
+                <input type="time" class="form-input w-28 text-xs py-1.5" id="input-dnd-end" value="08:00">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Tab: API 密钥 ==================== -->
+      <div id="tab-api" class="tab-content hidden">
+        <!-- Section: API 密钥管理 -->
+        <div class="settings-section">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h3 class="settings-title mb-0">API 密钥</h3>
+              <p class="settings-desc mb-0 mt-1">管理用于外部系统集成的 API 密钥</p>
+            </div>
+            <button class="btn-accent" id="btn-create-api-key">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              创建密钥
+            </button>
+          </div>
+
+          <div class="border border-border rounded-lg overflow-hidden">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-bg border-b border-border">
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">密钥名称</th>
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">密钥值</th>
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">权限范围</th>
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">创建时间</th>
+                  <th class="text-left px-4 py-3 font-medium text-text-secondary">最后使用</th>
+                  <th class="text-right px-4 py-3 font-medium text-text-secondary">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- API密钥1 -->
+                <tr class="border-b border-border hover:bg-bg/50 transition-colors" id="api-key-row-1">
+                  <td class="px-4 py-3">
+                    <div class="font-medium text-text">生产环境密钥</div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <code class="text-xs font-mono bg-bg px-2 py-1 rounded text-text-secondary" id="api-key-value-1">ed_live_sk_•••••••••••••4f2a</code>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="badge badge-info">全部权限</span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">2024-01-15</td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">2 分钟前</td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="flex items-center justify-end gap-1">
+                      <button class="text-text-muted hover:text-text p-1.5" id="btn-copy-key-1" title="复制">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <button class="text-text-muted hover:text-danger p-1.5" id="btn-delete-key-1" title="删除">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <!-- API密钥2 -->
+                <tr class="border-b border-border hover:bg-bg/50 transition-colors" id="api-key-row-2">
+                  <td class="px-4 py-3">
+                    <div class="font-medium text-text">ERP 系统对接</div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <code class="text-xs font-mono bg-bg px-2 py-1 rounded text-text-secondary" id="api-key-value-2">ed_live_sk_•••••••••••••8b1c</code>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="badge badge-warning">只读</span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">2024-03-22</td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">1 天前</td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="flex items-center justify-end gap-1">
+                      <button class="text-text-muted hover:text-text p-1.5" id="btn-copy-key-2" title="复制">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <button class="text-text-muted hover:text-danger p-1.5" id="btn-delete-key-2" title="删除">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <!-- API密钥3 -->
+                <tr class="border-b border-border hover:bg-bg/50 transition-colors" id="api-key-row-3">
+                  <td class="px-4 py-3">
+                    <div class="font-medium text-text">测试环境</div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <code class="text-xs font-mono bg-bg px-2 py-1 rounded text-text-secondary" id="api-key-value-3">ed_test_sk_•••••••••••••2d7e</code>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="badge badge-success">沙箱</span>
+                  </td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">2024-06-10</td>
+                  <td class="px-4 py-3 text-text-secondary text-xs">5 天前</td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="flex items-center justify-end gap-1">
+                      <button class="text-text-muted hover:text-text p-1.5" id="btn-copy-key-3" title="复制">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <button class="text-text-muted hover:text-danger p-1.5" id="btn-delete-key-3" title="删除">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section: Webhook 配置 -->
+        <div class="settings-section">
+          <h3 class="settings-title">Webhook 配置</h3>
+          <p class="settings-desc">配置事件回调地址，实时接收系统事件通知</p>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 border border-border rounded-lg">
+              <div class="flex items-center gap-4">
+                <div class="w-2 h-2 rounded-full bg-success"></div>
+                <div>
+                  <div class="text-sm font-medium text-text font-mono">https://api.yuanhang-export.com/webhooks/exportdrive</div>
+                  <div class="text-xs text-text-secondary mt-0.5">事件: order.created, shipment.updated · 最后触发: 10分钟前</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="btn-secondary text-xs px-3 py-1.5" id="btn-edit-webhook-1">
+                  <i data-lucide="edit" class="w-3 h-3"></i>
+                  编辑
+                </button>
+                <button class="btn-secondary text-xs px-3 py-1.5 text-danger border-danger/30" id="btn-delete-webhook-1">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  删除
+                </button>
+              </div>
+            </div>
+            <button class="btn-secondary" id="btn-add-webhook">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              添加 Webhook
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2"></div>
+
+  <!-- Invite Member Modal -->
+  <div id="modal-invite" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" id="modal-invite-overlay"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card rounded-xl shadow-xl w-full max-w-md p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-semibold text-text">邀请新成员</h3>
+        <button class="text-text-muted hover:text-text p-1" id="btn-close-invite-modal">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="form-label">邮箱地址 <span class="text-danger">*</span></label>
+          <input type="email" class="form-input" id="input-invite-email" placeholder="输入成员邮箱地址">
+        </div>
+        <div>
+          <label class="form-label">姓名 <span class="text-danger">*</span></label>
+          <input type="text" class="form-input" id="input-invite-name" placeholder="输入成员姓名">
+        </div>
+        <div>
+          <label class="form-label">角色</label>
+          <select class="form-input" id="select-invite-role">
+            <option value="viewer">查看者</option>
+            <option value="editor">编辑者</option>
+            <option value="admin">管理员</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">部门</label>
+          <select class="form-input" id="select-invite-dept">
+            <option value="ops">运营部</option>
+            <option value="docs">单证部</option>
+            <option value="finance">财务部</option>
+            <option value="logistics">物流部</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button class="btn-secondary" id="btn-cancel-invite">取消</button>
+        <button class="btn-accent" id="btn-send-invite">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          发送邀请
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      // Initialize Lucide icons
+      lucide.createIcons();
+
+      // ===== Tab Switching =====
+      $('#settings-tabs').on('click', '.tab-item', function() {
+        var tabId = $(this).data('tab');
+        // Update tab active state
+        $('.tab-item').removeClass('active');
+        $(this).addClass('active');
+        // Show/hide tab content
+        $('.tab-content').addClass('hidden');
+        $('#tab-' + tabId).removeClass('hidden');
+      });
+
+      // ===== Toggle Switches =====
+      $(document).on('click', '.toggle-switch', function() {
+        $(this).toggleClass('active');
+        var isActive = $(this).hasClass('active');
+        showToast(isActive ? '已启用' : '已关闭', 'success');
+      });
+
+      // ===== Toast Notification =====
+      function showToast(message, type) {
+        type = type || 'info';
+        var iconMap = { success: 'check-circle', error: 'alert-circle', warning: 'alert-triangle', info: 'info' };
+        var colorMap = { success: 'text-success', error: 'text-danger', warning: 'text-warning', info: 'text-info' };
+        var bgMap = { success: 'bg-success/10 border-success/20', error: 'bg-danger/10 border-danger/20', warning: 'bg-warning/10 border-warning/20', info: 'bg-info/10 border-info/20' };
+        var toast = $(
+          '<div class="flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ' + bgMap[type] + ' bg-card animate-slide-in">' +
+            '<i data-lucide="' + iconMap[type] + '" class="w-5 h-5 ' + colorMap[type] + '"></i>' +
+            '<span class="text-sm text-text">' + message + '</span>' +
+          '</div>'
+        );
+        $('#toast-container').append(toast);
+        lucide.createIcons();
+        setTimeout(function() {
+          toast.fadeOut(300, function() { $(this).remove(); });
+        }, 3000);
+      }
+
+      // ===== Save All Changes =====
+      $('#btn-save-all').on('click', function() {
+        showToast('所有更改已保存', 'success');
+      });
+
+      // ===== Export Config =====
+      $('#btn-export-config').on('click', function() {
+        showToast('配置文件导出成功', 'success');
+      });
+
+      // ===== Invite Member Modal =====
+      $('#btn-invite-member').on('click', function() {
+        $('#modal-invite').removeClass('hidden');
+        lucide.createIcons();
+      });
+      $('#btn-close-invite-modal, #btn-cancel-invite, #modal-invite-overlay').on('click', function() {
+        $('#modal-invite').addClass('hidden');
+      });
+      $('#btn-send-invite').on('click', function() {
+        var email = $('#input-invite-email').val();
+        var name = $('#input-invite-name').val();
+        if (!email || !name) {
+          showToast('请填写必填字段', 'warning');
+          return;
+        }
+        showToast('邀请已发送至 ' + email, 'success');
+        $('#modal-invite').addClass('hidden');
+        $('#input-invite-email').val('');
+        $('#input-invite-name').val('');
+      });
+
+      // ===== Change Password =====
+      $('#btn-change-password').on('click', function() {
+        var current = $('#input-current-password').val();
+        var newPwd = $('#input-new-password').val();
+        var confirm = $('#input-confirm-password').val();
+        if (!current || !newPwd || !confirm) {
+          showToast('请填写所有密码字段', 'warning');
+          return;
+        }
+        if (newPwd !== confirm) {
+          showToast('两次输入的密码不一致', 'error');
+          return;
+        }
+        if (newPwd.length < 8) {
+          showToast('密码长度不能少于8位', 'error');
+          return;
+        }
+        showToast('密码更新成功', 'success');
+        $('#input-current-password, #input-new-password, #input-confirm-password').val('');
+      });
+
+      // ===== Revoke Sessions =====
+      $('#btn-revoke-session-2').on('click', function() {
+        $(this).closest('.border').fadeOut(300, function() {
+          showToast('会话已撤销', 'success');
+        });
+      });
+      $('#btn-revoke-session-3').on('click', function() {
+        $(this).closest('.border').fadeOut(300, function() {
+          showToast('会话已撤销', 'success');
+        });
+      });
+      $('#btn-revoke-all-sessions').on('click', function() {
+        showToast('已撤销所有其他会话', 'success');
+      });
+
+      // ===== API Key Actions =====
+      $('[id^="btn-copy-key"]').on('click', function() {
+        showToast('密钥已复制到剪贴板', 'success');
+      });
+      $('[id^="btn-delete-key"]').on('click', function() {
+        if (confirm('确定要删除此 API 密钥吗？此操作不可撤销。')) {
+          $(this).closest('tr').fadeOut(300, function() {
+            showToast('API 密钥已删除', 'success');
+          });
+        }
+      });
+      $('#btn-create-api-key').on('click', function() {
+        showToast('新 API 密钥已创建', 'success');
+      });
+
+      // ===== Webhook Actions =====
+      $('#btn-add-webhook').on('click', function() {
+        showToast('Webhook 添加功能开发中', 'info');
+      });
+      $('#btn-edit-webhook-1').on('click', function() {
+        showToast('Webhook 编辑功能开发中', 'info');
+      });
+      $('#btn-delete-webhook-1').on('click', function() {
+        if (confirm('确定要删除此 Webhook 配置吗？')) {
+          showToast('Webhook 已删除', 'success');
+        }
+      });
+
+      // ===== Member Actions =====
+      $('[id^="btn-member-action"]').on('click', function() {
+        showToast('成员操作菜单开发中', 'info');
+      });
+
+      // ===== Logo Upload =====
+      $('#btn-upload-logo').on('click', function() {
+        showToast('Logo 上传功能开发中', 'info');
+      });
+      $('#btn-remove-logo').on('click', function() {
+        showToast('Logo 已移除', 'success');
+      });
+
+      // ===== Notifications =====
+      $('#btn-notifications').on('click', function() {
+        showToast('通知中心开发中', 'info');
+      });
+      $('#btn-help').on('click', function() {
+        showToast('帮助中心开发中', 'info');
+      });
+    });
+  </script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

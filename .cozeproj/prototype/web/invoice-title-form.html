@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #0C2D48;
+      --color-primary-container:    #1A5276;
+      --color-on-primary:           #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F7F9FC;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EEF2F7;
+      --color-surface-container-high:     #E8EDF4;
+      --color-surface-container-highest:  #DDE4EE;
+      /* === 文字 === */
+      --color-on-surface:           #2C3E50;
+      --color-on-surface-variant:   #7F8C8D;
+      /* === 功能色 === */
+      --color-success:  #27AE60;
+      --color-error:    #E74C3C;
+      --color-warning:  #E67E22;
+      /* === 边框 === */
+      --color-outline:          #CBD5E1;
+      --color-outline-variant:  #E2E8F0;
+      /* === 圆角 === */
+      --radius-sm:   0.25rem;
+      --radius-md:   0.375rem;
+      --radius-lg:   0.5rem;
+      --radius-xl:   0.75rem;
+      --radius-2xl:  1rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 3px rgba(12,45,72,0.08), 0 1px 2px rgba(12,45,72,0.06);
+      --shadow-float:  0 10px 25px rgba(12,45,72,0.12), 0 4px 10px rgba(12,45,72,0.08);
+      --shadow-dialog: 0 25px 50px rgba(12,45,72,0.18), 0 10px 20px rgba(12,45,72,0.1);
+      /* === 字体 === */
+      --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 400;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans antialiased">
+
+  <!-- @nav:start 导航组件 -->
+  <header class="bg-surface sticky top-0 z-40 h-16 flex items-center justify-between px-6 border-b border-outline-variant/20 shadow-card">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+        <i data-lucide="ship" class="text-on-primary w-5 h-5"></i>
+      </div>
+      <div class="flex flex-col leading-tight">
+        <span class="font-bold text-base text-primary tracking-tight">ExportDrive</span>
+        <span class="text-[11px] text-on-surface-variant -mt-0.5">二手车出口工具平台</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" aria-label="搜索">
+        <i data-lucide="search" class="w-[18px] h-[18px]"></i>
+      </button>
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" aria-label="通知">
+        <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
+        <span class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-warning"></span>
+      </button>
+      <div class="w-px h-6 bg-outline-variant/60 mx-1"></div>
+      <div class="flex items-center gap-2.5 pl-1">
+        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">初</div>
+        <div class="flex flex-col leading-tight hidden sm:flex">
+          <span class="text-sm font-medium text-on-surface">小初</span>
+          <span class="text-[11px] text-on-surface-variant">管理员</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex" style="height: calc(100vh - 4rem)">
+    <aside class="w-60 shrink-0 bg-surface border-r border-outline-variant/20 overflow-y-auto">
+      <nav class="p-3 space-y-0.5">
+        <div class="px-3 pt-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">核心工具</div>
+        <a href="invoice-tax.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="file-text" class="w-4 h-4"></i>发票 / 报税
+        </a>
+        <a href="tax-bureaus.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="landmark" class="w-4 h-4"></i>税务局导航
+        </a>
+        <a href="invoice-titles.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="id-card" class="w-4 h-4"></i>发票抬头
+        </a>
+        <a href="invoice-title-form.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md bg-primary/10 text-primary font-medium text-sm" aria-current="page">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>新增抬头
+        </a>
+
+        <div class="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">其他模块</div>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>工作台
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="car" class="w-4 h-4"></i>车辆核验
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="file-stack" class="w-4 h-4"></i>单证模板
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="anchor" class="w-4 h-4"></i>运费测算
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>海运跟踪
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="book-open" class="w-4 h-4"></i>准入政策
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="users" class="w-4 h-4"></i>客户管理
+        </a>
+      </nav>
+    </aside>
+    <!-- @nav:end 导航组件 -->
+
+    <!-- @main-content:start -->
+    <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6 lg:p-8">
+
+      <!-- 顶部页面标题区 -->
+      <div class="flex items-start justify-between gap-4 mb-7">
+        <div class="flex flex-col gap-1">
+          <nav class="flex items-center gap-1.5 text-xs text-on-surface-variant mb-1.5">
+            <a href="invoice-tax.html" class="hover:text-primary transition-colors">发票 / 报税</a>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            <a href="invoice-titles.html" class="hover:text-primary transition-colors">发票抬头</a>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            <span class="text-on-surface font-medium">新增抬头</span>
+          </nav>
+          <h1 class="text-2xl font-bold text-on-surface tracking-tight">新增发票抬头</h1>
+          <p class="text-sm text-on-surface-variant max-w-2xl">录入本公司或合作方的开票信息，保存后可在形式发票、商业发票等单据中快速调用</p>
+        </div>
+        <a id="btn-back-to-list" href="invoice-titles.html"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-surface-container text-on-surface text-sm font-medium
+                  hover:bg-surface-container-high active:scale-[0.98] transition-all shadow-card shrink-0">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          返回列表
+        </a>
+      </div>
+
+      <!-- 抬头类型选择卡片 -->
+      <section class="mb-6">
+        <h2 class="text-sm font-semibold text-on-surface mb-3">抬头类型</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 卡片-本公司 -->
+          <label id="card-type-self" class="relative flex gap-4 p-5 rounded-lg bg-surface border-2 border-outline-variant/20 shadow-card cursor-pointer hover:border-primary/40 transition-all">
+            <input type="radio" name="titleType" value="self" class="sr-only" />
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center shrink-0">
+              <i data-lucide="building-2" class="w-5 h-5 text-on-surface-variant"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-on-surface">本公司</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-primary/10 text-primary">销售方</span>
+              </div>
+              <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">我方企业作为销售方/开票方，用于出口商业发票、形式发票等单据的卖方信息。建议优先设置一个默认本公司抬头。</p>
+            </div>
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-primary absolute top-4 right-4 hidden type-icon-checked"></i>
+          </label>
+          <!-- 卡片-合作方（默认选中） -->
+          <label id="card-type-partner" class="relative flex gap-4 p-5 rounded-lg bg-primary/[0.04] border-2 border-primary shadow-card cursor-pointer transition-all">
+            <input type="radio" name="titleType" value="partner" class="sr-only" checked />
+            <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <i data-lucide="handshake" class="w-5 h-5 text-primary"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-primary">合作方</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-warning/15 text-warning">购买方</span>
+              </div>
+              <p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">海外买家或国内供应商作为购买方/收货方，用于发票购买方栏位或采购发票管理。</p>
+            </div>
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-primary absolute top-4 right-4 type-icon-checked"></i>
+          </label>
+        </div>
+      </section>
+
+      <!-- 主体两列布局：左表单 + 右预览 -->
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+
+        <!-- 左侧表单（2/3） -->
+        <div class="xl:col-span-2 flex flex-col gap-6">
+
+          <!-- 分区一：基本信息 -->
+          <fieldset class="bg-surface rounded-lg shadow-card p-5">
+            <legend class="text-base font-semibold text-on-surface px-1 mb-4 flex items-center gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-primary"></i>
+              基本信息
+            </legend>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+              <!-- 公司/个人名称 -->
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <label for="input-company-name" class="text-sm font-medium text-on-surface flex items-center gap-1">
+                  公司 / 个人名称 <span class="text-error">*</span>
+                </label>
+                <input id="input-company-name" type="text" value="Dubai Al Futtaim Motors LLC"
+                       placeholder="请输入公司全称或个人姓名"
+                       class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                              placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+
+              <!-- 纳税人识别号 -->
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <label for="input-tax-id" class="text-sm font-medium text-on-surface flex items-center gap-1">
+                  纳税人识别号 / 统一社会信用代码 <span class="text-error">*</span>
+                  <button id="btn-verify-tax-id" type="button"
+                          class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-medium
+                                 bg-surface-container-high text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+                    <i data-lucide="shield-check" class="w-3 h-3"></i>校验
+                  </button>
+                </label>
+                <div class="flex gap-2">
+                  <input id="input-tax-id" type="text" value=""
+                         placeholder="境外企业可留空或填写当地税号"
+                         class="flex-1 bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                                placeholder:text-on-surface-variant/50 font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+                </div>
+                <p class="text-xs text-on-surface-variant flex items-start gap-1 mt-0.5">
+                  <i data-lucide="info" class="w-3 h-3 mt-0.5 shrink-0"></i>
+                  中国企业请填写18位统一社会信用代码；境外合作方可填写当地税号或留空
+                </p>
+              </div>
+
+              <!-- 类型标签 -->
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <span class="text-sm font-medium text-on-surface">类型标签 <span class="text-on-surface-variant font-normal text-xs">（可多选）</span></span>
+                <div id="tag-group" class="flex flex-wrap gap-2">
+                  <!-- 标签-默认抬头 -->
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-surface-container text-on-surface-variant text-sm cursor-pointer hover:bg-surface-container-high transition-colors tag-option">
+                    <input type="checkbox" value="default" class="sr-only" />
+                    <i data-lucide="star" class="w-3.5 h-3.5 tag-check-icon opacity-0"></i>
+                    默认抬头
+                  </label>
+                  <!-- 标签-海外买家（选中） -->
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm cursor-pointer transition-colors tag-option">
+                    <input type="checkbox" value="overseas" class="sr-only" checked />
+                    <i data-lucide="check" class="w-3.5 h-3.5 tag-check-icon"></i>
+                    海外买家
+                  </label>
+                  <!-- 标签-国内供应商 -->
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-surface-container text-on-surface-variant text-sm cursor-pointer hover:bg-surface-container-high transition-colors tag-option">
+                    <input type="checkbox" value="supplier" class="sr-only" />
+                    <i data-lucide="check" class="w-3.5 h-3.5 tag-check-icon opacity-0"></i>
+                    国内供应商
+                  </label>
+                  <!-- 标签-物流商 -->
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-surface-container text-on-surface-variant text-sm cursor-pointer hover:bg-surface-container-high transition-colors tag-option">
+                    <input type="checkbox" value="logistics" class="sr-only" />
+                    <i data-lucide="check" class="w-3.5 h-3.5 tag-check-icon opacity-0"></i>
+                    物流商
+                  </label>
+                  <!-- 标签-长期合作（选中） -->
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm cursor-pointer transition-colors tag-option">
+                    <input type="checkbox" value="longterm" class="sr-only" checked />
+                    <i data-lucide="check" class="w-3.5 h-3.5 tag-check-icon"></i>
+                    长期合作
+                  </label>
+                  <!-- 标签-临时客户 -->
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-surface-container text-on-surface-variant text-sm cursor-pointer hover:bg-surface-container-high transition-colors tag-option">
+                    <input type="checkbox" value="temporary" class="sr-only" />
+                    <i data-lucide="check" class="w-3.5 h-3.5 tag-check-icon opacity-0"></i>
+                    临时客户
+                  </label>
+                </div>
+              </div>
+
+              <!-- 备注 -->
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <label for="input-remark" class="text-sm font-medium text-on-surface">备注</label>
+                <textarea id="input-remark" rows="3"
+                          placeholder="补充说明，如合作背景、主要采购品类、付款方式等"
+                          class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                                 placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none">长期合作中东买家，主要采购丰田酷路泽、日产途乐，付款方式T/T 30%定金。</textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- 分区二：联系方式与地址 -->
+          <fieldset class="bg-surface rounded-lg shadow-card p-5">
+            <legend class="text-base font-semibold text-on-surface px-1 mb-4 flex items-center gap-2">
+              <i data-lucide="contact" class="w-4 h-4 text-primary"></i>
+              联系方式与地址
+            </legend>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+              <!-- 注册地址 -->
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <label for="input-address" class="text-sm font-medium text-on-surface">注册地址</label>
+                <input id="input-address" type="text" value="Sheikh Zayed Road, PO Box 1234, Dubai, UAE"
+                       placeholder="请输入注册地址"
+                       class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                              placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+
+              <!-- 联系电话 -->
+              <div class="flex flex-col gap-1.5">
+                <label for="input-phone" class="text-sm font-medium text-on-surface">联系电话</label>
+                <input id="input-phone" type="tel" value="+971 4 295-XXXX"
+                       placeholder="如 +86 138-XXXX-XXXX"
+                       class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                              placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+
+              <!-- 联系人姓名 -->
+              <div class="flex flex-col gap-1.5">
+                <label for="input-contact" class="text-sm font-medium text-on-surface">联系人姓名 <span class="text-on-surface-variant font-normal text-xs">（合作方适用）</span></label>
+                <input id="input-contact" type="text" value="Ahmed Al Futtaim"
+                       placeholder="请输入联系人姓名"
+                       class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                              placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+
+              <!-- 开户银行 -->
+              <div class="flex flex-col gap-1.5">
+                <label for="input-bank" class="text-sm font-medium text-on-surface">开户银行</label>
+                <input id="input-bank" type="text" value="Emirates NBD Bank"
+                       placeholder="请输入开户银行名称"
+                       class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                              placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+
+              <!-- 银行账号 -->
+              <div class="flex flex-col gap-1.5">
+                <label for="input-bank-account" class="text-sm font-medium text-on-surface">银行账号</label>
+                <input id="input-bank-account" type="text" value="0112-3456789-01"
+                       placeholder="请输入银行账号"
+                       class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                              placeholder:text-on-surface-variant/50 font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+
+              <!-- 电子邮箱 -->
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <label for="input-email" class="text-sm font-medium text-on-surface">电子邮箱</label>
+                <input id="input-email" type="email" value="purchase@alfuttaim-motors.ae"
+                       placeholder="example@company.com"
+                       class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                              placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+                <p class="text-xs text-on-surface-variant flex items-start gap-1 mt-0.5">
+                  <i data-lucide="mail" class="w-3 h-3 mt-0.5 shrink-0"></i>
+                  用于接收电子版发票
+                </p>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- 分区三：海外信息 -->
+          <fieldset class="bg-surface rounded-lg shadow-card p-5">
+            <legend class="text-base font-semibold text-on-surface px-1 mb-4 flex items-center gap-2">
+              <i data-lucide="globe" class="w-4 h-4 text-primary"></i>
+              海外信息
+              <span class="text-xs font-normal text-on-surface-variant">（合作方 / 海外买家可选填）</span>
+            </legend>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+              <!-- 国家/地区 -->
+              <div class="flex flex-col gap-1.5">
+                <label for="select-country" class="text-sm font-medium text-on-surface">国家 / 地区</label>
+                <div class="relative">
+                  <select id="select-country"
+                          class="w-full bg-surface-container border-none rounded-md pl-3 pr-9 py-2 text-sm text-on-surface
+                                 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors appearance-none">
+                    <option value="cn">中国</option>
+                    <option value="ae" selected>阿联酋</option>
+                    <option value="kg">吉尔吉斯斯坦</option>
+                    <option value="kz">哈萨克斯坦</option>
+                    <option value="ru">俄罗斯</option>
+                    <option value="sa">沙特阿拉伯</option>
+                    <option value="other">其他</option>
+                  </select>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-on-surface-variant absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                </div>
+              </div>
+
+              <!-- 城市/港口 -->
+              <div class="flex flex-col gap-1.5">
+                <label for="input-city" class="text-sm font-medium text-on-surface">城市 / 港口</label>
+                <input id="input-city" type="text" value="Dubai / Jebel Ali"
+                       placeholder="如 Dubai / Jebel Ali"
+                       class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                              placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+
+              <!-- 海外税号/VAT/TRN -->
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <label for="input-vat" class="text-sm font-medium text-on-surface">海外税号 / VAT / TRN</label>
+                <input id="input-vat" type="text" value="100-2019-5001"
+                       placeholder="如 TRN 100-XXXX-XXXX"
+                       class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                              placeholder:text-on-surface-variant/50 font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+
+              <!-- 收货地址 -->
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <label for="input-shipping-address" class="text-sm font-medium text-on-surface">收货地址</label>
+                <textarea id="input-shipping-address" rows="2"
+                          placeholder="请输入实际收货地址（如与注册地址不同）"
+                          class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface
+                                 placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none"></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+
+        <!-- 右侧：实时预览 + 帮助提示（1/3） -->
+        <div class="xl:col-span-1 flex flex-col gap-6 xl:sticky xl:top-6">
+
+          <!-- 实时预览卡片 -->
+          <section class="bg-surface rounded-lg shadow-card overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-outline-variant/20 bg-surface-container/50">
+              <h2 class="text-sm font-semibold text-on-surface flex items-center gap-2">
+                <i data-lucide="eye" class="w-4 h-4 text-primary"></i>
+                实时预览
+              </h2>
+              <span id="preview-role-badge" class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-warning/15 text-warning">购买方</span>
+            </div>
+
+            <!-- 发票抬头信息卡（模拟发票上的呈现） -->
+            <div id="preview-card" class="p-5">
+              <div class="rounded-md border border-outline-variant/30 bg-surface-container-lowest p-4">
+                <div class="flex items-center gap-2 pb-2 mb-3 border-b border-dashed border-outline-variant/40">
+                  <i data-lucide="file-invoice" class="w-4 h-4 text-primary"></i>
+                  <span id="preview-title" class="text-xs font-semibold text-primary uppercase tracking-wider">Invoice To · 购买方</span>
+                </div>
+
+                <div class="flex flex-col gap-2.5 text-sm">
+                  <!-- 预览-公司名称 -->
+                  <div>
+                    <div class="text-[11px] text-on-surface-variant mb-0.5">名称</div>
+                    <div id="preview-name" class="font-semibold text-on-surface">Dubai Al Futtaim Motors LLC</div>
+                  </div>
+
+                  <!-- 预览-税号 -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <div class="text-[11px] text-on-surface-variant mb-0.5">统一社会信用代码</div>
+                      <div id="preview-tax-id" class="font-mono text-xs text-on-surface-variant italic">—</div>
+                    </div>
+                    <div>
+                      <div class="text-[11px] text-on-surface-variant mb-0.5">VAT / TRN</div>
+                      <div id="preview-vat" class="font-mono text-xs text-on-surface">100-2019-5001</div>
+                    </div>
+                  </div>
+
+                  <!-- 预览-地址 -->
+                  <div>
+                    <div class="text-[11px] text-on-surface-variant mb-0.5">地址</div>
+                    <div id="preview-address" class="text-xs text-on-surface leading-relaxed">Sheikh Zayed Road, PO Box 1234, Dubai, UAE</div>
+                  </div>
+
+                  <!-- 预览-电话/邮箱 -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <div class="text-[11px] text-on-surface-variant mb-0.5">电话</div>
+                      <div id="preview-phone" class="text-xs text-on-surface">+971 4 295-XXXX</div>
+                    </div>
+                    <div>
+                      <div class="text-[11px] text-on-surface-variant mb-0.5">邮箱</div>
+                      <div id="preview-email" class="text-xs text-on-surface truncate">purchase@alfuttaim-motors.ae</div>
+                    </div>
+                  </div>
+
+                  <!-- 预览-银行信息 -->
+                  <div class="pt-2 mt-1 border-t border-dashed border-outline-variant/40">
+                    <div class="text-[11px] text-on-surface-variant mb-1">开户行 / 账号</div>
+                    <div class="flex flex-col gap-0.5">
+                      <div id="preview-bank" class="text-xs text-on-surface">Emirates NBD Bank</div>
+                      <div id="preview-bank-account" class="font-mono text-xs text-on-surface">0112-3456789-01</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-[11px] text-on-surface-variant mt-3 flex items-start gap-1.5">
+                <i data-lucide="lightbulb" class="w-3 h-3 mt-0.5 shrink-0 text-warning"></i>
+                以上内容将按此格式呈现在形式发票 / 商业发票的「购买方」栏位中。
+              </p>
+            </div>
+          </section>
+
+          <!-- 帮助提示卡片 -->
+          <section class="bg-surface rounded-lg shadow-card p-5">
+            <h2 class="text-sm font-semibold text-on-surface flex items-center gap-2 mb-3">
+              <i data-lucide="help-circle" class="w-4 h-4 text-primary"></i>
+              填写提示
+            </h2>
+            <ul class="flex flex-col gap-2.5 text-xs text-on-surface-variant leading-relaxed">
+              <li class="flex gap-2">
+                <span class="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-semibold shrink-0 mt-0.5">1</span>
+                <span><strong class="text-on-surface font-medium">本公司抬头</strong>建议设置为默认，将自动填入出口商业发票的卖方信息。</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-semibold shrink-0 mt-0.5">2</span>
+                <span>中国企业必须填写<strong class="text-on-surface font-medium">18 位统一社会信用代码</strong>，否则无法开具增值税发票。</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-semibold shrink-0 mt-0.5">3</span>
+                <span>境外合作方请填写当地 VAT / TRN 税号，部分国家清关时需要。</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-semibold shrink-0 mt-0.5">4</span>
+                <span>银行账号信息用于收款指令，建议与合作方书面确认后再保存。</span>
+              </li>
+            </ul>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- 底部固定操作栏 -->
+      <div class="sticky bottom-0 -mx-6 lg:-mx-8 mt-8 px-6 lg:px-8 py-4 bg-surface/95 backdrop-blur-sm border-t border-outline-variant/20 shadow-[0_-4px_12px_rgba(12,45,72,0.06)] z-30">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <!-- 左侧：设为默认（仅本公司显示） -->
+          <div id="default-toggle-wrap" class="hidden">
+            <label for="checkbox-default" class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input id="checkbox-default" type="checkbox"
+                     class="w-4 h-4 rounded border-outline-variant/40 text-primary focus:ring-primary/30 bg-surface-container" />
+              <span class="text-sm text-on-surface">设为默认抬头</span>
+              <span class="text-xs text-on-surface-variant">（新建发票时自动填入）</span>
+            </label>
+          </div>
+          <div id="partner-hint" class="text-xs text-on-surface-variant flex items-center gap-1.5">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            当前为「合作方」抬头，保存后可在发票购买方栏位快速调用
+          </div>
+
+          <!-- 右侧：操作按钮 -->
+          <div class="flex items-center gap-2 ml-auto">
+            <a id="btn-cancel" href="invoice-titles.html"
+               class="inline-flex items-center px-4 py-2 rounded-md bg-surface-container text-on-surface text-sm font-medium
+                      hover:bg-surface-container-high active:scale-[0.98] transition-all">
+              取消
+            </a>
+            <button id="btn-save-new" type="button"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-surface-container-high text-on-surface text-sm font-medium
+                           hover:bg-surface-container-highest active:scale-[0.98] transition-all border border-outline-variant/20">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              保存并新增
+            </button>
+            <button id="btn-save" type="button"
+                    class="inline-flex items-center gap-2 px-5 py-2 rounded-md bg-primary text-on-primary text-sm font-medium
+                           hover:opacity-90 active:scale-[0.98] transition-all shadow-card">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              保存抬头
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+    <!-- @main-content:end -->
+  </div>
+
+  <script>
+    $(function () {
+      // === 抬头类型切换 ===
+      // 点击卡片：切换选中态、更新预览角色标签、显示/隐藏「设为默认」
+      function setTitleType(type) {
+        const $self = $('#card-type-self');
+        const $partner = $('#card-type-partner');
+        if (type === 'self') {
+          // 本公司选中
+          $self.removeClass('border-outline-variant/20 bg-surface').addClass('border-primary bg-primary/[0.04]');
+          $self.find('.type-icon-checked').removeClass('hidden');
+          $self.find('input[name="titleType"]').prop('checked', true);
+          $self.find('.w-10').removeClass('bg-surface-container').addClass('bg-primary/10');
+          $self.find('.building-2, [data-lucide="building-2"]').removeClass('text-on-surface-variant').addClass('text-primary');
+          $self.find('span.text-sm.font-semibold').first().removeClass('text-on-surface').addClass('text-primary');
+          // 合作方取消
+          $partner.removeClass('border-primary bg-primary/[0.04]').addClass('border-outline-variant/20 bg-surface');
+          $partner.find('.type-icon-checked').addClass('hidden');
+          $partner.find('.w-10').removeClass('bg-primary/10').addClass('bg-surface-container');
+          $partner.find('.handshake, [data-lucide="handshake"]').removeClass('text-primary').addClass('text-on-surface-variant');
+          $partner.find('span.text-sm.font-semibold').first().removeClass('text-primary').addClass('text-on-surface');
+
+          // 预览切换为销售方
+          $('#preview-role-badge').removeClass('bg-warning/15 text-warning').addClass('bg-primary/10 text-primary').text('销售方');
+          $('#preview-title').text('Invoice From · 销售方');
+          $('#default-toggle-wrap').removeClass('hidden');
+          $('#partner-hint').addClass('hidden');
+        } else {
+          // 合作方选中
+          $partner.removeClass('border-outline-variant/20 bg-surface').addClass('border-primary bg-primary/[0.04]');
+          $partner.find('.type-icon-checked').removeClass('hidden');
+          $partner.find('input[name="titleType"]').prop('checked', true);
+          $partner.find('.w-10').removeClass('bg-surface-container').addClass('bg-primary/10');
+          $partner.find('.handshake, [data-lucide="handshake"]').removeClass('text-on-surface-variant').addClass('text-primary');
+          $partner.find('span.text-sm.font-semibold').first().removeClass('text-on-surface').addClass('text-primary');
+          // 本公司取消
+          $self.removeClass('border-primary bg-primary/[0.04]').addClass('border-outline-variant/20 bg-surface');
+          $self.find('.type-icon-checked').addClass('hidden');
+          $self.find('.w-10').removeClass('bg-primary/10').addClass('bg-surface-container');
+          $self.find('.building-2, [data-lucide="building-2"]').removeClass('text-primary').addClass('text-on-surface-variant');
+          $self.find('span.text-sm.font-semibold').first().removeClass('text-primary').addClass('text-on-surface');
+
+          // 预览切换为购买方
+          $('#preview-role-badge').removeClass('bg-primary/10 text-primary').addClass('bg-warning/15 text-warning').text('购买方');
+          $('#preview-title').text('Invoice To · 购买方');
+          $('#default-toggle-wrap').addClass('hidden');
+          $('#partner-hint').removeClass('hidden');
+        }
+        lucide.createIcons();
+      }
+
+      $('#card-type-self').on('click', function () { setTitleType('self'); });
+      $('#card-type-partner').on('click', function () { setTitleType('partner'); });
+
+      // === 标签多选切换 ===
+      // 点击标签：切换 checkbox + 视觉选中态
+      $('#tag-group').on('click', '.tag-option', function (e) {
+        e.preventDefault();
+        const $label = $(this);
+        const $input = $label.find('input[type="checkbox"]');
+        const checked = !$input.prop('checked');
+        $input.prop('checked', checked);
+        const $icon = $label.find('.tag-check-icon');
+        if (checked) {
+          $label.removeClass('bg-surface-container text-on-surface-variant hover:bg-surface-container-high')
+                .addClass('bg-primary/10 text-primary');
+          $icon.removeClass('opacity-0');
+        } else {
+          $label.removeClass('bg-primary/10 text-primary')
+                .addClass('bg-surface-container text-on-surface-variant hover:bg-surface-container-high');
+          $icon.addClass('opacity-0');
+        }
+      });
+
+      // === 实时预览同步（简单交互：输入时更新预览区域） ===
+      function syncPreview() {
+        const name = $('#input-company-name').val() || '—';
+        const taxId = $('#input-tax-id').val();
+        const vat = $('#input-vat').val();
+        const address = $('#input-address').val() || '—';
+        const phone = $('#input-phone').val() || '—';
+        const email = $('#input-email').val() || '—';
+        const bank = $('#input-bank').val() || '—';
+        const bankAccount = $('#input-bank-account').val() || '—';
+
+        $('#preview-name').text(name);
+        $('#preview-tax-id').text(taxId || '—').toggleClass('italic text-on-surface-variant', !taxId).toggleClass('text-on-surface', !!taxId);
+        $('#preview-vat').text(vat || '—').toggleClass('italic text-on-surface-variant', !vat).toggleClass('text-on-surface', !!vat);
+        $('#preview-address').text(address);
+        $('#preview-phone').text(phone);
+        $('#preview-email').text(email);
+        $('#preview-bank').text(bank);
+        $('#preview-bank-account').text(bankAccount);
+      }
+
+      $('#input-company-name, #input-tax-id, #input-vat, #input-address, #input-phone, #input-email, #input-bank, #input-bank-account')
+        .on('input', syncPreview);
+
+      // === 税号校验按钮 ===
+      // 校验按钮 - 点击后应实现：
+      // 1. 获取 #input-tax-id 的值
+      // 2. 中国企业：校验是否为 18 位统一社会信用代码（正则 ^[0-9A-HJ-NPQRTUWXY]{2}\d{6}[0-9A-HJ-NPQRTUWXY]{10}$）
+      // 3. 境外企业：非空时仅做长度校验（≥4 位）
+      // 4. 校验通过：在输入框下方显示绿色「校验通过」提示
+      // 5. 校验失败：输入框 ring 变为 error 色，下方显示红色错误原因
+      // 6. 实际项目应调用后端接口核验工商信息
+      $('#btn-verify-tax-id').on('click', function () {
+        const val = $('#input-tax-id').val();
+        if (!val) {
+          console.log('税号为空，境外企业可留空');
+          return;
+        }
+        console.log('校验税号:', val);
+      });
+
+      // === 保存按钮 ===
+      // 保存抬头 - 点击后应实现：
+      // 1. 收集表单所有字段（抬头类型、名称、税号、标签、联系方式、海外信息等）
+      // 2. 前端校验：必填字段（公司名称、税号条件必填）
+      // 3. 校验通过后调用 POST /api/invoice-titles 提交数据
+      // 4. 成功后跳转 invoice-titles.html 并显示 toast「抬头保存成功」
+      // 5. 失败则在对应字段下方显示错误信息
+      $('#btn-save').on('click', function () {
+        const name = $('#input-company-name').val();
+        if (!name.trim()) {
+          $('#input-company-name').focus();
+          return;
+        }
+        console.log('保存抬头，当前类型:', $('input[name="titleType"]:checked').val());
+        window.location.href = 'invoice-titles.html';
+      });
+
+      // 保存并新增 - 点击后应实现：
+      // 1. 同「保存抬头」的校验和提交逻辑
+      // 2. 保存成功后不跳转列表，而是清空表单停留在当前页，继续新增下一条
+      $('#btn-save-new').on('click', function () {
+        console.log('保存并新增');
+      });
+
+      // 初始化图标
+      lucide.createIcons();
+    });
+  </script>
+</body>
+
+</html>

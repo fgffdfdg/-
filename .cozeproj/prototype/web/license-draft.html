@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色（与主站一致：深海蓝 + 暖橙） === */
+      --color-primary:              #0C2D48;
+      --color-primary-container:    #1A5276;
+      --color-on-primary:           #ffffff;
+      --color-accent:               #E67E22;
+      --color-accent-foreground:    #ffffff;
+
+      /* === 背景 / 表面（中性灰阶） === */
+      --color-background:                 #F7F9FC;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EEF2F7;
+      --color-surface-container-high:     #E8EDF4;
+      --color-surface-container-highest:  #DDE4EE;
+
+      /* === 文字 === */
+      --color-on-surface:           #2C3E50;
+      --color-on-surface-variant:   #7F8C8D;
+
+      /* === 功能色 === */
+      --color-success:  #27AE60;
+      --color-error:    #E74C3C;
+      --color-warning:  #E67E22;
+
+      /* === 边框 === */
+      --color-outline:          #CBD5E1;
+      --color-outline-variant:  #E2E8F0;
+
+      /* === 侧边栏（深蓝） === */
+      --color-navy:              #0C2D48;
+      --color-navy-dark:         #081F33;
+      --color-navy-light:        #1A5276;
+      --color-sidebar:           #0C2D48;
+      --color-sidebar-foreground:#CBD5E1;
+
+      /* === 圆角 === */
+      --radius-sm:   0.25rem;
+      --radius-md:   0.375rem;
+      --radius-lg:   0.5rem;
+      --radius-xl:   0.75rem;
+      --radius-2xl:  1rem;
+      --radius-full: 9999px;
+
+      /* === 阴影 === */
+      --shadow-card:   0 1px 3px rgba(12,45,72,0.08), 0 1px 2px rgba(12,45,72,0.06);
+      --shadow-float:  0 10px 25px rgba(12,45,72,0.12), 0 4px 10px rgba(12,45,72,0.08);
+      --shadow-dialog: 0 25px 50px rgba(12,45,72,0.18), 0 10px 20px rgba(12,45,72,0.1);
+
+      /* === 字体 === */
+      --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 400;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans antialiased">
+
+  <!-- @nav:start 导航组件（侧边栏 + 顶栏） -->
+  <aside class="fixed left-0 top-0 z-40 flex h-screen w-[240px] flex-col bg-navy text-sidebar-foreground">
+    <!-- Logo -->
+    <div class="flex items-center gap-2.5 border-b border-white/10 px-4 h-14">
+      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent shadow-sm shadow-accent/20">
+        <i data-lucide="anchor" class="h-4 w-4 text-white"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-[13px] font-semibold tracking-wide text-white leading-tight">汽车出口通</h1>
+        <p class="text-[10px] text-white/50 leading-tight">专业工具 · 高效出口</p>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto py-3 px-2.5">
+
+      <div class="mb-2">
+        <div class="flex w-full items-center gap-1 px-2 py-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-white/50">
+          <span class="flex-1 text-left">车辆服务</span>
+        </div>
+        <div class="space-y-0.5">
+          <a href="#" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors">
+            <i data-lucide="search" class="h-[18px] w-[18px] text-white/55 group-hover:text-white/80"></i>
+            <span class="truncate">常用车源</span>
+          </a>
+          <a href="#" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors">
+            <i data-lucide="car" class="h-[18px] w-[18px] text-white/55 group-hover:text-white/80"></i>
+            <span class="truncate">配置查询</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <div class="flex w-full items-center gap-1 px-2 py-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-white/50">
+          <span class="flex-1 text-left">单证中心</span>
+        </div>
+        <div class="space-y-0.5">
+          <a href="#" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors">
+            <i data-lucide="folder-open" class="h-[18px] w-[18px] text-white/55 group-hover:text-white/80"></i>
+            <span class="truncate">发票合同装箱单</span>
+          </a>
+
+          <!-- 出口许可证（当前模块，含两个二级功能） -->
+          <div>
+            <a href="export-license.html" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium bg-white/[0.12] text-white transition-colors" aria-current="page">
+              <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-accent"></span>
+              <i data-lucide="shield-check" class="h-[18px] w-[18px] text-accent"></i>
+              <span class="truncate">出口许可证</span>
+              <i data-lucide="chevron-down" class="h-3.5 w-3.5 ml-auto text-white/60"></i>
+            </a>
+            <div class="mt-0.5 ml-5 space-y-0.5 border-l border-white/10 pl-3">
+              <a href="license-draft.html" class="group/sub flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[12.5px] bg-white/[0.08] text-white transition-colors" aria-current="page">
+                <i data-lucide="file-pen-line" class="h-3.5 w-3.5 text-accent"></i>
+                <span>许可证草单</span>
+              </a>
+              <a href="export-license.html#mofcom" class="group/sub flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[12.5px] text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors">
+                <i data-lucide="external-link" class="h-3.5 w-3.5 text-white/50 group-hover/sub:text-accent"></i>
+                <span>商务部统一平台</span>
+              </a>
+            </div>
+          </div>
+
+          <a href="#" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors">
+            <i data-lucide="anchor" class="h-[18px] w-[18px] text-white/55 group-hover:text-white/80"></i>
+            <span class="truncate">报关系统</span>
+          </a>
+          <a href="#" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors">
+            <i data-lucide="stamp" class="h-[18px] w-[18px] text-white/55 group-hover:text-white/80"></i>
+            <span class="truncate">印章工具</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <div class="flex w-full items-center gap-1 px-2 py-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-white/50">
+          <span class="flex-1 text-left">发票报税</span>
+        </div>
+        <div class="space-y-0.5">
+          <a href="#" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors">
+            <i data-lucide="receipt" class="h-[18px] w-[18px] text-white/55 group-hover:text-white/80"></i>
+            <span class="truncate">发票报税</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <div class="flex w-full items-center gap-1 px-2 py-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-white/50">
+          <span class="flex-1 text-left">物流跟踪</span>
+        </div>
+        <div class="space-y-0.5">
+          <a href="#" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors">
+            <i data-lucide="ship" class="h-[18px] w-[18px] text-white/55 group-hover:text-white/80"></i>
+            <span class="truncate">海运跟踪</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <div class="flex w-full items-center gap-1 px-2 py-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-white/50">
+          <span class="flex-1 text-left">客户与记录</span>
+        </div>
+        <div class="space-y-0.5">
+          <a href="#" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors">
+            <i data-lucide="users" class="h-[18px] w-[18px] text-white/55 group-hover:text-white/80"></i>
+            <span class="truncate">客户管理</span>
+          </a>
+          <a href="#" class="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/75 hover:bg-white/[0.08] hover:text-white transition-colors">
+            <i data-lucide="file-text" class="h-[18px] w-[18px] text-white/55 group-hover:text-white/80"></i>
+            <span class="truncate">我的记录</span>
+          </a>
+        </div>
+      </div>
+
+    </nav>
+
+    <!-- Footer - User Info -->
+    <div class="border-t border-white/10 px-3 py-3">
+      <div class="space-y-2.5">
+        <div class="flex items-center gap-2.5 px-1">
+          <div class="flex items-center justify-center rounded-full bg-accent/15 ring-1 ring-accent/20 h-7 w-7">
+            <i data-lucide="user" class="h-3.5 w-3.5 text-accent"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-white/90 truncate text-[12px]">小初</p>
+            <p class="text-[10px] text-white/45 truncate">xiaochu@exportdrive.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Top Bar -->
+  <header class="fixed top-0 right-0 left-[240px] z-30 h-14 bg-surface border-b border-outline-variant/30 flex items-center justify-between px-6">
+    <div class="flex items-center gap-3">
+      <h2 class="text-[15px] font-semibold text-on-surface">出口许可证</h2>
+      <span class="text-on-surface-variant/40">/</span>
+      <span class="text-[13px] text-on-surface-variant" id="header-crumb">许可证草单</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-on-surface-variant hover:bg-surface-container transition-colors">
+        <i data-lucide="help-circle" class="h-4 w-4"></i>
+        帮助
+      </button>
+      <button class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] text-on-surface-variant hover:bg-surface-container transition-colors">
+        <i data-lucide="bell" class="h-4 w-4"></i>
+      </button>
+    </div>
+  </header>
+  <!-- @nav:end 导航组件 -->
+
+  <!-- @main-content:start -->
+  <main class="flex-1 min-w-0 ml-[240px] pt-14 min-h-screen">
+    <!-- Sticky 顶部操作栏 -->
+    <div class="sticky top-14 z-20 bg-surface/90 backdrop-blur supports-[backdrop-filter]:bg-surface/75 border-b border-outline-variant/30">
+      <div class="flex items-center justify-between gap-4 px-6 py-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <a href="export-license.html" id="btn-back-overview" class="inline-flex items-center gap-1.5 text-[13px] font-medium text-on-surface-variant hover:text-primary transition-colors">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span>返回总览</span>
+          </a>
+          <span class="text-on-surface-variant/30">|</span>
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+              <i data-lucide="file-pen-line" class="h-4 w-4 text-primary"></i>
+            </div>
+            <h1 class="text-[17px] font-bold text-on-surface truncate">许可证草单</h1>
+            <span class="hidden sm:inline-flex items-center gap-1 rounded-sm bg-warning/15 text-warning px-1.5 py-0.5 text-[10.5px] font-medium">
+              <i data-lucide="edit-3" class="h-3 w-3"></i>草稿中
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="btn-save-draft" class="inline-flex items-center gap-1.5 bg-surface-container text-on-surface border-none px-3.5 py-2 rounded-md text-[13px] font-medium hover:bg-surface-container-high active:scale-[0.98] transition-all">
+            <i data-lucide="save" class="h-4 w-4"></i>
+            <span class="hidden sm:inline">保存草稿</span>
+          </button>
+          <button id="btn-preview-a4" class="inline-flex items-center gap-1.5 bg-surface-container text-on-surface border-none px-3.5 py-2 rounded-md text-[13px] font-medium hover:bg-surface-container-high active:scale-[0.98] transition-all">
+            <i data-lucide="eye" class="h-4 w-4"></i>
+            <span class="hidden sm:inline">预览 A4</span>
+          </button>
+          <button id="btn-export-pdf" class="inline-flex items-center gap-1.5 bg-primary text-on-primary px-4 py-2 rounded-md text-[13px] font-medium hover:opacity-90 active:scale-[0.98] transition-all shadow-sm shadow-primary/20">
+            <i data-lucide="download" class="h-4 w-4"></i>
+            <span>导出 PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <div class="grid grid-cols-1 xl:grid-cols-5 gap-5 items-start">
+
+        <!-- 左侧：表单编辑区 -->
+        <div class="xl:col-span-2 space-y-5">
+
+          <!-- 提示条 -->
+          <div class="flex items-start gap-2.5 rounded-lg bg-primary/[0.06] border border-primary/10 px-3.5 py-2.5">
+            <i data-lucide="info" class="h-4 w-4 text-primary mt-0.5 shrink-0"></i>
+            <p class="text-[12.5px] leading-relaxed text-on-surface-variant">
+              本草单用于在线制作<b class="text-on-surface font-medium">出口许可证</b>，数据独立于发票/合同/装箱单。完成后可导出 PDF，用于在商务部统一平台申报。
+            </p>
+          </div>
+
+          <!-- 卡片：基本信息 -->
+          <section class="bg-surface rounded-lg shadow-card p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">1</span>
+              <h3 class="text-base font-semibold text-on-surface">基本信息</h3>
+            </div>
+            <div class="space-y-3.5">
+              <div>
+                <label for="f-license-no" class="block text-[12.5px] font-medium text-on-surface mb-1.5">许可证号</label>
+                <input id="f-license-no" type="text" value="24-21-10866" placeholder="系统自动生成"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors font-mono"/>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="f-issue-date" class="block text-[12.5px] font-medium text-on-surface mb-1.5">发证日期</label>
+                  <input id="f-issue-date" type="date" value="2025-01-15"
+                    class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"/>
+                </div>
+                <div>
+                  <label for="f-expire-date" class="block text-[12.5px] font-medium text-on-surface mb-1.5">有效期截止日期</label>
+                  <input id="f-expire-date" type="date" value="2025-12-31"
+                    class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"/>
+                </div>
+              </div>
+              <div>
+                <label for="f-trade-mode" class="block text-[12.5px] font-medium text-on-surface mb-1.5">贸易方式</label>
+                <select id="f-trade-mode"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors appearance-none pr-9">
+                  <option value="一般贸易" selected>一般贸易</option>
+                  <option value="边境小额贸易">边境小额贸易</option>
+                  <option value="其他">其他</option>
+                </select>
+              </div>
+              <div>
+                <label for="f-contract-no" class="block text-[12.5px] font-medium text-on-surface mb-1.5">合同号</label>
+                <input id="f-contract-no" type="text" value="GTD-2025-AE-0118" placeholder="请输入合同号"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors font-mono"/>
+              </div>
+            </div>
+          </section>
+
+          <!-- 卡片：出口商信息 -->
+          <section class="bg-surface rounded-lg shadow-card p-5">
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div class="flex items-center gap-2">
+                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">2</span>
+                <h3 class="text-base font-semibold text-on-surface">出口商信息</h3>
+              </div>
+              <button type="button" id="btn-pull-exporter" class="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-primary hover:bg-primary/5 px-2.5 py-1.5 rounded-md transition-colors">
+                <i data-lucide="building-2" class="h-3.5 w-3.5"></i>
+                从我的公司信息带入
+              </button>
+            </div>
+            <div class="space-y-3.5">
+              <div>
+                <label for="f-exporter-name" class="block text-[12.5px] font-medium text-on-surface mb-1.5">出口商名称</label>
+                <input id="f-exporter-name" type="text" value="广州通达汽车出口有限公司"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"/>
+              </div>
+              <div>
+                <label for="f-exporter-code" class="block text-[12.5px] font-medium text-on-surface mb-1.5">出口商代码（统一社会信用代码）</label>
+                <input id="f-exporter-code" type="text" value="91440101MA9Y3K7X2P"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors font-mono"/>
+              </div>
+              <div>
+                <label for="f-exporter-addr" class="block text-[12.5px] font-medium text-on-surface mb-1.5">出口商地址</label>
+                <textarea id="f-exporter-addr" rows="2"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none">广东省广州市南沙区港前大道南 168 号通达国贸中心 12 层</textarea>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="f-exporter-contact" class="block text-[12.5px] font-medium text-on-surface mb-1.5">联系人</label>
+                  <input id="f-exporter-contact" type="text" value="陈志远"
+                    class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"/>
+                </div>
+                <div>
+                  <label for="f-exporter-tel" class="block text-[12.5px] font-medium text-on-surface mb-1.5">电话</label>
+                  <input id="f-exporter-tel" type="text" value="+86 20 3908 2266"
+                    class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"/>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 卡片：发货人信息 -->
+          <section class="bg-surface rounded-lg shadow-card p-5">
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div class="flex items-center gap-2">
+                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">3</span>
+                <h3 class="text-base font-semibold text-on-surface">发货人信息</h3>
+              </div>
+              <label class="inline-flex items-center gap-1.5 text-[12.5px] text-on-surface-variant cursor-pointer select-none">
+                <input type="checkbox" id="chk-same-as-exporter" class="h-3.5 w-3.5 rounded accent-primary"/>
+                同出口商
+              </label>
+            </div>
+            <div id="consignor-fields" class="space-y-3.5">
+              <div>
+                <label for="f-consignor-name" class="block text-[12.5px] font-medium text-on-surface mb-1.5">发货人名称</label>
+                <input id="f-consignor-name" type="text" value="广州通达汽车出口有限公司"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"/>
+              </div>
+              <div>
+                <label for="f-consignor-code" class="block text-[12.5px] font-medium text-on-surface mb-1.5">发货人代码</label>
+                <input id="f-consignor-code" type="text" value="91440101MA9Y3K7X2P"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors font-mono"/>
+              </div>
+              <div>
+                <label for="f-consignor-addr" class="block text-[12.5px] font-medium text-on-surface mb-1.5">发货人地址</label>
+                <textarea id="f-consignor-addr" rows="2"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none">广东省广州市南沙区港前大道南 168 号通达国贸中心 12 层</textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- 卡片：进口国 / 到达信息 -->
+          <section class="bg-surface rounded-lg shadow-card p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">4</span>
+              <h3 class="text-base font-semibold text-on-surface">进口国 / 到达信息</h3>
+            </div>
+            <div class="space-y-3.5">
+              <div>
+                <label for="f-import-country" class="block text-[12.5px] font-medium text-on-surface mb-1.5">进口国（地区）</label>
+                <select id="f-import-country"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors appearance-none pr-9">
+                  <option value="阿联酋" selected>阿联酋</option>
+                  <option value="沙特阿拉伯">沙特阿拉伯</option>
+                  <option value="哈萨克斯坦">哈萨克斯坦</option>
+                  <option value="蒙古">蒙古</option>
+                  <option value="俄罗斯">俄罗斯</option>
+                  <option value="其他">其他</option>
+                </select>
+              </div>
+              <div>
+                <label for="f-dest-port" class="block text-[12.5px] font-medium text-on-surface mb-1.5">目的港</label>
+                <input id="f-dest-port" type="text" value="Jebel Ali（杰贝阿里）"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"/>
+              </div>
+              <div>
+                <label for="f-transport" class="block text-[12.5px] font-medium text-on-surface mb-1.5">运输方式</label>
+                <select id="f-transport"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors appearance-none pr-9">
+                  <option value="水路" selected>水路运输</option>
+                  <option value="公路">公路运输</option>
+                  <option value="铁路">铁路运输</option>
+                  <option value="航空">航空运输</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- 卡片：车辆明细 -->
+          <section class="bg-surface rounded-lg shadow-card p-5">
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div class="flex items-center gap-2">
+                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-accent text-[11px] font-bold">5</span>
+                <h3 class="text-base font-semibold text-on-surface">车辆明细</h3>
+                <span class="inline-flex items-center rounded-sm bg-primary/10 text-primary px-1.5 py-0.5 text-[10.5px] font-medium">核心</span>
+              </div>
+              <span class="text-[12px] text-on-surface-variant">总值随数量 × 单价自动计算</span>
+            </div>
+
+            <div class="overflow-x-auto -mx-1 px-1">
+              <table class="w-full min-w-[640px] border-collapse text-[12.5px]">
+                <thead>
+                  <tr class="bg-surface-container text-on-surface-variant text-[11px] uppercase tracking-wide">
+                    <th class="px-2 py-2.5 text-left font-semibold w-10">#</th>
+                    <th class="px-2 py-2.5 text-left font-semibold">品牌 / 车型</th>
+                    <th class="px-2 py-2.5 text-left font-semibold">VIN 车架号</th>
+                    <th class="px-2 py-2.5 text-left font-semibold">发动机型号</th>
+                    <th class="px-2 py-2.5 text-center font-semibold w-16">数量</th>
+                    <th class="px-2 py-2.5 text-right font-semibold w-28">单价 USD</th>
+                    <th class="px-2 py-2.5 text-right font-semibold w-28">总值 USD</th>
+                    <th class="px-2 py-2.5 text-center font-semibold w-12">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="vehicle-table-body" class="divide-y divide-outline-variant/40">
+                  <!-- 列表-车辆1：比亚迪 ATTO 3 -->
+                  <tr class="vehicle-row hover:bg-surface-container/40 transition-colors" data-id="v1">
+                    <td class="px-2 py-2.5 text-on-surface-variant font-mono seq-cell">1</td>
+                    <td class="px-2 py-2.5">
+                      <div class="flex flex-col gap-1">
+                        <input type="text" value="比亚迪" class="vehicle-brand w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                        <input type="text" value="ATTO 3（元 PLUS）" class="vehicle-model w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                      </div>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="text" value="LGXC16DF8N0228761" class="vehicle-vin w-full bg-surface-container border-none rounded px-2 py-1 text-[11.5px] font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="text" value="BYD472ZQA" class="vehicle-engine w-full bg-surface-container border-none rounded px-2 py-1 text-[12px] font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="number" min="1" value="1" class="vehicle-qty w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-center text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="number" min="0" step="0.01" value="21500" class="vehicle-price w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-right font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5 text-right font-mono font-semibold text-primary vehicle-total">$21,500</td>
+                    <td class="px-2 py-2.5 text-center">
+                      <button type="button" class="btn-delete-row inline-flex h-7 w-7 items-center justify-center rounded-md text-error/70 hover:bg-error/10 hover:text-error transition-colors" title="删除该行">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <!-- 列表-车辆2：吉利 缤越 -->
+                  <tr class="vehicle-row hover:bg-surface-container/40 transition-colors" data-id="v2">
+                    <td class="px-2 py-2.5 text-on-surface-variant font-mono seq-cell">2</td>
+                    <td class="px-2 py-2.5">
+                      <div class="flex flex-col gap-1">
+                        <input type="text" value="吉利" class="vehicle-brand w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                        <input type="text" value="缤越 Coolray" class="vehicle-model w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                      </div>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="text" value="LB3762KZ2NX031542" class="vehicle-vin w-full bg-surface-container border-none rounded px-2 py-1 text-[11.5px] font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="text" value="JLB-4G15TD" class="vehicle-engine w-full bg-surface-container border-none rounded px-2 py-1 text-[12px] font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="number" min="1" value="1" class="vehicle-qty w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-center text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="number" min="0" step="0.01" value="16900" class="vehicle-price w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-right font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5 text-right font-mono font-semibold text-primary vehicle-total">$16,900</td>
+                    <td class="px-2 py-2.5 text-center">
+                      <button type="button" class="btn-delete-row inline-flex h-7 w-7 items-center justify-center rounded-md text-error/70 hover:bg-error/10 hover:text-error transition-colors" title="删除该行">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <!-- 列表-车辆3：五菱 宏光MINIEV -->
+                  <tr class="vehicle-row hover:bg-surface-container/40 transition-colors" data-id="v3">
+                    <td class="px-2 py-2.5 text-on-surface-variant font-mono seq-cell">3</td>
+                    <td class="px-2 py-2.5">
+                      <div class="flex flex-col gap-1">
+                        <input type="text" value="五菱" class="vehicle-brand w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                        <input type="text" value="宏光 MINIEV" class="vehicle-model w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                      </div>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="text" value="LZW6442EVA6K118907" class="vehicle-vin w-full bg-surface-container border-none rounded px-2 py-1 text-[11.5px] font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="text" value="TZ160XS050" class="vehicle-engine w-full bg-surface-container border-none rounded px-2 py-1 text-[12px] font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="number" min="1" value="2" class="vehicle-qty w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-center text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5">
+                      <input type="number" min="0" step="0.01" value="10000" class="vehicle-price w-full bg-surface-container border-none rounded px-2 py-1 text-[12.5px] text-right font-mono text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"/>
+                    </td>
+                    <td class="px-2 py-2.5 text-right font-mono font-semibold text-primary vehicle-total">$20,000</td>
+                    <td class="px-2 py-2.5 text-center">
+                      <button type="button" class="btn-delete-row inline-flex h-7 w-7 items-center justify-center rounded-md text-error/70 hover:bg-error/10 hover:text-error transition-colors" title="删除该行">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mt-3 flex items-center justify-between gap-3">
+              <button type="button" id="btn-add-vehicle" class="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-primary hover:bg-primary/5 px-2.5 py-1.5 rounded-md transition-colors">
+                <i data-lucide="plus" class="h-4 w-4"></i>
+                添加车辆
+              </button>
+              <div class="flex items-center gap-4 text-[12.5px]">
+                <span class="text-on-surface-variant">共 <b id="total-qty" class="text-on-surface font-semibold">4</b> 辆</span>
+                <span class="text-on-surface-variant">总值 USD <b id="total-amount" class="text-primary font-bold text-[14px]">$58,400</b></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- 备注 -->
+          <section class="bg-surface rounded-lg shadow-card p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-bold">6</span>
+              <h3 class="text-base font-semibold text-on-surface">备注与附件</h3>
+            </div>
+            <div class="space-y-3.5">
+              <div>
+                <label for="f-remark" class="block text-[12.5px] font-medium text-on-surface mb-1.5">备注（将打印在许可证备注栏）</label>
+                <textarea id="f-remark" rows="3" placeholder="可填写唛头、批次、特殊说明等"
+                  class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none">本批车辆为新能源乘用车，电池已按 IMDG 规定通过 UN38.3 测试，随附品质证书及合格证。</textarea>
+              </div>
+              <div>
+                <p class="block text-[12.5px] font-medium text-on-surface mb-1.5">附件</p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="inline-flex items-center gap-1.5 rounded-md bg-surface-container px-2.5 py-1.5 text-[12px] text-on-surface">
+                    <i data-lucide="file-check-2" class="h-3.5 w-3.5 text-success"></i>
+                    合同_GTD-2025-AE-0118.pdf
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 rounded-md bg-surface-container px-2.5 py-1.5 text-[12px] text-on-surface">
+                    <i data-lucide="file-check-2" class="h-3.5 w-3.5 text-success"></i>
+                    VIN清单.xlsx
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- 右侧：A4 预览区 -->
+        <div class="xl:col-span-3 xl:sticky xl:top-20">
+          <div class="flex flex-col items-center">
+            <div class="flex items-center justify-between w-full max-w-[780px] mb-3 px-1">
+              <div class="flex items-center gap-1.5 text-[12px] text-on-surface-variant">
+                <i data-lucide="file-text" class="h-3.5 w-3.5"></i>
+                <span>A4 预览 · 210 × 297 mm</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-[12px] text-on-surface-variant">
+                <span class="inline-block h-1.5 w-1.5 rounded-full bg-success"></span>
+                已与左侧表单同步
+              </div>
+            </div>
+
+            <!-- A4 纸张 -->
+            <div id="a4-paper" class="w-full max-w-[780px] aspect-[1/1.414] bg-surface-container-lowest shadow-float rounded-sm overflow-hidden text-black relative">
+
+              <!-- 顶部红色国徽 + 标题 -->
+              <div class="pt-6 pb-3 text-center border-b-2 border-[#C0392B]">
+                <div class="flex items-center justify-center gap-3">
+                  <!-- 国徽占位（圆形齿轮+麦穗，用纯 CSS 形状） -->
+                  <div class="relative h-10 w-10 rounded-full bg-[#C0392B] flex items-center justify-center shadow-sm">
+                    <i data-lucide="landmark" class="h-5 w-5 text-white"></i>
+                  </div>
+                  <div class="text-left">
+                    <div class="text-[22px] font-bold leading-tight tracking-widest text-[#C0392B]" style="font-family:'SimSun','STSong','Songti SC',serif;">中华人民共和国出口许可证</div>
+                    <div class="text-[9.5px] leading-tight tracking-[0.25em] text-[#C0392B]/80 mt-0.5">EXPORT&nbsp;LICENCE&nbsp;OF&nbsp;THE&nbsp;PEOPLE'S&nbsp;REPUBLIC&nbsp;OF&nbsp;CHINA</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 许可证号（右上） -->
+              <div class="flex items-center justify-between px-8 pt-3">
+                <div class="text-[11px] text-black/70">
+                  <span class="inline-block border border-black/50 px-2 py-0.5 rounded-sm bg-black/[0.03]">第一联（正本）</span>
+                </div>
+                <div class="text-right">
+                  <div class="text-[11px] text-black/60 leading-none">出口许可证号 No.</div>
+                  <div class="text-[15px] font-bold font-mono text-[#C0392B] leading-tight mt-0.5 tracking-wider">24-21-10866</div>
+                </div>
+              </div>
+
+              <!-- 18 栏表格 -->
+              <div class="px-8 pt-4">
+                <table class="w-full border-collapse text-[10.5px] leading-tight" style="font-family:'SimSun','STSong',serif;">
+                  <tbody>
+                    <!-- 1. 出口商 -->
+                    <tr>
+                      <td class="border border-black/80 px-1.5 py-1 w-[78px] bg-black/[0.04] text-black/70 align-top">1. 出口商<br/><span class="text-[8.5px]">Exporter</span></td>
+                      <td class="border border-black/80 px-2 py-1" colspan="5">
+                        <div class="font-semibold">广州通达汽车出口有限公司</div>
+                        <div class="text-black/70 text-[9.5px] mt-0.5">91440101MA9Y3K7X2P · 广东省广州市南沙区港前大道南 168 号</div>
+                      </td>
+                    </tr>
+                    <!-- 2. 发货人 -->
+                    <tr>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top">2. 发货人<br/><span class="text-[8.5px]">Consignor</span></td>
+                      <td class="border border-black/80 px-2 py-1" colspan="5">
+                        <div class="font-semibold">广州通达汽车出口有限公司</div>
+                        <div class="text-black/70 text-[9.5px] mt-0.5">91440101MA9Y3K7X2P</div>
+                      </td>
+                    </tr>
+                    <!-- 3. 出口许可证号 | 4. 有效截止日期 -->
+                    <tr>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top">3. 许可证号<br/><span class="text-[8.5px]">Licence No.</span></td>
+                      <td class="border border-black/80 px-2 py-1 font-mono font-semibold text-[#C0392B]">24-21-10866</td>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top w-[90px]">4. 截止日期<br/><span class="text-[8.5px]">Expiry</span></td>
+                      <td class="border border-black/80 px-2 py-1 font-semibold">2025-12-31</td>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top w-[78px]">5. 贸易方式<br/><span class="text-[8.5px]">Trade mode</span></td>
+                      <td class="border border-black/80 px-2 py-1 font-semibold">一般贸易</td>
+                    </tr>
+                    <!-- 6/7 合同号 / 付款方式 -->
+                    <tr>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top">6. 合同号<br/><span class="text-[8.5px]">Contract No.</span></td>
+                      <td class="border border-black/80 px-2 py-1 font-mono">GTD-2025-AE-0118</td>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top">7. 付款方式<br/><span class="text-[8.5px]">Payment</span></td>
+                      <td class="border border-black/80 px-2 py-1" colspan="3">T/T 电汇（30% 预付 + 70% 见提单副本）</td>
+                    </tr>
+                    <!-- 8. 进口国 / 9. 运输方式 / 10/11 -->
+                    <tr>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top">8. 进口国(地区)<br/><span class="text-[8.5px]">Country/Region</span></td>
+                      <td class="border border-black/80 px-2 py-1 font-semibold">阿联酋 UAE</td>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top">9. 运输方式<br/><span class="text-[8.5px]">Transport</span></td>
+                      <td class="border border-black/80 px-2 py-1">水路运输（海运）</td>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top">10/11.<br/><span class="text-[8.5px]">目的港</span></td>
+                      <td class="border border-black/80 px-2 py-1">Jebel Ali</td>
+                    </tr>
+
+                    <!-- 12~17 商品明细表头 -->
+                    <tr class="bg-black/[0.06]">
+                      <td class="border border-black/80 px-1.5 py-1 text-black/80" colspan="3">12. 商品名称、规格等级<br/><span class="text-[8.5px] font-normal">Description of goods</span></td>
+                      <td class="border border-black/80 px-1.5 py-1 text-black/80 text-center w-[40px]">13. 单位<br/><span class="text-[8.5px] font-normal">Unit</span></td>
+                      <td class="border border-black/80 px-1.5 py-1 text-black/80 text-center w-[44px]">14. 数量<br/><span class="text-[8.5px] font-normal">Qty</span></td>
+                      <td class="border border-black/80 px-1.5 py-1 text-black/80 text-center w-[72px]">15. 单价 / 16. 总值 / 17. 折美元<br/><span class="text-[8.5px] font-normal">Unit/Total/USD</span></td>
+                    </tr>
+                    <!-- 商品行-1 -->
+                    <tr>
+                      <td class="border border-black/80 px-2 py-1 align-top" colspan="3">
+                        <div class="font-semibold">① 比亚迪 ATTO 3（元 PLUS）纯电动乘用车</div>
+                        <div class="text-[9px] text-black/65 mt-0.5">VIN: LGXC16DF8N0228761 · 发动机: BYD472ZQA</div>
+                      </td>
+                      <td class="border border-black/80 px-1.5 py-1 text-center align-middle">辆</td>
+                      <td class="border border-black/80 px-1.5 py-1 text-center align-middle font-semibold">1</td>
+                      <td class="border border-black/80 px-1.5 py-1 align-middle">
+                        <div class="flex justify-between"><span class="text-black/60">单价</span><span class="font-mono">21,500</span></div>
+                        <div class="flex justify-between text-[#C0392B]"><span class="text-black/60">总值 USD</span><span class="font-mono font-semibold">21,500</span></div>
+                      </td>
+                    </tr>
+                    <!-- 商品行-2 -->
+                    <tr>
+                      <td class="border border-black/80 px-2 py-1 align-top" colspan="3">
+                        <div class="font-semibold">② 吉利 缤越 Coolray 1.5T 乘用车</div>
+                        <div class="text-[9px] text-black/65 mt-0.5">VIN: LB3762KZ2NX031542 · 发动机: JLB-4G15TD</div>
+                      </td>
+                      <td class="border border-black/80 px-1.5 py-1 text-center align-middle">辆</td>
+                      <td class="border border-black/80 px-1.5 py-1 text-center align-middle font-semibold">1</td>
+                      <td class="border border-black/80 px-1.5 py-1 align-middle">
+                        <div class="flex justify-between"><span class="text-black/60">单价</span><span class="font-mono">16,900</span></div>
+                        <div class="flex justify-between text-[#C0392B]"><span class="text-black/60">总值 USD</span><span class="font-mono font-semibold">16,900</span></div>
+                      </td>
+                    </tr>
+                    <!-- 商品行-3 -->
+                    <tr>
+                      <td class="border border-black/80 px-2 py-1 align-top" colspan="3">
+                        <div class="font-semibold">③ 五菱 宏光 MINIEV 纯电动轿车</div>
+                        <div class="text-[9px] text-black/65 mt-0.5">VIN: LZW6442EVA6K118907 · 电机: TZ160XS050</div>
+                      </td>
+                      <td class="border border-black/80 px-1.5 py-1 text-center align-middle">辆</td>
+                      <td class="border border-black/80 px-1.5 py-1 text-center align-middle font-semibold">2</td>
+                      <td class="border border-black/80 px-1.5 py-1 align-middle">
+                        <div class="flex justify-between"><span class="text-black/60">单价</span><span class="font-mono">10,000</span></div>
+                        <div class="flex justify-between text-[#C0392B]"><span class="text-black/60">总值 USD</span><span class="font-mono font-semibold">20,000</span></div>
+                      </td>
+                    </tr>
+                    <!-- 18. 总计 -->
+                    <tr>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/80 font-semibold" colspan="3">18. 总计 Total</td>
+                      <td class="border border-black/80 px-1.5 py-1 text-center font-bold">辆</td>
+                      <td class="border border-black/80 px-1.5 py-1 text-center font-bold text-[#C0392B]">4</td>
+                      <td class="border border-black/80 px-1.5 py-1 font-bold">
+                        <div class="flex justify-between text-[#C0392B]"><span>总值折美元</span><span class="font-mono">$58,400</span></div>
+                      </td>
+                    </tr>
+                    <!-- 备注 -->
+                    <tr>
+                      <td class="border border-black/80 px-1.5 py-1 bg-black/[0.04] text-black/70 align-top">备注<br/><span class="text-[8.5px]">Remarks</span></td>
+                      <td class="border border-black/80 px-2 py-1 text-[10px] leading-snug" colspan="5">
+                        本批车辆为新能源乘用车，电池已按 IMDG 规定通过 UN38.3 测试，随附品质证书及合格证。
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- 签章区 -->
+              <div class="px-8 pt-4 flex items-end justify-between">
+                <div class="text-[10px] text-black/70 leading-relaxed">
+                  <div>发证机关签章：</div>
+                  <div class="mt-1 h-14 w-44 border border-dashed border-black/30 rounded-sm flex items-center justify-center text-black/40 text-[10px]">
+                    （Issuing Authority Stamp）
+                  </div>
+                </div>
+                <div class="relative">
+                  <!-- 模拟公章 -->
+                  <div class="h-20 w-20 rounded-full border-[2.5px] border-[#C0392B]/80 flex items-center justify-center relative">
+                    <div class="absolute inset-1.5 rounded-full border border-[#C0392B]/60"></div>
+                    <div class="text-center leading-tight">
+                      <div class="text-[8px] font-bold text-[#C0392B] tracking-wider">广州通达</div>
+                      <div class="text-[14px] font-bold text-[#C0392B] leading-none my-0.5">★</div>
+                      <div class="text-[7px] font-bold text-[#C0392B] tracking-wider">出口专用章</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-[10px] text-black/70 leading-relaxed text-right">
+                  <div>发证日期：</div>
+                  <div class="font-semibold">2025 年 01 月 15 日</div>
+                </div>
+              </div>
+
+              <!-- 页脚 -->
+              <div class="absolute bottom-0 left-0 right-0 px-8 py-1.5 flex items-center justify-between text-[8.5px] text-black/45 border-t border-black/10 bg-black/[0.02]">
+                <span>本证经发证机关签章生效 · 自发证之日起一年内有效</span>
+                <span class="font-mono">No. 24-21-10866</span>
+              </div>
+
+            </div>
+
+            <p class="mt-3 text-[11.5px] text-on-surface-variant max-w-[780px] w-full text-center">
+              以上为打印效果预览，最终以商务部业务系统生成的正式证件为准。
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <!-- @main-content:end -->
+
+  <script>
+    $(function () {
+      // 金额格式化
+      function fmtMoney(n) {
+        return '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+      }
+
+      // 重新计算某行总值
+      function recalcRow($row) {
+        const qty = parseFloat($row.find('.vehicle-qty').val()) || 0;
+        const price = parseFloat($row.find('.vehicle-price').val()) || 0;
+        const total = qty * price;
+        $row.find('.vehicle-total').text(fmtMoney(total));
+        return total;
+      }
+
+      // 重新计算所有合计 + 序号
+      function recalcAll() {
+        let totalQty = 0, totalAmt = 0, idx = 1;
+        $('#vehicle-table-body .vehicle-row').each(function () {
+          const $row = $(this);
+          $row.find('.seq-cell').text(idx++);
+          totalQty += parseFloat($row.find('.vehicle-qty').val()) || 0;
+          totalAmt += recalcRow($row);
+        });
+        $('#total-qty').text(totalQty);
+        $('#total-amount').text(fmtMoney(totalAmt));
+      }
+
+      // 数量 / 单价变化时重算
+      $('#vehicle-table-body').on('input', '.vehicle-qty, .vehicle-price', function () {
+        recalcAll();
+      });
+
+      // 删除行
+      // 完整交互：
+      // 1. 弹出确认气泡 "确认删除该车辆？"
+      // 2. 确认后从 DOM 中移除当前 .vehicle-row
+      // 3. 重新排序序号并重算合计
+      // 4. 当表格仅剩 1 行时，删除按钮应置灰（disabled）
+      // 5. 同步更新右侧 A4 预览的商品明细与总计
+      $('#vehicle-table-body').on('click', '.btn-delete-row', function () {
+        const $row = $(this).closest('.vehicle-row');
+        const brand = $row.find('.vehicle-brand').val() || '';
+        const model = $row.find('.vehicle-model').val() || '';
+        if (window.confirm('确认删除车辆「' + brand + ' ' + model + '」？')) {
+          $row.remove();
+          recalcAll();
+        }
+      });
+
+      // 添加车辆
+      // 完整交互：
+      // 1. 克隆当前最后一行作为模板（或使用预定义的 HTML 模板）
+      // 2. 清空品牌/车型/VIN/发动机输入，数量默认 1，单价默认 0
+      // 3. 生成新的 data-id（如 v4、v5...）
+      // 4. append 到 #vehicle-table-body，自动聚焦品牌输入框
+      // 5. 重新排序序号、重算合计；同步 A4 预览（追加一条空商品行，输入时实时刷新）
+      let addSeq = $('#vehicle-table-body .vehicle-row').length + 1;
+      $('#btn-add-vehicle').on('click', function () {
+        const $tpl = $('#vehicle-table-body .vehicle-row').last().clone();
+        $tpl.attr('data-id', 'v' + addSeq++);
+        $tpl.find('.vehicle-brand').val('');
+        $tpl.find('.vehicle-model').val('');
+        $tpl.find('.vehicle-vin').val('');
+        $tpl.find('.vehicle-engine').val('');
+        $tpl.find('.vehicle-qty').val(1);
+        $tpl.find('.vehicle-price').val(0);
+        $tpl.find('.vehicle-total').text('$0');
+        $('#vehicle-table-body').append($tpl);
+        recalcAll();
+        lucide.createIcons();
+        $tpl.find('.vehicle-brand').trigger('focus');
+      });
+
+      // 同出口商 checkbox
+      // 完整交互：
+      // 1. 勾选时：将出口商的名称/代码/地址复制到发货人三个字段，并禁用这些输入框
+      // 2. 取消勾选时：解锁发货人输入框，保留当前值（允许用户修改）
+      // 3. 同步更新 A4 预览的"发货人"栏
+      $('#chk-same-as-exporter').on('change', function () {
+        const checked = $(this).is(':checked');
+        if (checked) {
+          $('#f-consignor-name').val($('#f-exporter-name').val()).prop('disabled', true);
+          $('#f-consignor-code').val($('#f-exporter-code').val()).prop('disabled', true);
+          $('#f-consignor-addr').val($('#f-exporter-addr').val()).prop('disabled', true);
+          $('#consignor-fields').addClass('opacity-70');
+        } else {
+          $('#f-consignor-name, #f-consignor-code, #f-consignor-addr').prop('disabled', false);
+          $('#consignor-fields').removeClass('opacity-70');
+        }
+      }).prop('checked', true).trigger('change');
+
+      // 从我的公司信息带入
+      // 完整交互：
+      // 1. 调用后端 GET /api/org/profile 获取当前登录公司信息
+      // 2. 将名称/代码/地址/联系人/电话回填到出口商 5 个字段
+      // 3. 若"同出口商"已勾选，同步刷新发货人字段
+      // 4. 右上角弹出 toast "已带入公司信息"
+      $('#btn-pull-exporter').on('click', function () {
+        console.log('从我的公司信息带入：应调用 GET /api/org/profile 并回填出口商字段');
+      });
+
+      // 保存草稿
+      // 完整交互：收集所有表单字段 + 车辆明细数组，POST /api/license/draft，成功后右上角 toast "草稿已保存 · HH:mm:ss"
+      $('#btn-save-draft').on('click', function () {
+        console.log('保存草稿');
+      });
+
+      // 预览 A4
+      // 完整交互：打开新窗口或模态预览，使用当前表单数据生成完整 A4 视图，支持缩放/翻页
+      $('#btn-preview-a4').on('click', function () {
+        $('#a4-paper')[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
+      // 导出 PDF
+      // 完整交互：调用浏览器打印（window.print）或后端 POST /api/license/export-pdf，下载 24-21-10866.pdf
+      $('#btn-export-pdf').on('click', function () {
+        console.log('导出 PDF：应触发打印 / 调用后端导出接口');
+        window.print();
+      });
+
+      // 初始化
+      recalcAll();
+    });
+  </script>
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

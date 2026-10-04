@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #0C2D48;
+      --color-primary-container:    #1A5276;
+      --color-on-primary:           #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F7F9FC;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EEF2F7;
+      --color-surface-container-high:     #E8EDF4;
+      --color-surface-container-highest:  #DDE4EE;
+      /* === 文字 === */
+      --color-on-surface:           #2C3E50;
+      --color-on-surface-variant:   #7F8C8D;
+      /* === 功能色 === */
+      --color-success:  #27AE60;
+      --color-error:    #E74C3C;
+      --color-warning:  #E67E22;
+      /* === 边框 === */
+      --color-outline:          #CBD5E1;
+      --color-outline-variant:  #E2E8F0;
+      /* === 圆角 === */
+      --radius-sm:   0.25rem;
+      --radius-md:   0.375rem;
+      --radius-lg:   0.5rem;
+      --radius-xl:   0.75rem;
+      --radius-2xl:  1rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 3px rgba(12,45,72,0.08), 0 1px 2px rgba(12,45,72,0.06);
+      --shadow-float:  0 10px 25px rgba(12,45,72,0.12), 0 4px 10px rgba(12,45,72,0.08);
+      --shadow-dialog: 0 25px 50px rgba(12,45,72,0.18), 0 10px 20px rgba(12,45,72,0.1);
+      /* === 字体 === */
+      --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 400;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans antialiased">
+
+  <!-- @nav:start 导航组件 -->
+  <header class="bg-surface sticky top-0 z-40 h-16 flex items-center justify-between px-6 border-b border-outline-variant/20 shadow-card">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+        <i data-lucide="ship" class="text-on-primary w-5 h-5"></i>
+      </div>
+      <div class="flex flex-col leading-tight">
+        <span class="font-bold text-base text-primary tracking-tight">ExportDrive</span>
+        <span class="text-[11px] text-on-surface-variant -mt-0.5">二手车出口工具平台</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" aria-label="搜索">
+        <i data-lucide="search" class="w-[18px] h-[18px]"></i>
+      </button>
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" aria-label="通知">
+        <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
+        <span class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-warning"></span>
+      </button>
+      <div class="w-px h-6 bg-outline-variant/60 mx-1"></div>
+      <div class="flex items-center gap-2.5 pl-1">
+        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">初</div>
+        <div class="flex flex-col leading-tight hidden sm:flex">
+          <span class="text-sm font-medium text-on-surface">小初</span>
+          <span class="text-[11px] text-on-surface-variant">管理员</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex" style="height: calc(100vh - 4rem)">
+    <aside class="w-60 shrink-0 bg-surface border-r border-outline-variant/20 overflow-y-auto">
+      <nav class="p-3 space-y-0.5">
+        <div class="px-3 pt-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">核心工具</div>
+        <a href="invoice-tax.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md bg-primary/10 text-primary font-medium text-sm" aria-current="page">
+          <i data-lucide="file-text" class="w-4 h-4"></i>发票 / 报税
+        </a>
+        <a href="tax-bureaus.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="landmark" class="w-4 h-4"></i>税务局导航
+        </a>
+        <a href="invoice-titles.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="id-card" class="w-4 h-4"></i>发票抬头
+        </a>
+        <a href="invoice-title-form.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>新增抬头
+        </a>
+
+        <div class="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">其他模块</div>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>工作台
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="car" class="w-4 h-4"></i>车辆核验
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="file-stack" class="w-4 h-4"></i>单证模板
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="anchor" class="w-4 h-4"></i>运费测算
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>海运跟踪
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="book-open" class="w-4 h-4"></i>准入政策
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="users" class="w-4 h-4"></i>客户管理
+        </a>
+      </nav>
+    </aside>
+    <!-- @nav:end 导航组件 -->
+
+    <!-- @main-content:start -->
+    <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6 lg:p-8">
+      <div class="max-w-7xl mx-auto space-y-8">
+
+        <!-- ===== 页面标题区 ===== -->
+        <section id="page-header" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="space-y-1">
+            <h1 class="text-2xl font-bold text-on-surface tracking-tight">发票 / 报税</h1>
+            <p class="text-sm text-on-surface-variant">管理税务局官网入口、常用发票抬头，快速处理出口业务开票与报税资料</p>
+          </div>
+          <div id="page-header-actions" class="flex items-center gap-2.5">
+            <a href="tax-bureaus.html" id="btn-go-bureaus"
+               class="inline-flex items-center gap-2 bg-surface-container text-on-surface px-4 py-2 rounded-md text-sm font-medium
+                      hover:bg-surface-container-high active:scale-[0.98] transition-all border border-outline-variant/20">
+              <i data-lucide="landmark" class="w-4 h-4"></i>访问税务局导航
+            </a>
+            <a href="invoice-title-form.html" id="btn-new-title"
+               class="inline-flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium
+                      hover:opacity-90 active:scale-[0.98] transition-all shadow-card">
+              <i data-lucide="plus" class="w-4 h-4"></i>新增发票抬头
+            </a>
+          </div>
+        </section>
+
+        <!-- ===== 顶部摘要卡片区 ===== -->
+        <section id="summary-cards" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <!-- 卡片-收藏税务局 -->
+          <div class="bg-surface rounded-lg shadow-card p-5 hover:shadow-float transition-shadow border border-outline-variant/10">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <i data-lucide="landmark" class="w-5 h-5 text-primary"></i>
+              </div>
+              <span class="text-[11px] font-medium text-on-surface-variant/70 uppercase tracking-wide">常用入口</span>
+            </div>
+            <div class="mt-4">
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-3xl font-bold text-on-surface tracking-tight">8</span>
+                <span class="text-sm text-on-surface-variant">个</span>
+              </div>
+              <p class="text-sm font-medium text-on-surface mt-1">收藏的税务局</p>
+              <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">覆盖广东、浙江、山东等重点口岸省市</p>
+            </div>
+          </div>
+
+          <!-- 卡片-本公司抬头 -->
+          <div class="bg-surface rounded-lg shadow-card p-5 hover:shadow-float transition-shadow border border-outline-variant/10">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <i data-lucide="building-2" class="w-5 h-5 text-primary"></i>
+              </div>
+              <span class="text-[11px] font-medium text-on-surface-variant/70 uppercase tracking-wide">开票方</span>
+            </div>
+            <div class="mt-4">
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-3xl font-bold text-on-surface tracking-tight">2</span>
+                <span class="text-sm text-on-surface-variant">条</span>
+              </div>
+              <p class="text-sm font-medium text-on-surface mt-1">本公司抬头</p>
+              <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">可用于销售方/开票方信息快速填充</p>
+            </div>
+          </div>
+
+          <!-- 卡片-合作方抬头 -->
+          <div class="bg-surface rounded-lg shadow-card p-5 hover:shadow-float transition-shadow border border-outline-variant/10">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
+                <i data-lucide="users" class="w-5 h-5 text-warning"></i>
+              </div>
+              <span class="text-[11px] font-medium text-on-surface-variant/70 uppercase tracking-wide">收票方</span>
+            </div>
+            <div class="mt-4">
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-3xl font-bold text-on-surface tracking-tight">6</span>
+                <span class="text-sm text-on-surface-variant">条</span>
+              </div>
+              <p class="text-sm font-medium text-on-surface mt-1">合作方抬头</p>
+              <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">海外买家与国内供应商信息</p>
+            </div>
+          </div>
+
+          <!-- 卡片-最近更新 -->
+          <div class="bg-surface rounded-lg shadow-card p-5 hover:shadow-float transition-shadow border border-outline-variant/10">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+                <i data-lucide="refresh-cw" class="w-5 h-5 text-success"></i>
+              </div>
+              <span class="text-[11px] font-medium text-on-surface-variant/70 uppercase tracking-wide">同步状态</span>
+            </div>
+            <div class="mt-4">
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-xl font-bold text-on-surface tracking-tight font-mono">2026-06-15</span>
+              </div>
+              <p class="text-sm font-medium text-on-surface mt-1">最近更新</p>
+              <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">发票抬头或税局入口最近维护时间</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== 核心功能入口卡片 ===== -->
+        <section id="core-entries" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- 入口-税务局官网导航 -->
+          <a href="tax-bureaus.html" id="entry-tax-bureau"
+             class="group bg-surface rounded-lg shadow-card p-6 hover:shadow-float transition-all border border-outline-variant/10
+                    flex flex-col gap-4 block">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+                <i data-lucide="landmark" class="w-6 h-6 text-primary"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h2 class="text-base font-semibold text-on-surface">税务局官网导航</h2>
+                <p class="text-xs text-on-surface-variant mt-0.5">国家税务总局 · 各省市电子税务局</p>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-5 h-5 text-on-surface-variant/50 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"></i>
+            </div>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+              收藏并快速跳转国家税务总局及各省市电子税务局，处理发票查验、纳税申报、出口退税等业务。
+            </p>
+            <div class="flex items-center gap-2 mt-auto pt-2">
+              <span class="inline-flex items-center gap-1.5 text-primary text-sm font-medium group-hover:gap-2.5 transition-all">
+                进入导航<i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </span>
+            </div>
+          </a>
+
+          <!-- 入口-常用发票抬头 -->
+          <a href="invoice-titles.html" id="entry-invoice-title"
+             class="group bg-surface rounded-lg shadow-card p-6 hover:shadow-float transition-all border border-outline-variant/10
+                    flex flex-col gap-4 block">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+                <i data-lucide="id-card" class="w-6 h-6 text-primary"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h2 class="text-base font-semibold text-on-surface">常用发票抬头</h2>
+                <p class="text-xs text-on-surface-variant mt-0.5">本公司 · 合作方 · 一键调用</p>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-5 h-5 text-on-surface-variant/50 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"></i>
+            </div>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+              维护本公司及合作方的发票抬头信息，包括名称、税号、地址电话、开户行账号，开票时一键调用。
+            </p>
+            <div class="flex items-center gap-2 mt-auto pt-2">
+              <span class="inline-flex items-center gap-1.5 text-primary text-sm font-medium group-hover:gap-2.5 transition-all">
+                管理抬头<i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </span>
+            </div>
+          </a>
+        </section>
+
+        <!-- ===== 常用操作快捷区 ===== -->
+        <section id="quick-actions" class="bg-surface rounded-lg shadow-card p-5 border border-outline-variant/10">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-on-surface flex items-center gap-2">
+              <i data-lucide="zap" class="w-4 h-4 text-warning"></i>常用操作
+            </h2>
+            <span class="text-xs text-on-surface-variant">快捷入口</span>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+            <!-- 快捷操作-新增本公司抬头 -->
+            <a href="invoice-title-form.html?type=company" id="quick-add-company"
+               class="flex items-center gap-3 px-4 py-3 rounded-md bg-surface-container hover:bg-surface-container-high
+                      transition-colors group border border-transparent hover:border-primary/15">
+              <div class="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="building-2" class="w-4 h-4 text-primary"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-on-surface">新增本公司抬头</p>
+                <p class="text-[11px] text-on-surface-variant truncate">销售方/开票方</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/40 group-hover:text-primary transition-colors"></i>
+            </a>
+
+            <!-- 快捷操作-新增合作方抬头 -->
+            <a href="invoice-title-form.html?type=partner" id="quick-add-partner"
+               class="flex items-center gap-3 px-4 py-3 rounded-md bg-surface-container hover:bg-surface-container-high
+                      transition-colors group border border-transparent hover:border-primary/15">
+              <div class="w-8 h-8 rounded-md bg-warning/10 flex items-center justify-center shrink-0">
+                <i data-lucide="user-plus" class="w-4 h-4 text-warning"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-on-surface">新增合作方抬头</p>
+                <p class="text-[11px] text-on-surface-variant truncate">海外买家/供应商</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/40 group-hover:text-primary transition-colors"></i>
+            </a>
+
+            <!-- 快捷操作-发票查验入口 -->
+            <a href="tax-bureaus.html#invoice-check" id="quick-invoice-check"
+               class="flex items-center gap-3 px-4 py-3 rounded-md bg-surface-container hover:bg-surface-container-high
+                      transition-colors group border border-transparent hover:border-primary/15">
+              <div class="w-8 h-8 rounded-md bg-success/10 flex items-center justify-center shrink-0">
+                <i data-lucide="check-circle" class="w-4 h-4 text-success"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-on-surface">发票查验入口</p>
+                <p class="text-[11px] text-on-surface-variant truncate">全国增值税发票查验</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/40 group-hover:text-primary transition-colors"></i>
+            </a>
+
+            <!-- 快捷操作-出口退税申报 -->
+            <a href="tax-bureaus.html#export-refund" id="quick-export-refund"
+               class="flex items-center gap-3 px-4 py-3 rounded-md bg-surface-container hover:bg-surface-container-high
+                      transition-colors group border border-transparent hover:border-primary/15">
+              <div class="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="package-check" class="w-4 h-4 text-primary"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-on-surface">出口退税申报</p>
+                <p class="text-[11px] text-on-surface-variant truncate">单证备案与申报</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/40 group-hover:text-primary transition-colors"></i>
+            </a>
+
+            <!-- 快捷操作-增值税发票综合服务平台 -->
+            <a href="tax-bureaus.html#vat-platform" id="quick-vat-platform"
+               class="flex items-center gap-3 px-4 py-3 rounded-md bg-surface-container hover:bg-surface-container-high
+                      transition-colors group border border-transparent hover:border-primary/15">
+              <div class="w-8 h-8 rounded-md bg-primary-container/10 flex items-center justify-center shrink-0">
+                <i data-lucide="layout-grid" class="w-4 h-4 text-primary-container"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-on-surface">增值税发票综合服务平台</p>
+                <p class="text-[11px] text-on-surface-variant truncate">抵扣勾选 · 确认签名</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/40 group-hover:text-primary transition-colors"></i>
+            </a>
+
+            <!-- 快捷操作-电子税务局登录 -->
+            <a href="tax-bureaus.html#etax-login" id="quick-etax-login"
+               class="flex items-center gap-3 px-4 py-3 rounded-md bg-surface-container hover:bg-surface-container-high
+                      transition-colors group border border-transparent hover:border-primary/15">
+              <div class="w-8 h-8 rounded-md bg-error/10 flex items-center justify-center shrink-0">
+                <i data-lucide="log-in" class="w-4 h-4 text-error"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-on-surface">电子税务局登录</p>
+                <p class="text-[11px] text-on-surface-variant truncate">各省市电子税务局</p>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/40 group-hover:text-primary transition-colors"></i>
+            </a>
+          </div>
+        </section>
+
+        <!-- ===== 下方：最近使用抬头 + 报税提醒 ===== -->
+        <section id="bottom-section" class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+
+          <!-- 最近使用抬头列表 -->
+          <div id="recent-titles" class="xl:col-span-2 bg-surface rounded-lg shadow-card border border-outline-variant/10 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-outline-variant/15">
+              <div class="flex items-center gap-2">
+                <i data-lucide="history" class="w-4 h-4 text-primary"></i>
+                <h2 class="text-base font-semibold text-on-surface">最近使用抬头</h2>
+              </div>
+              <a href="invoice-titles.html" id="link-view-all-titles"
+                 class="text-sm text-primary font-medium hover:underline inline-flex items-center gap-1">
+                查看全部<i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+
+            <!-- 表格表头 -->
+            <div class="grid grid-cols-12 gap-3 px-5 py-3 bg-surface-container text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">
+              <span class="col-span-2">类型</span>
+              <span class="col-span-4">名称</span>
+              <span class="col-span-3">税号</span>
+              <span class="col-span-2">联系人/电话</span>
+              <span class="col-span-1 text-right">操作</span>
+            </div>
+
+            <div class="divide-y divide-outline-variant/40">
+              <!-- 列表-抬头1：本公司 深圳远扬 -->
+              <div class="grid grid-cols-12 gap-3 px-5 py-3.5 hover:bg-surface-container/40 transition-colors items-center" data-title-id="T001">
+                <div class="col-span-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">本公司</span>
+                </div>
+                <div class="col-span-4 min-w-0">
+                  <p class="text-sm font-medium text-on-surface truncate" title="深圳市远扬汽车出口贸易有限公司">深圳市远扬汽车出口贸易有限公司</p>
+                  <p class="text-[11px] text-on-surface-variant mt-0.5">深圳 · 销售方</p>
+                </div>
+                <div class="col-span-3 min-w-0">
+                  <span class="text-sm font-mono text-on-surface/90">91440300MA5EX1234A</span>
+                </div>
+                <div class="col-span-2 min-w-0">
+                  <p class="text-sm text-on-surface truncate">陈志强</p>
+                  <p class="text-[11px] text-on-surface-variant font-mono">0755-8823****</p>
+                </div>
+                <div class="col-span-1 flex items-center justify-end gap-2">
+                  <button id="btn-use-T001" class="text-primary text-xs font-medium hover:underline" title="使用此抬头">使用</button>
+                  <a href="invoice-title-form.html?id=T001" id="btn-edit-T001" class="text-on-surface-variant text-xs font-medium hover:text-primary hover:underline" title="编辑">编辑</a>
+                </div>
+              </div>
+
+              <!-- 列表-抬头2：合作方 迪拜 Al Futtaim -->
+              <div class="grid grid-cols-12 gap-3 px-5 py-3.5 hover:bg-surface-container/40 transition-colors items-center" data-title-id="T002">
+                <div class="col-span-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/15 text-warning">合作方</span>
+                </div>
+                <div class="col-span-4 min-w-0">
+                  <p class="text-sm font-medium text-on-surface truncate" title="Al Futtaim Motors LLC">Al Futtaim Motors LLC</p>
+                  <p class="text-[11px] text-on-surface-variant mt-0.5">阿联酋 迪拜 · 海外买家</p>
+                </div>
+                <div class="col-span-3 min-w-0">
+                  <span class="text-sm font-mono text-on-surface/90">AE-TRN-100-2019-5001</span>
+                </div>
+                <div class="col-span-2 min-w-0">
+                  <p class="text-sm text-on-surface truncate">Mr. Rashid</p>
+                  <p class="text-[11px] text-on-surface-variant font-mono">+971-4-280****</p>
+                </div>
+                <div class="col-span-1 flex items-center justify-end gap-2">
+                  <button id="btn-use-T002" class="text-primary text-xs font-medium hover:underline" title="使用此抬头">使用</button>
+                  <a href="invoice-title-form.html?id=T002" id="btn-edit-T002" class="text-on-surface-variant text-xs font-medium hover:text-primary hover:underline" title="编辑">编辑</a>
+                </div>
+              </div>
+
+              <!-- 列表-抬头3：合作方 宁波海恒物流 -->
+              <div class="grid grid-cols-12 gap-3 px-5 py-3.5 hover:bg-surface-container/40 transition-colors items-center" data-title-id="T003">
+                <div class="col-span-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/15 text-warning">合作方</span>
+                </div>
+                <div class="col-span-4 min-w-0">
+                  <p class="text-sm font-medium text-on-surface truncate" title="宁波海恒物流有限公司">宁波海恒物流有限公司</p>
+                  <p class="text-[11px] text-on-surface-variant mt-0.5">宁波 · 国内供应商（货代）</p>
+                </div>
+                <div class="col-span-3 min-w-0">
+                  <span class="text-sm font-mono text-on-surface/90">91330200MA2H8765X</span>
+                </div>
+                <div class="col-span-2 min-w-0">
+                  <p class="text-sm text-on-surface truncate">林海波</p>
+                  <p class="text-[11px] text-on-surface-variant font-mono">0574-8765****</p>
+                </div>
+                <div class="col-span-1 flex items-center justify-end gap-2">
+                  <button id="btn-use-T003" class="text-primary text-xs font-medium hover:underline" title="使用此抬头">使用</button>
+                  <a href="invoice-title-form.html?id=T003" id="btn-edit-T003" class="text-on-surface-variant text-xs font-medium hover:text-primary hover:underline" title="编辑">编辑</a>
+                </div>
+              </div>
+
+              <!-- 列表-抬头4：本公司 广州远扬分公司 -->
+              <div class="grid grid-cols-12 gap-3 px-5 py-3.5 hover:bg-surface-container/40 transition-colors items-center" data-title-id="T004">
+                <div class="col-span-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">本公司</span>
+                </div>
+                <div class="col-span-4 min-w-0">
+                  <p class="text-sm font-medium text-on-surface truncate" title="广州远扬二手车出口分公司">广州远扬二手车出口分公司</p>
+                  <p class="text-[11px] text-on-surface-variant mt-0.5">广州 · 销售方</p>
+                </div>
+                <div class="col-span-3 min-w-0">
+                  <span class="text-sm font-mono text-on-surface/90">91440101MA9YABCD3K</span>
+                </div>
+                <div class="col-span-2 min-w-0">
+                  <p class="text-sm text-on-surface truncate">黄敏仪</p>
+                  <p class="text-[11px] text-on-surface-variant font-mono">020-3888****</p>
+                </div>
+                <div class="col-span-1 flex items-center justify-end gap-2">
+                  <button id="btn-use-T004" class="text-primary text-xs font-medium hover:underline" title="使用此抬头">使用</button>
+                  <a href="invoice-title-form.html?id=T004" id="btn-edit-T004" class="text-on-surface-variant text-xs font-medium hover:text-primary hover:underline" title="编辑">编辑</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 报税日历/提醒区 -->
+          <aside id="tax-reminders" class="bg-surface rounded-lg shadow-card border border-outline-variant/10 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-outline-variant/15">
+              <div class="flex items-center gap-2">
+                <i data-lucide="calendar-clock" class="w-4 h-4 text-primary"></i>
+                <h2 class="text-base font-semibold text-on-surface">报税提醒</h2>
+              </div>
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-sm bg-error/10 text-error">
+                <span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>1 项紧急
+              </span>
+            </div>
+
+            <div class="p-3 space-y-2.5">
+              <!-- 提醒1：增值税及附加税申报（紧急） -->
+              <div class="p-3.5 rounded-md bg-error/5 border-l-[3px] border-error hover:bg-error/10 transition-colors" id="reminder-1">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-md bg-error/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-error"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <p class="text-sm font-semibold text-on-surface">增值税及附加税申报截止</p>
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-error/15 text-error">紧急</span>
+                    </div>
+                    <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">每月 15 日前完成上月增值税及附加税费申报，遇节假日顺延。</p>
+                    <div class="flex items-center gap-2 mt-2">
+                      <span class="inline-flex items-center gap-1 text-[11px] text-error font-medium">
+                        <i data-lucide="clock" class="w-3 h-3"></i>距截止 3 天
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 提醒2：出口退税单证备案（一般） -->
+              <div class="p-3.5 rounded-md bg-warning/5 border-l-[3px] border-warning hover:bg-warning/10 transition-colors" id="reminder-2">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-md bg-warning/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <i data-lucide="file-clock" class="w-4 h-4 text-warning"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <p class="text-sm font-semibold text-on-surface">出口退税单证备案</p>
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-warning/15 text-warning">一般</span>
+                    </div>
+                    <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">收汇后次月申报期内完成出口退税单证备案与申报，注意报关单、收汇凭证齐全。</p>
+                    <div class="flex items-center gap-2 mt-2">
+                      <span class="inline-flex items-center gap-1 text-[11px] text-warning font-medium">
+                        <i data-lucide="calendar" class="w-3 h-3"></i>本月申报期内
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 提醒3：企业所得税季度预缴（已完成） -->
+              <div class="p-3.5 rounded-md bg-success/5 border-l-[3px] border-success hover:bg-success/10 transition-colors" id="reminder-3">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-md bg-success/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-success"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <p class="text-sm font-semibold text-on-surface line-through opacity-70">企业所得税季度预缴</p>
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-success/15 text-success">已完成</span>
+                    </div>
+                    <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">1月 / 4月 / 7月 / 10月 15 日前完成季度企业所得税预缴申报。本期已于 7 月 12 日完成。</p>
+                    <div class="flex items-center gap-2 mt-2">
+                      <span class="inline-flex items-center gap-1 text-[11px] text-success font-medium">
+                        <i data-lucide="check" class="w-3 h-3"></i>已申报
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-5 py-3 border-t border-outline-variant/15 bg-surface-container/40">
+              <a href="tax-bureaus.html" id="link-tax-calendar"
+                 class="text-xs text-primary font-medium hover:underline inline-flex items-center gap-1">
+                <i data-lucide="external-link" class="w-3 h-3"></i>前往电子税务局办理
+              </a>
+            </div>
+          </aside>
+
+        </section>
+
+      </div>
+    </main>
+    <!-- @main-content:end -->
+  </div>
+
+  <script>
+    $(function () {
+      // === 使用抬头按钮 ===
+      // 点击「使用」后应实现：记录该抬头为最近使用，并跳转到开票/单证填写页，自动填充抬头信息。
+      // 原型阶段仅做日志与视觉反馈，实际应：
+      // 1. 读取该行 data-title-id
+      // 2. 将抬头写入 localStorage 作为「最近使用」
+      // 3. 跳转到开票页面（如 invoice-create.html?titleId=xxx）并预填表单
+      $('#recent-titles').on('click', '[id^="btn-use-"]', function () {
+        const id = $(this).closest('[data-title-id]').data('title-id');
+        console.log('使用发票抬头:', id);
+        // 轻量反馈：短暂高亮该行
+        const $row = $(this).closest('[data-title-id]');
+        $row.addClass('bg-primary/5');
+        setTimeout(() => $row.removeClass('bg-primary/5'), 600);
+      });
+
+      // === 报税提醒项点击 ===
+      // 点击提醒项后应展开详情或跳转到对应税局入口的锚点；
+      // 原型仅记录事件。
+      $('#tax-reminders').on('click', '[id^="reminder-"]', function () {
+        const id = $(this).attr('id');
+        console.log('查看报税提醒详情:', id);
+      });
+    });
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

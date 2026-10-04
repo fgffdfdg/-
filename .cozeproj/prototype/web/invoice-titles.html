@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #0C2D48;
+      --color-primary-container:    #1A5276;
+      --color-on-primary:           #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F7F9FC;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EEF2F7;
+      --color-surface-container-high:     #E8EDF4;
+      --color-surface-container-highest:  #DDE4EE;
+      /* === 文字 === */
+      --color-on-surface:           #2C3E50;
+      --color-on-surface-variant:   #7F8C8D;
+      /* === 功能色 === */
+      --color-success:  #27AE60;
+      --color-error:    #E74C3C;
+      --color-warning:  #E67E22;
+      /* === 边框 === */
+      --color-outline:          #CBD5E1;
+      --color-outline-variant:  #E2E8F0;
+      /* === 圆角 === */
+      --radius-sm:   0.25rem;
+      --radius-md:   0.375rem;
+      --radius-lg:   0.5rem;
+      --radius-xl:   0.75rem;
+      --radius-2xl:  1rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 3px rgba(12,45,72,0.08), 0 1px 2px rgba(12,45,72,0.06);
+      --shadow-float:  0 10px 25px rgba(12,45,72,0.12), 0 4px 10px rgba(12,45,72,0.08);
+      --shadow-dialog: 0 25px 50px rgba(12,45,72,0.18), 0 10px 20px rgba(12,45,72,0.1);
+      /* === 字体 === */
+      --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 400;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans antialiased">
+
+  <!-- @nav:start 导航组件 -->
+  <header class="bg-surface sticky top-0 z-40 h-16 flex items-center justify-between px-6 border-b border-outline-variant/20 shadow-card">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+        <i data-lucide="ship" class="text-on-primary w-5 h-5"></i>
+      </div>
+      <div class="flex flex-col leading-tight">
+        <span class="font-bold text-base text-primary tracking-tight">ExportDrive</span>
+        <span class="text-[11px] text-on-surface-variant -mt-0.5">二手车出口工具平台</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" aria-label="搜索">
+        <i data-lucide="search" class="w-[18px] h-[18px]"></i>
+      </button>
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" aria-label="通知">
+        <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
+        <span class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-warning"></span>
+      </button>
+      <div class="w-px h-6 bg-outline-variant/60 mx-1"></div>
+      <div class="flex items-center gap-2.5 pl-1">
+        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">初</div>
+        <div class="flex flex-col leading-tight hidden sm:flex">
+          <span class="text-sm font-medium text-on-surface">小初</span>
+          <span class="text-[11px] text-on-surface-variant">管理员</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex" style="height: calc(100vh - 4rem)">
+    <aside class="w-60 shrink-0 bg-surface border-r border-outline-variant/20 overflow-y-auto">
+      <nav class="p-3 space-y-0.5">
+        <div class="px-3 pt-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">核心工具</div>
+        <a href="invoice-tax.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="file-text" class="w-4 h-4"></i>发票 / 报税
+        </a>
+        <a href="tax-bureaus.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="landmark" class="w-4 h-4"></i>税务局导航
+        </a>
+        <a href="invoice-titles.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md bg-primary/10 text-primary font-medium text-sm" aria-current="page">
+          <i data-lucide="id-card" class="w-4 h-4"></i>发票抬头
+        </a>
+        <a href="invoice-title-form.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>新增抬头
+        </a>
+
+        <div class="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">其他模块</div>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>工作台
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="car" class="w-4 h-4"></i>车辆核验
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="file-stack" class="w-4 h-4"></i>单证模板
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="anchor" class="w-4 h-4"></i>运费测算
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>海运跟踪
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="book-open" class="w-4 h-4"></i>准入政策
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="users" class="w-4 h-4"></i>客户管理
+        </a>
+      </nav>
+    </aside>
+    <!-- @nav:end 导航组件 -->
+
+    <!-- @main-content:start -->
+    <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6 lg:p-8">
+      <div class="max-w-[1600px] mx-auto space-y-6">
+
+        <!-- 页面标题区 -->
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant">
+              <a href="invoice-tax.html" class="hover:text-primary transition-colors">发票 / 报税</a>
+              <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              <span class="text-on-surface">发票抬头</span>
+            </div>
+            <h1 class="text-2xl font-bold text-on-surface tracking-tight">常用发票抬头</h1>
+            <p class="text-sm text-on-surface-variant max-w-2xl">维护本公司与合作方发票抬头信息，开票时一键填充，支持快速复制税号、地址、银行账号。</p>
+          </div>
+          <a href="invoice-title-form.html" id="btn-add-title" class="inline-flex items-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all shadow-card whitespace-nowrap">
+            <i data-lucide="plus" class="w-4 h-4"></i>新增抬头
+          </a>
+        </div>
+
+        <!-- 帮助提示框 -->
+        <div id="help-tip" class="bg-primary/5 border border-primary/15 rounded-lg p-4 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+            <i data-lucide="info" class="w-4 h-4 text-primary"></i>
+          </div>
+          <div class="flex-1 text-sm">
+            <p class="text-on-surface font-medium mb-1">抬头数据将被其他模块调用</p>
+            <p class="text-on-surface-variant text-[13px] leading-relaxed">在此维护的发票抬头，会在 <span class="text-primary font-medium">形式发票（PI）</span>、<span class="text-primary font-medium">商业发票（CI）</span>、<span class="text-primary font-medium">报关单据</span> 等模块中快速调用。本公司抬头至少保留一条作为默认开票方；合作方抬头可包含国内供应商与海外买家。</p>
+          </div>
+          <button id="btn-close-help" class="text-on-surface-variant/60 hover:text-on-surface transition-colors shrink-0" aria-label="关闭提示">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div id="stat-all" class="bg-surface rounded-lg shadow-card p-4 flex items-center gap-4 border border-outline-variant/10 cursor-pointer hover:shadow-float transition-shadow">
+            <div class="w-10 h-10 rounded-md bg-surface-container flex items-center justify-center shrink-0">
+              <i data-lucide="layers" class="w-5 h-5 text-on-surface-variant"></i>
+            </div>
+            <div>
+              <div class="text-xs text-on-surface-variant mb-0.5">全部抬头</div>
+              <div class="text-2xl font-bold text-on-surface leading-none">8<span class="text-sm font-normal text-on-surface-variant ml-1">条</span></div>
+            </div>
+          </div>
+          <div id="stat-own" class="bg-surface rounded-lg shadow-card p-4 flex items-center gap-4 border border-primary/15 cursor-pointer hover:shadow-float transition-shadow relative overflow-hidden">
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+            <div class="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+              <i data-lucide="building-2" class="w-5 h-5 text-primary"></i>
+            </div>
+            <div>
+              <div class="text-xs text-on-surface-variant mb-0.5">本公司（开票方）</div>
+              <div class="text-2xl font-bold text-primary leading-none">2<span class="text-sm font-normal text-on-surface-variant ml-1">条</span></div>
+            </div>
+          </div>
+          <div id="stat-partner" class="bg-surface rounded-lg shadow-card p-4 flex items-center gap-4 border border-warning/20 cursor-pointer hover:shadow-float transition-shadow relative overflow-hidden">
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-warning"></div>
+            <div class="w-10 h-10 rounded-md bg-warning/10 flex items-center justify-center shrink-0">
+              <i data-lucide="users" class="w-5 h-5 text-warning"></i>
+            </div>
+            <div>
+              <div class="text-xs text-on-surface-variant mb-0.5">合作方（购买方/供应商）</div>
+              <div class="text-2xl font-bold text-warning leading-none">6<span class="text-sm font-normal text-on-surface-variant ml-1">条</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 筛选 + 搜索 + 批量操作栏 -->
+        <div class="bg-surface rounded-lg shadow-card p-4 space-y-3 border border-outline-variant/10">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            <!-- Tabs -->
+            <div id="filter-tabs" class="inline-flex bg-surface-container rounded-md p-1">
+              <button data-filter="all" class="filter-tab px-4 py-1.5 rounded text-sm font-medium bg-surface text-on-surface shadow-card transition-all">全部 <span class="text-on-surface-variant ml-1 text-xs">(8)</span></button>
+              <button data-filter="own" class="filter-tab px-4 py-1.5 rounded text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all">本公司 <span class="opacity-70 ml-1 text-xs">(2)</span></button>
+              <button data-filter="partner" class="filter-tab px-4 py-1.5 rounded text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all">合作方 <span class="opacity-70 ml-1 text-xs">(6)</span></button>
+            </div>
+            <div class="flex items-center gap-2">
+              <!-- 搜索框 -->
+              <div class="relative">
+                <i data-lucide="search" class="w-4 h-4 text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                <input id="search-input" type="text" placeholder="搜索公司名称、税号、联系人" class="w-64 bg-surface-container border-none rounded-md pl-9 pr-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+              <!-- 排序下拉 -->
+              <div class="relative">
+                <select id="sort-select" class="appearance-none bg-surface-container border-none rounded-md pl-3 pr-8 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors cursor-pointer">
+                  <option value="updated">最近更新</option>
+                  <option value="name">名称 A-Z</option>
+                  <option value="used">最近使用</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-on-surface-variant absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- 批量操作栏（默认隐藏，选中后显示） -->
+          <div id="batch-bar" class="hidden flex items-center justify-between bg-primary/5 border border-primary/15 rounded-md px-4 py-2.5">
+            <div class="flex items-center gap-3 text-sm">
+              <span class="text-on-surface">已选择 <span id="selected-count" class="font-semibold text-primary">0</span> 项</span>
+              <button id="btn-select-all" class="text-primary hover:underline text-xs font-medium">全选当前筛选结果</button>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btn-batch-export" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-surface text-on-surface hover:bg-surface-container-high border border-outline-variant/20 transition-colors">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>导出
+              </button>
+              <button id="btn-batch-delete" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-error/10 text-error hover:bg-error/20 transition-colors">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>批量删除
+              </button>
+              <button id="btn-clear-selection" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>取消
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 表格 -->
+        <div class="bg-surface rounded-lg shadow-card overflow-hidden border border-outline-variant/10">
+          <!-- 表头 -->
+          <div class="grid grid-cols-[36px_140px_minmax(220px,1.6fr)_minmax(180px,1.4fr)_minmax(200px,1.4fr)_minmax(160px,1fr)_110px_140px] gap-3 px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide items-center">
+            <span>
+              <input type="checkbox" id="checkbox-all" class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/30 cursor-pointer" />
+            </span>
+            <span>类型</span>
+            <span>公司名称 / 税号</span>
+            <span>地址 / 电话</span>
+            <span>开户行 / 账号</span>
+            <span>联系人 / 邮箱</span>
+            <span>更新时间</span>
+            <span class="text-right">操作</span>
+          </div>
+
+          <!-- 表体 -->
+          <div id="title-table-body" class="divide-y divide-outline-variant/40">
+            <!-- 列表-抬头1：本公司（默认）- 深圳远扬总部 -->
+            <div class="title-row grid grid-cols-[36px_140px_minmax(220px,1.6fr)_minmax(180px,1.4fr)_minmax(200px,1.4fr)_minmax(160px,1fr)_110px_140px] gap-3 px-4 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-type="own" data-id="T001" data-name="深圳市远扬汽车出口贸易有限公司">
+              <span><input type="checkbox" class="row-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/30 cursor-pointer" /></span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-primary text-on-primary">本公司</span>
+                <span class="default-badge inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-success/15 text-success">默认</span>
+              </div>
+              <div class="min-w-0">
+                <div class="company-name text-sm font-semibold text-on-surface truncate" title="深圳市远扬汽车出口贸易有限公司">深圳市远扬汽车出口贸易有限公司</div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="font-mono text-xs text-on-surface-variant">91440300MA5EX1234A</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="91440300MA5EX1234A" data-label="税号" aria-label="复制税号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+                <div class="text-[11px] text-on-surface-variant/80 mt-1 truncate" title="主营二手车出口总部主体">
+                  <i data-lucide="tag" class="w-2.5 h-2.5 inline -mt-0.5 mr-0.5"></i>主营二手车出口总部主体
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant leading-relaxed">
+                <div class="truncate" title="深圳市盐田区盐田港保税区综合楼308">深圳市盐田区盐田港保税区综合楼308</div>
+                <div class="font-mono mt-0.5">0755-2520XXXX</div>
+              </div>
+              <div class="min-w-0 text-xs leading-relaxed">
+                <div class="text-on-surface-variant truncate" title="中国银行深圳盐田支行">中国银行深圳盐田支行</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="font-mono text-on-surface" title="7484 0000 1901">7484 **** **** 1901</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="7484 0000 1901" data-label="银行账号" aria-label="复制账号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant">
+                <div class="truncate">陈志远（财务）</div>
+                <div class="truncate font-mono text-[11px] mt-0.5">finance@yuanyang-export.com</div>
+              </div>
+              <div class="text-xs text-on-surface-variant whitespace-nowrap">2025-01-08</div>
+              <div class="flex items-center justify-end gap-1">
+                <button class="btn-use w-7 h-7 rounded-md flex items-center justify-center text-primary hover:bg-primary/10 transition-colors" title="使用（填充到开票）">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-edit w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="编辑">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-set-default hidden w-7 h-7 rounded-md flex items-center justify-center text-success/70 hover:bg-success/10 hover:text-success transition-colors" title="设为默认">
+                  <i data-lucide="star" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-delete w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant/50 hover:bg-error/10 hover:text-error transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 列表-抬头2：本公司-广州南沙分公司 -->
+            <div class="title-row grid grid-cols-[36px_140px_minmax(220px,1.6fr)_minmax(180px,1.4fr)_minmax(200px,1.4fr)_minmax(160px,1fr)_110px_140px] gap-3 px-4 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-type="own" data-id="T002" data-name="广州远扬二手车出口分公司">
+              <span><input type="checkbox" class="row-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/30 cursor-pointer" /></span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-primary text-on-primary">本公司</span>
+              </div>
+              <div class="min-w-0">
+                <div class="company-name text-sm font-semibold text-on-surface truncate" title="广州远扬二手车出口分公司">广州远扬二手车出口分公司</div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="font-mono text-xs text-on-surface-variant">91440101MA9YABCD3K</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="91440101MA9YABCD3K" data-label="税号" aria-label="复制税号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+                <div class="text-[11px] text-on-surface-variant/80 mt-1 truncate" title="南沙口岸出口主体">
+                  <i data-lucide="tag" class="w-2.5 h-2.5 inline -mt-0.5 mr-0.5"></i>南沙口岸出口主体
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant leading-relaxed">
+                <div class="truncate" title="广州市南沙区港前大道南1号">广州市南沙区港前大道南1号</div>
+                <div class="font-mono mt-0.5">020-3900XXXX</div>
+              </div>
+              <div class="min-w-0 text-xs leading-relaxed">
+                <div class="text-on-surface-variant truncate" title="中国工商银行广州南沙支行">中国工商银行广州南沙支行</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="font-mono text-on-surface" title="3602 0088 1920 0123 456">3602 **** **** 0123 456*</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="3602 0088 1920 0123 456" data-label="银行账号" aria-label="复制账号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant">
+                <div class="truncate">李文博（分公司负责人）</div>
+                <div class="truncate font-mono text-[11px] mt-0.5">nansha@yuanyang-export.com</div>
+              </div>
+              <div class="text-xs text-on-surface-variant whitespace-nowrap">2024-12-22</div>
+              <div class="flex items-center justify-end gap-1">
+                <button class="btn-use w-7 h-7 rounded-md flex items-center justify-center text-primary hover:bg-primary/10 transition-colors" title="使用（填充到开票）">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-edit w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="编辑">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-set-default w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant/50 hover:bg-success/10 hover:text-success transition-colors" title="设为默认">
+                  <i data-lucide="star" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-delete w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant/50 hover:bg-error/10 hover:text-error transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 列表-抬头3：合作方-宁波海恒物流 -->
+            <div class="title-row grid grid-cols-[36px_140px_minmax(220px,1.6fr)_minmax(180px,1.4fr)_minmax(200px,1.4fr)_minmax(160px,1fr)_110px_140px] gap-3 px-4 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-type="partner" data-id="T003" data-name="宁波海恒物流有限公司">
+              <span><input type="checkbox" class="row-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/30 cursor-pointer" /></span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-warning/15 text-warning">合作方</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-surface-container-high text-on-surface-variant">国内供应商</span>
+              </div>
+              <div class="min-w-0">
+                <div class="company-name text-sm font-semibold text-on-surface truncate" title="宁波海恒物流有限公司">宁波海恒物流有限公司</div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="font-mono text-xs text-on-surface-variant">91330200MA2H8765X</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="91330200MA2H8765X" data-label="税号" aria-label="复制税号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+                <div class="text-[11px] text-on-surface-variant/80 mt-1 truncate" title="宁波港口内装/集卡长期合作物流商">
+                  <i data-lucide="tag" class="w-2.5 h-2.5 inline -mt-0.5 mr-0.5"></i>宁波港口内装/集卡长期合作物流商
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant leading-relaxed">
+                <div class="truncate" title="宁波市北仑区新碶街道迎宾路88号物流园B栋">宁波市北仑区新碶街道迎宾路88号物流园B栋</div>
+                <div class="font-mono mt-0.5">0574-8688XXXX</div>
+              </div>
+              <div class="min-w-0 text-xs leading-relaxed">
+                <div class="text-on-surface-variant truncate" title="中国建设银行宁波北仑支行">中国建设银行宁波北仑支行</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="font-mono text-on-surface" title="6217 0012 3456 7890 123">6217 **** **** 7890 123</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="6217 0012 3456 7890 123" data-label="银行账号" aria-label="复制账号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant">
+                <div class="truncate">王海恒（业务经理）</div>
+                <div class="truncate font-mono text-[11px] mt-0.5">wanghh@haiheng-logistics.com</div>
+              </div>
+              <div class="text-xs text-on-surface-variant whitespace-nowrap">2025-01-10</div>
+              <div class="flex items-center justify-end gap-1">
+                <button class="btn-use w-7 h-7 rounded-md flex items-center justify-center text-primary hover:bg-primary/10 transition-colors" title="使用（填充到开票）">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-edit w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="编辑">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-delete w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant/50 hover:bg-error/10 hover:text-error transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 列表-抬头4：合作方-天津港通国际贸易 -->
+            <div class="title-row grid grid-cols-[36px_140px_minmax(220px,1.6fr)_minmax(180px,1.4fr)_minmax(200px,1.4fr)_minmax(160px,1fr)_110px_140px] gap-3 px-4 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-type="partner" data-id="T004" data-name="天津港通国际贸易有限公司">
+              <span><input type="checkbox" class="row-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/30 cursor-pointer" /></span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-warning/15 text-warning">合作方</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-surface-container-high text-on-surface-variant">国内采购商</span>
+              </div>
+              <div class="min-w-0">
+                <div class="company-name text-sm font-semibold text-on-surface truncate" title="天津港通国际贸易有限公司">天津港通国际贸易有限公司</div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="font-mono text-xs text-on-surface-variant">91120116MA05JKLM8P</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="91120116MA05JKLM8P" data-label="税号" aria-label="复制税号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+                <div class="text-[11px] text-on-surface-variant/80 mt-1 truncate" title="天津港平行进口车采购合作方">
+                  <i data-lucide="tag" class="w-2.5 h-2.5 inline -mt-0.5 mr-0.5"></i>天津港平行进口车采购合作方
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant leading-relaxed">
+                <div class="truncate" title="天津市滨海新区天津港保税区海滨九路99号">天津市滨海新区天津港保税区海滨九路99号</div>
+                <div class="font-mono mt-0.5">022-2576XXXX</div>
+              </div>
+              <div class="min-w-0 text-xs leading-relaxed">
+                <div class="text-on-surface-variant truncate" title="中国银行天津保税区分行">中国银行天津保税区分行</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="font-mono text-on-surface" title="6013 8201 0000 5678 901">6013 **** **** 5678 901</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="6013 8201 0000 5678 901" data-label="银行账号" aria-label="复制账号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant">
+                <div class="truncate">赵港通（采购总监）</div>
+                <div class="truncate font-mono text-[11px] mt-0.5">zhao@gangtong-trade.com</div>
+              </div>
+              <div class="text-xs text-on-surface-variant whitespace-nowrap">2025-01-05</div>
+              <div class="flex items-center justify-end gap-1">
+                <button class="btn-use w-7 h-7 rounded-md flex items-center justify-center text-primary hover:bg-primary/10 transition-colors" title="使用（填充到开票）">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-edit w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="编辑">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-delete w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant/50 hover:bg-error/10 hover:text-error transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 列表-抬头5：合作方-Dubai Al Futtaim -->
+            <div class="title-row grid grid-cols-[36px_140px_minmax(220px,1.6fr)_minmax(180px,1.4fr)_minmax(200px,1.4fr)_minmax(160px,1fr)_110px_140px] gap-3 px-4 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-type="partner" data-id="T005" data-name="Dubai Al Futtaim Motors LLC">
+              <span><input type="checkbox" class="row-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/30 cursor-pointer" /></span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-warning/15 text-warning">合作方</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-surface-container-high text-on-surface-variant">海外买家</span>
+              </div>
+              <div class="min-w-0">
+                <div class="company-name text-sm font-semibold text-on-surface truncate" title="Dubai Al Futtaim Motors LLC">Dubai Al Futtaim Motors LLC</div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="font-mono text-xs text-on-surface-variant">TRN: 100-2019-5001</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="100-2019-5001" data-label="TRN 税号" aria-label="复制税号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+                <div class="text-[11px] text-on-surface-variant/80 mt-1 truncate" title="迪拜长期合作买家 · 主要采购丰田/日产SUV">
+                  <i data-lucide="tag" class="w-2.5 h-2.5 inline -mt-0.5 mr-0.5"></i>迪拜长期合作买家 · 主要采购丰田/日产SUV
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant leading-relaxed">
+                <div class="truncate" title="PO Box 1234, Dubai, United Arab Emirates">PO Box 1234, Dubai, UAE</div>
+                <div class="font-mono mt-0.5">+971-4-260-XXXX</div>
+              </div>
+              <div class="min-w-0 text-xs leading-relaxed">
+                <div class="text-on-surface-variant truncate" title="Emirates NBD Bank, Dubai">Emirates NBD Bank, Dubai</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="font-mono text-on-surface" title="AE07 0331 2345 6789 0123 456">AE07 **** **** **** 3456</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="AE07 0331 2345 6789 0123 456" data-label="IBAN" aria-label="复制账号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant">
+                <div class="truncate">Mr. Rashid Al Futtaim</div>
+                <div class="truncate font-mono text-[11px] mt-0.5">rashid@alfuttaim-motors.ae</div>
+              </div>
+              <div class="text-xs text-on-surface-variant whitespace-nowrap">2025-01-12</div>
+              <div class="flex items-center justify-end gap-1">
+                <button class="btn-use w-7 h-7 rounded-md flex items-center justify-center text-primary hover:bg-primary/10 transition-colors" title="使用（填充到开票）">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-edit w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="编辑">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-delete w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant/50 hover:bg-error/10 hover:text-error transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 列表-抬头6：合作方-广州佳驰二手车 -->
+            <div class="title-row grid grid-cols-[36px_140px_minmax(220px,1.6fr)_minmax(180px,1.4fr)_minmax(200px,1.4fr)_minmax(160px,1fr)_110px_140px] gap-3 px-4 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-type="partner" data-id="T006" data-name="广州佳驰二手车经销有限公司">
+              <span><input type="checkbox" class="row-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/30 cursor-pointer" /></span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-warning/15 text-warning">合作方</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-surface-container-high text-on-surface-variant">国内供应商</span>
+              </div>
+              <div class="min-w-0">
+                <div class="company-name text-sm font-semibold text-on-surface truncate" title="广州佳驰二手车经销有限公司">广州佳驰二手车经销有限公司</div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="font-mono text-xs text-on-surface-variant">91440101MA9U1234XY</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="91440101MA9U1234XY" data-label="税号" aria-label="复制税号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+                <div class="text-[11px] text-on-surface-variant/80 mt-1 truncate" title="广州本地二手车收车渠道供应商">
+                  <i data-lucide="tag" class="w-2.5 h-2.5 inline -mt-0.5 mr-0.5"></i>广州本地二手车收车渠道供应商
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant leading-relaxed">
+                <div class="truncate" title="广州市番禺区南村镇大道南600号二手车交易市场A18">广州市番禺区南村镇大道南600号A18</div>
+                <div class="font-mono mt-0.5">020-3488XXXX</div>
+              </div>
+              <div class="min-w-0 text-xs leading-relaxed">
+                <div class="text-on-surface-variant truncate" title="中国农业银行广州番禺支行">中国农业银行广州番禺支行</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="font-mono text-on-surface" title="6228 4801 0987 6543 210">6228 **** **** 6543 210</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="6228 4801 0987 6543 210" data-label="银行账号" aria-label="复制账号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant">
+                <div class="truncate">黄佳驰（总经理）</div>
+                <div class="truncate font-mono text-[11px] mt-0.5">huang@jiachi-usedcar.com</div>
+              </div>
+              <div class="text-xs text-on-surface-variant whitespace-nowrap">2024-12-30</div>
+              <div class="flex items-center justify-end gap-1">
+                <button class="btn-use w-7 h-7 rounded-md flex items-center justify-center text-primary hover:bg-primary/10 transition-colors" title="使用（填充到开票）">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-edit w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="编辑">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-delete w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant/50 hover:bg-error/10 hover:text-error transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 列表-抬头7：合作方-Bishkek Auto Import -->
+            <div class="title-row grid grid-cols-[36px_140px_minmax(220px,1.6fr)_minmax(180px,1.4fr)_minmax(200px,1.4fr)_minmax(160px,1fr)_110px_140px] gap-3 px-4 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-type="partner" data-id="T007" data-name="Bishkek Auto Import LLC">
+              <span><input type="checkbox" class="row-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/30 cursor-pointer" /></span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-warning/15 text-warning">合作方</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-surface-container-high text-on-surface-variant">海外买家</span>
+              </div>
+              <div class="min-w-0">
+                <div class="company-name text-sm font-semibold text-on-surface truncate" title="Bishkek Auto Import LLC">Bishkek Auto Import LLC</div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="font-mono text-xs text-on-surface-variant">INN: 0123456789</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="0123456789" data-label="INN 税号" aria-label="复制税号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+                <div class="text-[11px] text-on-surface-variant/80 mt-1 truncate" title="吉尔吉斯斯坦比什凯克 · 中亚车商批量采购">
+                  <i data-lucide="tag" class="w-2.5 h-2.5 inline -mt-0.5 mr-0.5"></i>吉尔吉斯斯坦比什凯克 · 中亚车商批量采购
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant leading-relaxed">
+                <div class="truncate" title="128 Chui Avenue, Bishkek 720000, Kyrgyz Republic">128 Chui Avenue, Bishkek, KG</div>
+                <div class="font-mono mt-0.5">+996-312-66-XXXX</div>
+              </div>
+              <div class="min-w-0 text-xs leading-relaxed">
+                <div class="text-on-surface-variant truncate" title="Kyrgyz Investment Bank, Bishkek">Kyrgyz Investment Bank</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="font-mono text-on-surface" title="KG10 1080 0900 0123 4567 8790">KG10 **** **** **** 8790</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="KG10 1080 0900 0123 4567 8790" data-label="IBAN" aria-label="复制账号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant">
+                <div class="truncate">Mr. Aibek Sultanov</div>
+                <div class="truncate font-mono text-[11px] mt-0.5">aibek@bishkek-auto.kg</div>
+              </div>
+              <div class="text-xs text-on-surface-variant whitespace-nowrap">2024-12-15</div>
+              <div class="flex items-center justify-end gap-1">
+                <button class="btn-use w-7 h-7 rounded-md flex items-center justify-center text-primary hover:bg-primary/10 transition-colors" title="使用（填充到开票）">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-edit w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="编辑">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-delete w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant/50 hover:bg-error/10 hover:text-error transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 列表-抬头8：合作方-成都西部汽车城 -->
+            <div class="title-row grid grid-cols-[36px_140px_minmax(220px,1.6fr)_minmax(180px,1.4fr)_minmax(200px,1.4fr)_minmax(160px,1fr)_110px_140px] gap-3 px-4 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-type="partner" data-id="T008" data-name="成都西部汽车城贸易有限公司">
+              <span><input type="checkbox" class="row-checkbox w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/30 cursor-pointer" /></span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold bg-warning/15 text-warning">合作方</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-surface-container-high text-on-surface-variant">国内供应商</span>
+              </div>
+              <div class="min-w-0">
+                <div class="company-name text-sm font-semibold text-on-surface truncate" title="成都西部汽车城贸易有限公司">成都西部汽车城贸易有限公司</div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="font-mono text-xs text-on-surface-variant">91510100MA623ABCD0</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="91510100MA623ABCD0" data-label="税号" aria-label="复制税号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+                <div class="text-[11px] text-on-surface-variant/80 mt-1 truncate" title="成都西部车城 · 新能源车与SUV西南货源">
+                  <i data-lucide="tag" class="w-2.5 h-2.5 inline -mt-0.5 mr-0.5"></i>成都西部车城 · 新能源车与SUV西南货源
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant leading-relaxed">
+                <div class="truncate" title="成都市武侯区佳灵路53号西部汽车城3楼3018室">成都市武侯区佳灵路53号3楼3018室</div>
+                <div class="font-mono mt-0.5">028-8501XXXX</div>
+              </div>
+              <div class="min-w-0 text-xs leading-relaxed">
+                <div class="text-on-surface-variant truncate" title="招商银行成都武侯支行">招商银行成都武侯支行</div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="font-mono text-on-surface" title="6225 8802 8765 4321 009">6225 **** **** 4321 009</span>
+                  <button class="btn-copy text-on-surface-variant/60 hover:text-primary transition-colors" data-copy="6225 8802 8765 4321 009" data-label="银行账号" aria-label="复制账号">
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="min-w-0 text-xs text-on-surface-variant">
+                <div class="truncate">周西成（车城招商经理）</div>
+                <div class="truncate font-mono text-[11px] mt-0.5">zhou@westauto-cd.com</div>
+              </div>
+              <div class="text-xs text-on-surface-variant whitespace-nowrap">2024-11-28</div>
+              <div class="flex items-center justify-end gap-1">
+                <button class="btn-use w-7 h-7 rounded-md flex items-center justify-center text-primary hover:bg-primary/10 transition-colors" title="使用（填充到开票）">
+                  <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-edit w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="编辑">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button class="btn-delete w-7 h-7 rounded-md flex items-center justify-center text-on-surface-variant/50 hover:bg-error/10 hover:text-error transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+<!-- ROWS_PLACEHOLDER -->
+          </div>
+
+          <!-- 空状态（默认隐藏，无筛选结果时显示） -->
+          <div id="empty-state" class="hidden py-16 px-6 text-center">
+            <div class="w-16 h-16 mx-auto rounded-full bg-surface-container flex items-center justify-center mb-4">
+              <i data-lucide="search-x" class="w-8 h-8 text-on-surface-variant/50"></i>
+            </div>
+            <h3 class="text-base font-semibold text-on-surface mb-1">未找到匹配的抬头</h3>
+            <p class="text-sm text-on-surface-variant mb-4">尝试调整搜索关键词或筛选条件</p>
+            <button id="btn-reset-filter" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>重置筛选
+            </button>
+          </div>
+        </div>
+
+        <!-- 分页器 -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
+          <div class="text-on-surface-variant text-xs">
+            共 <span id="total-count" class="font-semibold text-on-surface">8</span> 条记录，当前显示 <span id="showing-count" class="font-semibold text-on-surface">1-8</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant">
+              <span>每页</span>
+              <div class="relative">
+                <select id="page-size-select" class="appearance-none bg-surface-container border-none rounded-md pl-2.5 pr-7 py-1 text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer">
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-3 h-3 text-on-surface-variant absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+              </div>
+              <span>条</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <button id="btn-prev-page" class="w-8 h-8 rounded-md flex items-center justify-center bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" disabled>
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <button class="w-8 h-8 rounded-md flex items-center justify-center bg-primary text-on-primary text-xs font-semibold">1</button>
+              <button id="btn-next-page" class="w-8 h-8 rounded-md flex items-center justify-center bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" disabled>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+    <!-- @main-content:end -->
+  </div>
+
+  <!-- 删除确认弹窗 -->
+  <div id="delete-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-surface rounded-xl shadow-dialog max-w-md w-full p-6">
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-error"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-base font-semibold text-on-surface mb-1">确认删除该抬头？</h3>
+          <p id="delete-modal-body" class="text-sm text-on-surface-variant leading-relaxed">删除后无法恢复，且在历史发票中已引用的抬头不会被清除，但新发票将无法再选择该抬头。</p>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-6">
+        <button id="btn-delete-cancel" class="px-4 py-2 rounded-md text-sm font-medium bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors">取消</button>
+        <button id="btn-delete-confirm" class="px-4 py-2 rounded-md text-sm font-medium bg-error text-on-primary hover:opacity-90 transition-colors">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 提示 -->
+  <div id="toast" class="hidden fixed bottom-6 right-6 bg-on-surface text-background px-4 py-2.5 rounded-md shadow-dialog text-sm font-medium z-[60] flex items-center gap-2">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-success"></i>
+    <span id="toast-message">操作成功</span>
+  </div>
+
+  <script>
+    $(function () {
+      // 关闭帮助提示
+      $('#btn-close-help').on('click', function () {
+        $('#help-tip').slideUp(200);
+      });
+
+      // 筛选 tab 切换
+      $('#filter-tabs').on('click', '.filter-tab', function () {
+        const filter = $(this).data('filter');
+        $('.filter-tab').removeClass('bg-surface text-on-surface shadow-card').addClass('text-on-surface-variant');
+        $(this).addClass('bg-surface text-on-surface shadow-card').removeClass('text-on-surface-variant');
+        applyFilter();
+      });
+
+      // 统计卡片点击切换 tab
+      $('#stat-all').on('click', function () { $('#filter-tabs [data-filter="all"]').click(); });
+      $('#stat-own').on('click', function () { $('#filter-tabs [data-filter="own"]').click(); });
+      $('#stat-partner').on('click', function () { $('#filter-tabs [data-filter="partner"]').click(); });
+
+      // 搜索 & 排序
+      $('#search-input').on('input', applyFilter);
+      $('#sort-select').on('change', applyFilter);
+
+      function applyFilter() {
+        const activeTab = $('.filter-tab.bg-surface').data('filter') || 'all';
+        const keyword = ($('#search-input').val() || '').trim().toLowerCase();
+        let visible = 0;
+        $('.title-row').each(function () {
+          const $row = $(this);
+          const type = $row.data('type');
+          const text = $row.text().toLowerCase();
+          const matchType = activeTab === 'all' || type === activeTab;
+          const matchKeyword = !keyword || text.indexOf(keyword) > -1;
+          if (matchType && matchKeyword) {
+            $row.removeClass('hidden');
+            visible++;
+          } else {
+            $row.addClass('hidden');
+          }
+        });
+        if (visible === 0) {
+          $('#empty-state').removeClass('hidden');
+        } else {
+          $('#empty-state').addClass('hidden');
+        }
+        updateBatchBar();
+      }
+
+      // 重置筛选
+      $('#btn-reset-filter').on('click', function () {
+        $('#search-input').val('');
+        $('#sort-select').val('updated');
+        $('#filter-tabs [data-filter="all"]').click();
+      });
+
+      // 复选框
+      $('#checkbox-all').on('change', function () {
+        const checked = $(this).is(':checked');
+        $('.title-row:not(.hidden) .row-checkbox').prop('checked', checked);
+        updateBatchBar();
+      });
+
+      $('#title-table-body').on('change', '.row-checkbox', updateBatchBar);
+
+      function updateBatchBar() {
+        const total = $('.row-checkbox:checked').length;
+        $('#selected-count').text(total);
+        if (total > 0) {
+          $('#batch-bar').removeClass('hidden').addClass('flex');
+        } else {
+          $('#batch-bar').addClass('hidden').removeClass('flex');
+        }
+      }
+
+      $('#btn-clear-selection').on('click', function () {
+        $('.row-checkbox').prop('checked', false);
+        $('#checkbox-all').prop('checked', false);
+        updateBatchBar();
+      });
+
+      $('#btn-select-all').on('click', function () {
+        $('.title-row:not(.hidden) .row-checkbox').prop('checked', true);
+        updateBatchBar();
+      });
+
+      // 复制税号 / 银行账号
+      $('#title-table-body').on('click', '.btn-copy', function (e) {
+        e.stopPropagation();
+        const text = $(this).data('copy') || '';
+        const label = $(this).data('label') || '内容';
+        copyToClipboard(text);
+        showToast('已复制' + label);
+      });
+
+      function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(function () { fallbackCopy(text); });
+        } else {
+          fallbackCopy(text);
+        }
+      }
+      function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+
+      // 使用按钮：复制全部信息 / 填充到开票
+      $('#title-table-body').on('click', '.btn-use', function () {
+        const id = $(this).closest('.title-row').data('id');
+        const name = $(this).closest('.title-row').data('name');
+        // 实际应跳转到发票开票页并将该抬头信息预填充
+        showToast('已选用「' + name + '」，正在跳转开票页…');
+        console.log('使用抬头:', id, name, '→ 应携带抬头信息跳转至发票开票页并自动填充购方/销方字段');
+      });
+
+      // 编辑按钮
+      $('#title-table-body').on('click', '.btn-edit', function () {
+        const id = $(this).closest('.title-row').data('id');
+        window.location.href = 'invoice-title-form.html?id=' + id;
+      });
+
+      // 设为默认
+      $('#title-table-body').on('click', '.btn-set-default', function () {
+        const $row = $(this).closest('.title-row');
+        const id = $row.data('id');
+        const name = $row.data('name');
+        // 实际应请求后端将该本公司抬头设为默认
+        $('.title-row[data-type="own"]').find('.default-badge').remove();
+        $('.title-row[data-type="own"]').find('.btn-set-default').removeClass('hidden').find('span').text('设为默认');
+        $row.find('.company-name').after('<span class="default-badge inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-success/15 text-success ml-2 align-middle">默认</span>');
+        $(this).addClass('hidden');
+        showToast('已将「' + name + '」设为默认开票方');
+        console.log('设为默认:', id);
+      });
+
+      // 删除
+      let pendingDeleteIds = [];
+      $('#title-table-body').on('click', '.btn-delete', function () {
+        const id = $(this).closest('.title-row').data('id');
+        pendingDeleteIds = [id];
+        $('#delete-modal-body').text('删除后无法恢复，且在历史发票中已引用的抬头不会被清除，但新发票将无法再选择该抬头。');
+        $('#delete-modal').removeClass('hidden');
+      });
+
+      $('#btn-batch-delete').on('click', function () {
+        pendingDeleteIds = $('.row-checkbox:checked').map(function () {
+          return $(this).closest('.title-row').data('id');
+        }).get();
+        if (pendingDeleteIds.length === 0) return;
+        $('#delete-modal-body').text('确认删除选中的 ' + pendingDeleteIds.length + ' 条抬头？删除后无法恢复。');
+        $('#delete-modal').removeClass('hidden');
+      });
+
+      $('#btn-batch-export').on('click', function () {
+        // 实际应将选中的抬头导出为 Excel/CSV
+        showToast('正在导出选中抬头…');
+        console.log('导出抬头:', $('.row-checkbox:checked').map(function () {
+          return $(this).closest('.title-row').data('id');
+        }).get());
+      });
+
+      $('#btn-delete-cancel').on('click', function () {
+        $('#delete-modal').addClass('hidden');
+        pendingDeleteIds = [];
+      });
+
+      $('#btn-delete-confirm').on('click', function () {
+        pendingDeleteIds.forEach(function (id) {
+          $('.title-row[data-id="' + id + '"]').fadeOut(200, function () { $(this).remove(); applyFilter(); });
+        });
+        $('#delete-modal').addClass('hidden');
+        showToast('已删除 ' + pendingDeleteIds.length + ' 条抬头');
+        pendingDeleteIds = [];
+      });
+
+      // Toast
+      let toastTimer = null;
+      function showToast(msg) {
+        $('#toast-message').text(msg);
+        $('#toast').removeClass('hidden').css('opacity', '0').animate({ opacity: 1 }, 150);
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          $('#toast').animate({ opacity: 0 }, 200, function () { $(this).addClass('hidden'); });
+        }, 2200);
+      }
+
+      // 银行账号 hover 显示完整（使用 title 属性 + 自定义 tooltip 简单实现）
+      // 已在 HTML 中通过 title 原生支持
+    });
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

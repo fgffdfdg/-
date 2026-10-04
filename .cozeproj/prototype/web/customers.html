@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://lf-code-agent.coze.cn/obj/x-ai-cn/fonts/google/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #162033;
+      --color-primary-container:    #FEF7E8;
+      --color-on-primary:           #ffffff;
+      /* === 强调色 - 金色 === */
+      --color-accent:               #C4963C;
+      --color-accent-light:         #D4AA5C;
+      --color-on-accent:            #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F4F5F7;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EBEDF1;
+      --color-surface-container-high:     #E0E3E9;
+      --color-surface-container-highest:  #D5D9E1;
+      /* === 文字 === */
+      --color-on-surface:           #0F172A;
+      --color-on-surface-variant:   #64748B;
+      /* === 功能色 === */
+      --color-success:  #16A34A;
+      --color-error:    #DC2626;
+      --color-warning:  #F59E0B;
+      /* === 边框 === */
+      --color-outline:          #CBD5E1;
+      --color-outline-variant:  #E2E8F0;
+      /* === 侧边栏 === */
+      --color-sidebar-bg:           #0A0F1A;
+      --color-sidebar-text:         #8892A6;
+      --color-sidebar-text-light:   #C8D0E0;
+      --color-sidebar-active-bg:    rgba(196, 150, 60, 0.10);
+      --color-sidebar-hover-bg:     rgba(255, 255, 255, 0.05);
+      --color-sidebar-border:       rgba(255, 255, 255, 0.06);
+      /* === 圆角 === */
+      --radius-sm:   0.375rem;
+      --radius-md:   0.5rem;
+      --radius-lg:   0.75rem;
+      --radius-xl:   1rem;
+      --radius-2xl:  1.25rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-float:  0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-dialog: 0 20px 60px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.06);
+      /* === 字体 === */
+      --font-sans: "Inter", "Noto Sans SC", system-ui, sans-serif;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- @nav:start 导航组件 -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[252px] shrink-0 bg-sidebar-bg flex flex-col h-full overflow-hidden">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 px-5 h-16 border-b border-outline-variant/15">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent shadow-sm">
+          <i data-lucide="anchor" class="h-4.5 w-4.5 text-on-accent"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 class="text-[14px] font-bold text-white tracking-wide leading-tight">ExportDrive</h1>
+          <p class="text-[10px] text-sidebar-text leading-tight mt-0.5">二手车出口工具平台</p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 overflow-y-auto py-4 px-3">
+        <!-- 车辆服务 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">车辆服务</p>
+          <div class="space-y-0.5">
+            <a href="vin-lookup.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="car" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>车辆核验</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 单证中心 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">单证中心</p>
+          <div class="space-y-0.5">
+            <a href="proforma-invoice.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="file-text" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>形式发票</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 物流跟踪 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">物流跟踪</p>
+          <div class="space-y-0.5">
+            <a href="tracking.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="ship" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>海运跟踪</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 客户与记录 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">客户与记录</p>
+          <div class="space-y-0.5">
+            <a href="customers.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-sidebar-active-bg text-accent transition-colors text-[13.5px] font-medium" aria-current="page">
+              <i data-lucide="users" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>客户管理</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- User Footer -->
+      <div class="border-t border-outline-variant/15 px-3 py-3">
+        <div class="flex items-center gap-2.5 px-2">
+          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15 ring-1 ring-accent/25">
+            <span class="text-[12px] font-bold text-accent">初</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[12.5px] font-medium text-white/90 truncate">小初</p>
+            <p class="text-[10px] text-sidebar-text truncate">xiaochu@export.com</p>
+          </div>
+          <button class="p-1.5 rounded-md text-sidebar-text hover:text-sidebar-text-light hover:bg-sidebar-hover-bg transition-colors">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right area -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Header -->
+      <header class="h-16 shrink-0 bg-surface border-b border-outline-variant/20 flex items-center justify-between px-6">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50"></i>
+            <input type="text" placeholder="搜索功能、车辆、单证..." class="h-9 w-[280px] rounded-lg border-none bg-surface-container pl-9 pr-3 text-[13px] text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/15 transition-shadow" />
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+            <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent"></span>
+          </button>
+          <button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+            <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
+          </button>
+          <div class="w-px h-6 bg-outline-variant/60 mx-1"></div>
+          <button class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-surface-container transition-colors">
+            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-accent/10">
+              <span class="text-[11px] font-bold text-accent">初</span>
+            </div>
+            <span class="text-[13px] font-medium text-on-surface">小初</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-on-surface-variant"></i>
+          </button>
+        </div>
+      </header>
+
+  <!-- @nav:end 导航组件 -->
+
+  <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6">
+    <!-- @main-content:start -->
+
+    <!-- 页面标题区域 -->
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-on-surface">客户管理</h1>
+        <p class="text-sm text-on-surface-variant mt-1">管理您的海外买家信息，跟踪交易记录与客户状态</p>
+      </div>
+      <button id="btn-add-customer" class="bg-accent text-on-accent px-4 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2 shadow-sm">
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        新增客户
+      </button>
+    </div>
+
+    <!-- 客户统计条 -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <!-- 统计-总客户数 -->
+      <div class="bg-surface rounded-lg shadow-card p-5 flex items-center gap-4">
+        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/8">
+          <i data-lucide="users" class="w-5 h-5 text-primary"></i>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-on-surface leading-tight">28<span class="text-sm font-normal text-on-surface-variant ml-1">位</span></p>
+          <p class="text-xs text-on-surface-variant mt-0.5">总客户数</p>
+        </div>
+      </div>
+      <!-- 统计-活跃客户 -->
+      <div class="bg-surface rounded-lg shadow-card p-5 flex items-center gap-4">
+        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-success/10">
+          <i data-lucide="user-check" class="w-5 h-5 text-success"></i>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-on-surface leading-tight">18<span class="text-sm font-normal text-on-surface-variant ml-1">位</span></p>
+          <p class="text-xs text-on-surface-variant mt-0.5">活跃客户</p>
+        </div>
+        <div class="ml-auto">
+          <span class="inline-flex items-center gap-1 text-xs font-medium text-success">
+            <i data-lucide="trending-up" class="w-3 h-3"></i>
+            +2
+          </span>
+        </div>
+      </div>
+      <!-- 统计-本月新增 -->
+      <div class="bg-surface rounded-lg shadow-card p-5 flex items-center gap-4">
+        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-accent/10">
+          <i data-lucide="user-plus" class="w-5 h-5 text-accent"></i>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-on-surface leading-tight">3<span class="text-sm font-normal text-on-surface-variant ml-1">位</span></p>
+          <p class="text-xs text-on-surface-variant mt-0.5">本月新增</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 筛选工具栏 -->
+    <div class="bg-surface rounded-lg shadow-card p-4 mb-4">
+      <div class="flex items-center gap-3 flex-wrap">
+        <!-- 搜索框 -->
+        <div class="relative flex-1 min-w-[220px] max-w-xs">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50"></i>
+          <input id="input-search-customer" type="text" placeholder="搜索客户名称 / 国家..." class="w-full bg-surface-container border-none rounded-md pl-9 pr-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+        </div>
+        <!-- 状态筛选按钮组 -->
+        <div id="filter-status" class="flex items-center gap-1 bg-surface-container rounded-lg p-0.5">
+          <button id="btn-status-all" class="status-btn px-3 py-1.5 rounded-md text-xs font-medium bg-surface text-on-surface shadow-sm transition-all" data-status="all">全部</button>
+          <button id="btn-status-active" class="status-btn px-3 py-1.5 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-all" data-status="active">活跃</button>
+          <button id="btn-status-potential" class="status-btn px-3 py-1.5 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-all" data-status="potential">潜在</button>
+          <button id="btn-status-inactive" class="status-btn px-3 py-1.5 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-all" data-status="inactive">不活跃</button>
+        </div>
+        <!-- 国家筛选 -->
+        <select id="select-country" class="bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors cursor-pointer">
+          <option value="all">全部国家/地区</option>
+          <option value="AE">阿联酋</option>
+          <option value="MX">墨西哥</option>
+          <option value="NG">尼日利亚</option>
+          <option value="VN">越南</option>
+          <option value="RU">俄罗斯</option>
+          <option value="GH">加纳</option>
+        </select>
+        <!-- 排序 -->
+        <select id="select-sort" class="bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors cursor-pointer">
+          <option value="recent">按最近交易排序</option>
+          <option value="amount-desc">金额从高到低</option>
+          <option value="amount-asc">金额从低到高</option>
+          <option value="name">按名称排序</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 客户列表表格 -->
+    <div class="bg-surface rounded-lg shadow-card overflow-hidden">
+      <!-- 表头 -->
+      <div class="grid grid-cols-[1.4fr_1.1fr_1fr_1.5fr_0.8fr_0.9fr_0.7fr] px-6 py-3 bg-surface-container text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
+        <span>客户名称</span>
+        <span>国家/地区</span>
+        <span>联系人</span>
+        <span>邮箱</span>
+        <span>最近交易</span>
+        <span>交易金额</span>
+        <span>状态</span>
+      </div>
+      <!-- 表格内容 -->
+      <div id="customer-table-body" class="divide-y divide-outline-variant/50">
+
+        <!-- 列表-客户1: Ahmed Al-Rashid -->
+        <div id="row-customer-1" class="customer-row grid grid-cols-[1.4fr_1.1fr_1fr_1.5fr_0.8fr_0.9fr_0.7fr] px-6 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-status="active" data-country="AE" data-name="Ahmed Al-Rashid" data-amount="45000">
+          <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-accent text-xs font-bold shrink-0">A</div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-on-surface truncate">Ahmed Al-Rashid</p>
+              <p class="text-[11px] text-on-surface-variant truncate">Gulf Trading Co.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-5 rounded bg-primary/8 text-[10px] font-bold text-primary shrink-0">AE</span>
+            <span class="text-sm text-on-surface truncate">阿联酋·迪拜</span>
+          </div>
+          <span class="text-sm text-on-surface">Hassan Ibrahim</span>
+          <span class="text-sm text-on-surface-variant truncate">ahmed@gulftrading.com</span>
+          <span class="text-sm text-on-surface-variant">2024-12-15</span>
+          <span class="text-sm font-semibold text-on-surface">$45,000</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/12 text-success w-fit">活跃</span>
+        </div>
+
+        <!-- 列表-客户2: Carlos Mendez -->
+        <div id="row-customer-2" class="customer-row grid grid-cols-[1.4fr_1.1fr_1fr_1.5fr_0.8fr_0.9fr_0.7fr] px-6 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-status="active" data-country="MX" data-name="Carlos Mendez" data-amount="28500">
+          <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/8 text-primary text-xs font-bold shrink-0">C</div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-on-surface truncate">Carlos Mendez</p>
+              <p class="text-[11px] text-on-surface-variant truncate">AutoLatin SA</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-5 rounded bg-primary/8 text-[10px] font-bold text-primary shrink-0">MX</span>
+            <span class="text-sm text-on-surface truncate">墨西哥城</span>
+          </div>
+          <span class="text-sm text-on-surface">Maria Lopez</span>
+          <span class="text-sm text-on-surface-variant truncate">carlos@autolatin.com</span>
+          <span class="text-sm text-on-surface-variant">2024-12-08</span>
+          <span class="text-sm font-semibold text-on-surface">$28,500</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/12 text-success w-fit">活跃</span>
+        </div>
+
+        <!-- 列表-客户3: Okafor Emmanuel -->
+        <div id="row-customer-3" class="customer-row grid grid-cols-[1.4fr_1.1fr_1fr_1.5fr_0.8fr_0.9fr_0.7fr] px-6 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-status="potential" data-country="NG" data-name="Okafor Emmanuel" data-amount="15200">
+          <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-warning/10 text-warning text-xs font-bold shrink-0">O</div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-on-surface truncate">Okafor Emmanuel</p>
+              <p class="text-[11px] text-on-surface-variant truncate">Lago Motors Ltd</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-5 rounded bg-primary/8 text-[10px] font-bold text-primary shrink-0">NG</span>
+            <span class="text-sm text-on-surface truncate">尼日利亚·拉各斯</span>
+          </div>
+          <span class="text-sm text-on-surface">Chidi Nwosu</span>
+          <span class="text-sm text-on-surface-variant truncate">okafor@lagomotors.com</span>
+          <span class="text-sm text-on-surface-variant">2024-11-20</span>
+          <span class="text-sm font-semibold text-on-surface">$15,200</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/12 text-warning w-fit">潜在</span>
+        </div>
+
+        <!-- 列表-客户4: Nguyen Van Minh -->
+        <div id="row-customer-4" class="customer-row grid grid-cols-[1.4fr_1.1fr_1fr_1.5fr_0.8fr_0.9fr_0.7fr] px-6 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-status="active" data-country="VN" data-name="Nguyen Van Minh" data-amount="32000">
+          <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/8 text-primary text-xs font-bold shrink-0">N</div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-on-surface truncate">Nguyen Van Minh</p>
+              <p class="text-[11px] text-on-surface-variant truncate">Saigon Auto Corp</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-5 rounded bg-primary/8 text-[10px] font-bold text-primary shrink-0">VN</span>
+            <span class="text-sm text-on-surface truncate">越南·胡志明</span>
+          </div>
+          <span class="text-sm text-on-surface">Tran Thi Lan</span>
+          <span class="text-sm text-on-surface-variant truncate">minh@saigonauto.vn</span>
+          <span class="text-sm text-on-surface-variant">2024-12-01</span>
+          <span class="text-sm font-semibold text-on-surface">$32,000</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/12 text-success w-fit">活跃</span>
+        </div>
+
+        <!-- 列表-客户5: Dmitri Volkov -->
+        <div id="row-customer-5" class="customer-row grid grid-cols-[1.4fr_1.1fr_1fr_1.5fr_0.8fr_0.9fr_0.7fr] px-6 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-status="active" data-country="RU" data-name="Dmitri Volkov" data-amount="52000">
+          <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/8 text-primary text-xs font-bold shrink-0">D</div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-on-surface truncate">Dmitri Volkov</p>
+              <p class="text-[11px] text-on-surface-variant truncate">RusMotors LLC</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-5 rounded bg-primary/8 text-[10px] font-bold text-primary shrink-0">RU</span>
+            <span class="text-sm text-on-surface truncate">俄罗斯·莫斯科</span>
+          </div>
+          <span class="text-sm text-on-surface">Ivan Petrov</span>
+          <span class="text-sm text-on-surface-variant truncate">dmitri@rusmotors.ru</span>
+          <span class="text-sm text-on-surface-variant">2024-11-28</span>
+          <span class="text-sm font-semibold text-on-surface">$52,000</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/12 text-success w-fit">活跃</span>
+        </div>
+
+        <!-- 列表-客户6: Kwame Asante -->
+        <div id="row-customer-6" class="customer-row grid grid-cols-[1.4fr_1.1fr_1fr_1.5fr_0.8fr_0.9fr_0.7fr] px-6 py-3.5 items-center hover:bg-surface-container/40 transition-colors" data-status="inactive" data-country="GH" data-name="Kwame Asante" data-amount="8500">
+          <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-on-surface-variant/10 text-on-surface-variant text-xs font-bold shrink-0">K</div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-on-surface truncate">Kwame Asante</p>
+              <p class="text-[11px] text-on-surface-variant truncate">Accra Cars GH</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-5 rounded bg-primary/8 text-[10px] font-bold text-primary shrink-0">GH</span>
+            <span class="text-sm text-on-surface truncate">加纳·阿克拉</span>
+          </div>
+          <span class="text-sm text-on-surface">Yaa Mensah</span>
+          <span class="text-sm text-on-surface-variant truncate">kwame@accracars.gh</span>
+          <span class="text-sm text-on-surface-variant">2024-10-15</span>
+          <span class="text-sm font-semibold text-on-surface">$8,500</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-on-surface-variant/10 text-on-surface-variant w-fit">不活跃</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 分页器 -->
+    <div class="flex items-center justify-between mt-4 px-1">
+      <p class="text-sm text-on-surface-variant">显示 <span class="font-medium text-on-surface">1-6</span> 共 <span class="font-medium text-on-surface">28</span> 位客户</p>
+      <div id="pagination" class="flex items-center gap-1">
+        <button id="btn-page-prev" class="px-3 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors inline-flex items-center gap-1">
+          <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+          上一页
+        </button>
+        <button id="btn-page-1" class="page-btn px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-on-primary transition-colors">1</button>
+        <button id="btn-page-2" class="page-btn px-3 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors">2</button>
+        <button id="btn-page-3" class="page-btn px-3 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors">3</button>
+        <button id="btn-page-4" class="page-btn px-3 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors">4</button>
+        <button id="btn-page-5" class="page-btn px-3 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors">5</button>
+        <button id="btn-page-next" class="px-3 py-1.5 rounded-md text-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors inline-flex items-center gap-1">
+          下一页
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- @main-content:end -->
+  </main>
+
+  </div><!-- end right-area -->
+  </div><!-- end flex container -->
+
+  <script>
+  $(function() {
+    // === 状态筛选 ===
+    $('#filter-status').on('click', '.status-btn', function() {
+      var status = $(this).data('status');
+
+      // 更新按钮激活态
+      $('.status-btn').each(function() {
+        $(this).removeClass('bg-surface text-on-surface shadow-sm').addClass('text-on-surface-variant');
+      });
+      $(this).removeClass('text-on-surface-variant').addClass('bg-surface text-on-surface shadow-sm');
+
+      // 筛选表格行
+      $('.customer-row').each(function() {
+        if (status === 'all' || $(this).data('status') === status) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    });
+
+    // === 搜索过滤 ===
+    $('#input-search-customer').on('input', function() {
+      var keyword = $(this).val().toLowerCase();
+      $('.customer-row').each(function() {
+        var name = $(this).data('name').toString().toLowerCase();
+        var country = $(this).find('span').text().toLowerCase();
+        if (name.indexOf(keyword) !== -1 || country.indexOf(keyword) !== -1) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    });
+
+    // === 国家筛选 ===
+    $('#select-country').on('change', function() {
+      var country = $(this).val();
+      $('.customer-row').each(function() {
+        if (country === 'all' || $(this).data('country') === country) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    });
+
+    // === 排序 ===
+    $('#select-sort').on('change', function() {
+      // 排序功能 - 后续应实现：
+      // 1. 获取所有 .customer-row 元素及其 data-amount / data-name 属性
+      // 2. 根据选中的排序方式（金额升/降序、名称字母序、最近交易日期）对元素进行排序
+      // 3. 将排序后的元素重新 append 到 #customer-table-body 中
+      // 4. 更新分页信息
+      var sortType = $(this).val();
+      console.log('排序方式:', sortType);
+    });
+
+    // === 新增客户按钮 ===
+    $('#btn-add-customer').on('click', function() {
+      // 新增客户 - 后续应实现：
+      // 1. 弹出模态框，包含客户信息表单（名称、国家、联系人、邮箱等字段）
+      // 2. 表单验证：必填项校验、邮箱格式校验
+      // 3. 提交后将新客户数据以 HTML 节点形式插入到 #customer-table-body 顶部
+      // 4. 更新统计条数据（总客户数 +1，本月新增 +1）
+      // 5. 关闭模态框并显示成功提示
+      console.log('打开新增客户表单');
+    });
+
+    // === 分页按钮 ===
+    $('#pagination').on('click', '.page-btn', function() {
+      // 分页切换 - 后续应实现：
+      // 1. 更新当前页码按钮的激活态样式（bg-primary text-on-primary）
+      // 2. 根据页码计算显示的数据范围，隐藏/显示对应的表格行
+      // 3. 更新底部分页信息文字（如"显示 7-12 共 28 位客户"）
+      // 4. 处理上一页/下一页按钮的禁用状态
+      var page = $(this).text();
+      console.log('切换到第', page, '页');
+    });
+
+    $('#btn-page-prev').on('click', function() {
+      console.log('上一页');
+    });
+
+    $('#btn-page-next').on('click', function() {
+      console.log('下一页');
+    });
+  });
+  </script>
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

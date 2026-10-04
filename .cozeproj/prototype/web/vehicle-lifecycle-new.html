@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色（企业风：navy 主色 + orange 强调） === */
+      --color-primary:              #1A2A4A;
+      --color-primary-container:    #E8EDF6;
+      --color-on-primary:           #ffffff;
+      --color-accent:               #F48120;
+      --color-accent-container:     #FEEFDF;
+      --color-on-accent:            #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F6F8FB;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EEF1F6;
+      --color-surface-container-high:     #E6EAF2;
+      --color-surface-container-highest:  #DBE1EC;
+      /* === 文字 === */
+      --color-on-surface:           #152033;
+      --color-on-surface-variant:   #637089;
+      /* === 功能色（业务状态：阻断=红 风险=橙 关注=蓝 正常=绿） === */
+      --color-success:  #16A37B;
+      --color-error:    #DC2626;
+      --color-warning:  #F59E0B;
+      --color-info:     #3B82F6;
+      /* === 边框 === */
+      --color-outline:          #CBD3E1;
+      --color-outline-variant:  #E6EAF2;
+      /* === 圆角 === */
+      --radius-sm:   0.25rem;
+      --radius-md:   0.375rem;
+      --radius-lg:   0.5rem;
+      --radius-xl:   0.75rem;
+      --radius-2xl:  1rem;
+      --radius-full: 9999px;
+      /* === 阴影（background ≈ surface，opacity ≥ 0.08） === */
+      --shadow-card:   0 1px 3px rgba(21,32,51,0.08), 0 1px 2px rgba(21,32,51,0.04);
+      --shadow-float:  0 10px 25px rgba(21,32,51,0.10);
+      --shadow-dialog: 0 25px 50px rgba(21,32,51,0.18);
+      /* === 字体 === */
+      --font-sans: "Inter", "Noto Sans SC", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- @nav:start -->
+  <header class="bg-surface sticky top-0 z-40 h-16 flex items-center justify-between px-6 border-b border-outline-variant/30">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+        <i data-lucide="car-front" class="w-4.5 h-4.5 text-on-primary"></i>
+      </div>
+      <span class="font-bold text-base text-on-surface">ExportDrive</span>
+      <span class="w-px h-5 bg-outline-variant"></span>
+      <span class="text-sm text-on-surface-variant font-medium">车辆生命周期管理</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors">
+        <i data-lucide="bell" class="w-4.5 h-4.5"></i>
+      </button>
+      <div class="flex items-center gap-2 pl-3 border-l border-outline-variant/30">
+        <div class="w-8 h-8 rounded-full bg-primary-container text-primary flex items-center justify-center text-sm font-semibold">初</div>
+        <span class="text-sm font-medium text-on-surface">小初</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex" style="height: calc(100vh - 4rem)">
+    <aside class="w-60 shrink-0 bg-surface border-r border-outline-variant/30 overflow-y-auto">
+      <div class="p-3 space-y-0.5">
+        <div class="px-3 pt-2 pb-1.5 text-xs font-semibold text-on-surface-variant/70 tracking-wide">车辆生命周期</div>
+        <a href="vehicle-lifecycle.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="route" class="w-4 h-4"></i>车辆总览
+        </a>
+        <a href="vehicle-lifecycle-new.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md bg-primary/10 text-primary font-medium text-sm" aria-current="page">
+          <i data-lucide="file-plus" class="w-4 h-4"></i>新建建档
+        </a>
+        <a href="vehicle-lifecycle-settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>阶段字段设置
+        </a>
+      </div>
+    </aside>
+    <!-- @nav:end -->
+
+    <!-- @main-content:start -->
+    <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6">
+
+      <!-- 页头 -->
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold text-on-surface">新建车辆建档</h1>
+        <p class="text-sm text-on-surface-variant mt-1">以车架号为唯一标识，建立车辆出口全流程档案</p>
+      </div>
+
+      <!-- 步骤指示器 -->
+      <div id="stepper" class="flex items-center gap-0 mb-8 max-w-2xl">
+        <!-- 步骤1：当前激活 -->
+        <div id="step-indicator-1" class="flex items-center gap-2">
+          <div id="step-dot-1" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-sm font-semibold">1</div>
+          <span id="step-label-1" class="text-sm font-semibold text-primary">VIN 验证</span>
+        </div>
+        <!-- 连接线1 -->
+        <div id="step-line-1" class="flex-1 h-px bg-outline-variant mx-3"></div>
+        <!-- 步骤2：未到 -->
+        <div id="step-indicator-2" class="flex items-center gap-2">
+          <div id="step-dot-2" class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center text-sm font-semibold">2</div>
+          <span id="step-label-2" class="text-sm font-medium text-on-surface-variant">车辆基础信息</span>
+        </div>
+        <!-- 连接线2 -->
+        <div id="step-line-2" class="flex-1 h-px bg-outline-variant mx-3"></div>
+        <!-- 步骤3：未到 -->
+        <div id="step-indicator-3" class="flex items-center gap-2">
+          <div id="step-dot-3" class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center text-sm font-semibold">3</div>
+          <span id="step-label-3" class="text-sm font-medium text-on-surface-variant">阶段模板确认</span>
+        </div>
+      </div>
+
+      <!-- ========== 步骤 1：VIN 验证 ========== -->
+      <div id="step-panel-1" class="max-w-3xl">
+        <div class="bg-surface rounded-xl shadow-card p-6">
+          <div class="mb-5">
+            <h2 class="text-base font-semibold text-on-surface">VIN 验证</h2>
+            <p class="text-sm text-on-surface-variant mt-1">输入 17 位车架号，系统将自动解析车辆品牌与型号。VIN 将作为该车全生命周期的唯一标识。</p>
+          </div>
+
+          <!-- VIN 输入区 -->
+          <div class="flex items-end gap-3 mb-2">
+            <div class="flex-1">
+              <label for="input-vin" class="block text-sm font-medium text-on-surface mb-1.5">车架号（VIN）</label>
+              <input id="input-vin" type="text" maxlength="17" placeholder="如 LFV3A23C8N3012345"
+                class="w-full bg-surface-container border-none rounded-md px-3 py-2.5 text-lg font-mono tracking-widest uppercase text-on-surface placeholder:text-on-surface-variant/50 placeholder:tracking-normal placeholder:font-sans placeholder:text-base focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <button id="btn-parse-vin" class="bg-primary text-on-primary px-5 py-2.5 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2 whitespace-nowrap">
+              <i data-lucide="search-check" class="w-4 h-4"></i>自动解析
+            </button>
+          </div>
+          <!-- VIN 错误提示（初始隐藏） -->
+          <p id="vin-error-msg" class="text-xs text-error mt-1 hidden">请先输入有效的 17 位车架号并完成解析</p>
+
+          <!-- 解析结果卡片（初始隐藏） -->
+          <div id="vin-result-card" class="hidden mt-5 bg-success/5 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="circle-check" class="w-5 h-5 text-success"></i>
+              <span class="text-sm font-semibold text-success">VIN 校验通过</span>
+            </div>
+            <div class="grid grid-cols-3 gap-x-6 gap-y-3">
+              <div>
+                <span class="text-xs text-on-surface-variant block mb-0.5">品牌</span>
+                <span class="text-sm font-medium text-on-surface">丰田</span>
+              </div>
+              <div>
+                <span class="text-xs text-on-surface-variant block mb-0.5">车型</span>
+                <span class="text-sm font-medium text-on-surface">凯美瑞</span>
+              </div>
+              <div>
+                <span class="text-xs text-on-surface-variant block mb-0.5">年款</span>
+                <span class="text-sm font-medium text-on-surface">2022</span>
+              </div>
+              <div>
+                <span class="text-xs text-on-surface-variant block mb-0.5">装配厂</span>
+                <span class="text-sm font-medium text-on-surface">中国·天津</span>
+              </div>
+              <div>
+                <span class="text-xs text-on-surface-variant block mb-0.5">校验位</span>
+                <span class="text-sm font-medium text-success">有效</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 底部按钮 -->
+          <div class="flex justify-end mt-6 pt-5 border-t border-outline-variant/20">
+            <button id="btn-step1-next" class="bg-primary text-on-primary px-6 py-2.5 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+              下一步<i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 步骤 2：车辆基础信息 ========== -->
+      <div id="step-panel-2" class="max-w-3xl hidden">
+        <div class="bg-surface rounded-xl shadow-card p-6">
+          <div class="mb-5">
+            <h2 class="text-base font-semibold text-on-surface">车辆基础信息</h2>
+            <p class="text-sm text-on-surface-variant mt-1">补充车辆的详细参数，带 * 为必填项。</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-x-4 gap-y-4">
+            <!-- 品牌 -->
+            <div>
+              <label for="field-brand" class="block text-sm font-medium text-on-surface mb-1.5">品牌 *</label>
+              <input id="field-brand" type="text" value="丰田" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <!-- 车型 -->
+            <div>
+              <label for="field-model" class="block text-sm font-medium text-on-surface mb-1.5">车型 *</label>
+              <input id="field-model" type="text" value="凯美瑞" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <!-- 年款 -->
+            <div>
+              <label for="field-year" class="block text-sm font-medium text-on-surface mb-1.5">年款 *</label>
+              <input id="field-year" type="text" value="2022" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <!-- 颜色 -->
+            <div>
+              <label for="field-color" class="block text-sm font-medium text-on-surface mb-1.5">颜色</label>
+              <select id="field-color" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors appearance-none">
+                <option value="白色" selected>白色</option>
+                <option value="黑色">黑色</option>
+                <option value="银色">银色</option>
+                <option value="灰色">灰色</option>
+                <option value="蓝色">蓝色</option>
+                <option value="红色">红色</option>
+              </select>
+            </div>
+            <!-- 能源类型 -->
+            <div>
+              <label for="field-fuel" class="block text-sm font-medium text-on-surface mb-1.5">能源类型 *</label>
+              <select id="field-fuel" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors appearance-none">
+                <option value="汽油" selected>汽油</option>
+                <option value="柴油">柴油</option>
+                <option value="纯电">纯电</option>
+                <option value="插电混动">插电混动</option>
+                <option value="油电混合">油电混合</option>
+              </select>
+            </div>
+            <!-- 表显里程 -->
+            <div>
+              <label for="field-mileage" class="block text-sm font-medium text-on-surface mb-1.5">表显里程（km）</label>
+              <input id="field-mileage" type="number" placeholder="如 35000" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <!-- 车牌号 -->
+            <div>
+              <label for="field-plate" class="block text-sm font-medium text-on-surface mb-1.5">车牌号</label>
+              <input id="field-plate" type="text" placeholder="如 津A·12345" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <!-- 初次登记日期 -->
+            <div>
+              <label for="field-reg-date" class="block text-sm font-medium text-on-surface mb-1.5">初次登记日期</label>
+              <input id="field-reg-date" type="date" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <!-- 采购成本 -->
+            <div>
+              <label for="field-cost" class="block text-sm font-medium text-on-surface mb-1.5">采购成本（¥）*</label>
+              <input id="field-cost" type="number" placeholder="如 185000" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <!-- 车源渠道 -->
+            <div>
+              <label for="field-source" class="block text-sm font-medium text-on-surface mb-1.5">车源渠道</label>
+              <select id="field-source" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors appearance-none">
+                <option value="拍卖">拍卖</option>
+                <option value="车商采购" selected>车商采购</option>
+                <option value="个人收购">个人收购</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+            <!-- 目的国 -->
+            <div>
+              <label for="field-dest-country" class="block text-sm font-medium text-on-surface mb-1.5">目的国 *</label>
+              <select id="field-dest-country" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors appearance-none">
+                <option value="阿联酋" selected>阿联酋</option>
+                <option value="沙特阿拉伯">沙特阿拉伯</option>
+                <option value="尼日利亚">尼日利亚</option>
+                <option value="巴西">巴西</option>
+                <option value="俄罗斯">俄罗斯</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+            <!-- 买方名称 -->
+            <div>
+              <label for="field-buyer" class="block text-sm font-medium text-on-surface mb-1.5">买方名称</label>
+              <input id="field-buyer" type="text" placeholder="如 Al Rashid Trading LLC" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+          </div>
+
+          <!-- 底部按钮 -->
+          <div class="flex justify-between mt-6 pt-5 border-t border-outline-variant/20">
+            <button id="btn-step2-prev" class="bg-surface-container text-on-surface border-none px-5 py-2.5 rounded-md text-sm font-medium hover:bg-surface-container-high active:scale-[0.98] transition-all inline-flex items-center gap-2">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>上一步
+            </button>
+            <button id="btn-step2-next" class="bg-primary text-on-primary px-6 py-2.5 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+              下一步<i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 步骤 3：阶段模板确认 ========== -->
+      <div id="step-panel-3" class="max-w-3xl hidden">
+        <div class="bg-surface rounded-xl shadow-card p-6">
+          <div class="mb-5">
+            <h2 class="text-base font-semibold text-on-surface">阶段模板确认</h2>
+            <p class="text-sm text-on-surface-variant mt-1">
+              为该车选择生命周期阶段模板。每个阶段的固定填写字段可在
+              <a href="vehicle-lifecycle-settings.html" class="text-primary font-medium hover:underline">阶段字段设置</a>
+              中随时调整。
+            </p>
+          </div>
+
+          <!-- 单选项 A：默认 8 阶段模板（默认选中） -->
+          <label id="template-option-a" class="template-radio-card block cursor-pointer rounded-lg p-4 mb-3 ring-2 ring-primary/30 bg-primary/5 transition-all">
+            <div class="flex items-start gap-3">
+              <input type="radio" name="template-choice" value="default" checked class="mt-1 accent-primary w-4 h-4 shrink-0" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-semibold text-on-surface">默认 8 阶段模板（推荐）</span>
+                </div>
+                <p class="text-xs text-on-surface-variant mt-1">使用平台标准出口流程模板</p>
+                <!-- 8 个阶段标签横排展示 -->
+                <div class="flex flex-wrap items-center gap-1 mt-3">
+                  <!-- 阶段1 -->
+                  <span class="inline-flex items-center bg-surface-container rounded-full px-3 py-1 text-xs font-medium text-on-surface">1 建立车辆档案</span>
+                  <i data-lucide="chevron-right" class="w-3 h-3 text-on-surface-variant/50 shrink-0"></i>
+                  <!-- 阶段2 -->
+                  <span class="inline-flex items-center bg-surface-container rounded-full px-3 py-1 text-xs font-medium text-on-surface">2 制作形式发票</span>
+                  <i data-lucide="chevron-right" class="w-3 h-3 text-on-surface-variant/50 shrink-0"></i>
+                  <!-- 阶段3 -->
+                  <span class="inline-flex items-center bg-surface-container rounded-full px-3 py-1 text-xs font-medium text-on-surface">3 完成车辆采购</span>
+                  <i data-lucide="chevron-right" class="w-3 h-3 text-on-surface-variant/50 shrink-0"></i>
+                  <!-- 阶段4 -->
+                  <span class="inline-flex items-center bg-surface-container rounded-full px-3 py-1 text-xs font-medium text-on-surface">4 出口待转移</span>
+                  <i data-lucide="chevron-right" class="w-3 h-3 text-on-surface-variant/50 shrink-0"></i>
+                  <!-- 阶段5 -->
+                  <span class="inline-flex items-center bg-surface-container rounded-full px-3 py-1 text-xs font-medium text-on-surface">5 合同/发票/装箱单</span>
+                  <i data-lucide="chevron-right" class="w-3 h-3 text-on-surface-variant/50 shrink-0"></i>
+                  <!-- 阶段6 -->
+                  <span class="inline-flex items-center bg-surface-container rounded-full px-3 py-1 text-xs font-medium text-on-surface">6 制定出口许可证</span>
+                  <i data-lucide="chevron-right" class="w-3 h-3 text-on-surface-variant/50 shrink-0"></i>
+                  <!-- 阶段7 -->
+                  <span class="inline-flex items-center bg-surface-container rounded-full px-3 py-1 text-xs font-medium text-on-surface">7 出口报关单</span>
+                  <i data-lucide="chevron-right" class="w-3 h-3 text-on-surface-variant/50 shrink-0"></i>
+                  <!-- 阶段8 -->
+                  <span class="inline-flex items-center bg-surface-container rounded-full px-3 py-1 text-xs font-medium text-on-surface">8 提单</span>
+                </div>
+              </div>
+            </div>
+          </label>
+
+          <!-- 单选项 B：复制已有车辆 -->
+          <label id="template-option-b" class="template-radio-card block cursor-pointer rounded-lg p-4 transition-all hover:bg-surface-container/50">
+            <div class="flex items-start gap-3">
+              <input type="radio" name="template-choice" value="copy" class="mt-1 accent-primary w-4 h-4 shrink-0" />
+              <div class="flex-1 min-w-0">
+                <span class="text-sm font-semibold text-on-surface">复制已有车辆的字段配置</span>
+                <p class="text-xs text-on-surface-variant mt-1">从已建档车辆复制自定义字段</p>
+                <!-- 车辆下拉选择（选中 B 时才可用） -->
+                <select id="select-copy-vehicle" disabled class="mt-3 w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors appearance-none disabled:opacity-50 disabled:cursor-not-allowed">
+                  <option value="">请选择要复制的车辆</option>
+                  <option value="LFV3A23C8N3012345">LFV3A23C8N3012345 丰田凯美瑞</option>
+                  <option value="LSVAU2180N2087654">LSVAU2180N2087654 本田CR-V</option>
+                </select>
+              </div>
+            </div>
+          </label>
+
+          <!-- 底部按钮 -->
+          <div class="flex justify-between mt-6 pt-5 border-t border-outline-variant/20">
+            <button id="btn-step3-prev" class="bg-surface-container text-on-surface border-none px-5 py-2.5 rounded-md text-sm font-medium hover:bg-surface-container-high active:scale-[0.98] transition-all inline-flex items-center gap-2">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>上一步
+            </button>
+            <button id="btn-save-archive" class="bg-primary text-on-primary px-6 py-2.5 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+              <i data-lucide="save" class="w-4 h-4"></i>保存并建档
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 成功浮层（初始隐藏） ========== -->
+      <div id="success-overlay" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-surface rounded-xl shadow-dialog max-w-md w-full p-6 text-center">
+          <div class="w-14 h-14 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="circle-check" class="w-7 h-7 text-success"></i>
+          </div>
+          <h3 class="text-lg font-bold text-on-surface mb-1">建档成功</h3>
+          <p class="text-sm text-on-surface-variant mb-6">已进入车辆生命周期，可前往详情页查看或继续新建。</p>
+          <div class="flex items-center justify-center gap-3">
+            <a href="vehicle-lifecycle-detail.html" class="bg-primary text-on-primary px-5 py-2.5 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+              <i data-lucide="eye" class="w-4 h-4"></i>查看车辆详情
+            </a>
+            <button id="btn-continue-create" class="bg-surface-container text-on-surface border-none px-5 py-2.5 rounded-md text-sm font-medium hover:bg-surface-container-high active:scale-[0.98] transition-all">
+              继续建档
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+    <!-- @main-content:end -->
+  </div>
+
+  <script>
+    $(function () {
+      // ===== 状态变量 =====
+      var currentStep = 1;
+      var vinParsed = false;
+
+      // ===== VIN 输入自动转大写 =====
+      $('#input-vin').on('input', function () {
+        var val = $(this).val().toUpperCase();
+        $(this).val(val);
+      });
+
+      // ===== 更新步骤指示器 =====
+      function updateStepper(step) {
+        for (var i = 1; i <= 3; i++) {
+          var $dot = $('#step-dot-' + i);
+          var $label = $('#step-label-' + i);
+          if (i < step) {
+            // 已完成：绿色 check
+            $dot.removeClass('bg-primary text-on-primary bg-surface-container text-on-surface-variant')
+                .addClass('bg-success text-on-primary')
+                .html('<i data-lucide="check" class="w-4 h-4"></i>');
+            $label.removeClass('text-primary text-on-surface-variant').addClass('text-success font-semibold');
+          } else if (i === step) {
+            // 当前步：primary
+            $dot.removeClass('bg-success text-on-primary bg-surface-container text-on-surface-variant')
+                .addClass('bg-primary text-on-primary')
+                .text(i);
+            $label.removeClass('text-success text-on-surface-variant').addClass('text-primary font-semibold');
+          } else {
+            // 未到步：灰色
+            $dot.removeClass('bg-primary text-on-primary bg-success text-on-primary')
+                .addClass('bg-surface-container text-on-surface-variant')
+                .text(i);
+            $label.removeClass('text-primary text-success font-semibold').addClass('text-on-surface-variant font-medium');
+          }
+        }
+        // 重新渲染图标
+        lucide.createIcons();
+      }
+
+      // ===== 切换步骤面板 =====
+      function goToStep(step) {
+        currentStep = step;
+        $('#step-panel-1, #step-panel-2, #step-panel-3').addClass('hidden');
+        $('#step-panel-' + step).removeClass('hidden');
+        updateStepper(step);
+        // 滚动到顶部
+        $('main').scrollTop(0);
+      }
+
+      // ===== 步骤 1：自动解析 =====
+      $('#btn-parse-vin').on('click', function () {
+        var vin = $('#input-vin').val().trim();
+        if (vin.length < 17) {
+          $('#vin-error-msg').text('请输入完整的 17 位车架号').removeClass('hidden');
+          return;
+        }
+        var $btn = $(this);
+        var originalHtml = $btn.html();
+        $btn.prop('disabled', true).html('<i data-lucide="loader-circle" class="w-4 h-4 animate-spin"></i>解析中…');
+        lucide.createIcons();
+
+        setTimeout(function () {
+          $btn.prop('disabled', false).html(originalHtml);
+          lucide.createIcons();
+          $('#vin-error-msg').addClass('hidden');
+          $('#vin-result-card').removeClass('hidden');
+          vinParsed = true;
+          lucide.createIcons();
+        }, 600);
+      });
+
+      // ===== 步骤 1 → 步骤 2 =====
+      $('#btn-step1-next').on('click', function () {
+        if (!vinParsed) {
+          $('#vin-error-msg').text('请先输入有效的 17 位车架号并完成解析').removeClass('hidden');
+          return;
+        }
+        goToStep(2);
+      });
+
+      // ===== 步骤 2 → 步骤 1 =====
+      $('#btn-step2-prev').on('click', function () {
+        goToStep(1);
+      });
+
+      // ===== 步骤 2 → 步骤 3 =====
+      $('#btn-step2-next').on('click', function () {
+        goToStep(3);
+      });
+
+      // ===== 步骤 3 → 步骤 2 =====
+      $('#btn-step3-prev').on('click', function () {
+        goToStep(2);
+      });
+
+      // ===== 单选模板卡片切换样式 =====
+      $('input[name="template-choice"]').on('change', function () {
+        var val = $(this).val();
+        if (val === 'default') {
+          $('#template-option-a').addClass('ring-2 ring-primary/30 bg-primary/5').removeClass('hover:bg-surface-container/50');
+          $('#template-option-b').removeClass('ring-2 ring-primary/30 bg-primary/5').addClass('hover:bg-surface-container/50');
+          $('#select-copy-vehicle').prop('disabled', true);
+        } else {
+          $('#template-option-b').addClass('ring-2 ring-primary/30 bg-primary/5').removeClass('hover:bg-surface-container/50');
+          $('#template-option-a').removeClass('ring-2 ring-primary/30 bg-primary/5').addClass('hover:bg-surface-container/50');
+          $('#select-copy-vehicle').prop('disabled', false);
+        }
+      });
+
+      // ===== 保存并建档 =====
+      $('#btn-save-archive').on('click', function () {
+        $('#success-overlay').removeClass('hidden');
+        lucide.createIcons();
+      });
+
+      // ===== 继续建档：重置表单回到步骤 1 =====
+      $('#btn-continue-create').on('click', function () {
+        $('#success-overlay').addClass('hidden');
+        // 重置状态
+        vinParsed = false;
+        $('#input-vin').val('');
+        $('#vin-result-card').addClass('hidden');
+        $('#vin-error-msg').addClass('hidden');
+        // 重置模板选择
+        $('input[name="template-choice"][value="default"]').prop('checked', true).trigger('change');
+        $('#select-copy-vehicle').val('');
+        goToStep(1);
+      });
+
+      // 初始化图标
+      lucide.createIcons();
+    });
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

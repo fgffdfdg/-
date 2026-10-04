@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://lf-code-agent.coze.cn/obj/x-ai-cn/fonts/google/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #162033;
+      --color-primary-container:    #FEF7E8;
+      --color-on-primary:           #ffffff;
+      /* === 强调色 - 金色 === */
+      --color-accent:               #C4963C;
+      --color-accent-light:         #D4AA5C;
+      --color-on-accent:            #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F4F5F7;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EBEDF1;
+      --color-surface-container-high:     #E0E3E9;
+      --color-surface-container-highest:  #D5D9E1;
+      /* === 文字 === */
+      --color-on-surface:           #0F172A;
+      --color-on-surface-variant:   #64748B;
+      /* === 功能色 === */
+      --color-success:  #16A34A;
+      --color-error:    #DC2626;
+      --color-warning:  #F59E0B;
+      /* === 边框 === */
+      --color-outline:          #CBD5E1;
+      --color-outline-variant:  #E2E8F0;
+      /* === 侧边栏 === */
+      --color-sidebar-bg:           #0A0F1A;
+      --color-sidebar-text:         #8892A6;
+      --color-sidebar-text-light:   #C8D0E0;
+      --color-sidebar-active-bg:    rgba(196, 150, 60, 0.10);
+      --color-sidebar-hover-bg:     rgba(255, 255, 255, 0.05);
+      --color-sidebar-border:       rgba(255, 255, 255, 0.06);
+      /* === 圆角 === */
+      --radius-sm:   0.375rem;
+      --radius-md:   0.5rem;
+      --radius-lg:   0.75rem;
+      --radius-xl:   1rem;
+      --radius-2xl:  1.25rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-float:  0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-dialog: 0 20px 60px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.06);
+      /* === 字体 === */
+      --font-sans: "Inter", "Noto Sans SC", system-ui, sans-serif;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- @nav:start 导航组件 -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[252px] shrink-0 bg-sidebar-bg flex flex-col h-full overflow-hidden">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 px-5 h-16 border-b border-outline-variant/15">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent shadow-sm">
+          <i data-lucide="anchor" class="h-4.5 w-4.5 text-on-accent"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 class="text-[14px] font-bold text-white tracking-wide leading-tight">ExportDrive</h1>
+          <p class="text-[10px] text-sidebar-text leading-tight mt-0.5">二手车出口工具平台</p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 overflow-y-auto py-4 px-3">
+        <!-- 车辆服务 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">车辆服务</p>
+          <div class="space-y-0.5">
+            <a href="vin-lookup.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="car" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>车辆核验</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 单证中心 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">单证中心</p>
+          <div class="space-y-0.5">
+            <a href="proforma-invoice.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="file-text" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>形式发票</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 物流跟踪 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">物流跟踪</p>
+          <div class="space-y-0.5">
+            <a href="tracking.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="ship" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>海运跟踪</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 客户与记录 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">客户与记录</p>
+          <div class="space-y-0.5">
+            <a href="customers.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="users" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>客户管理</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- User Footer -->
+      <div class="border-t border-outline-variant/15 px-3 py-3">
+        <div class="flex items-center gap-2.5 px-2">
+          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15 ring-1 ring-accent/25">
+            <span class="text-[12px] font-bold text-accent">初</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[12.5px] font-medium text-white/90 truncate">小初</p>
+            <p class="text-[10px] text-sidebar-text truncate">xiaochu@export.com</p>
+          </div>
+          <button class="p-1.5 rounded-md text-sidebar-text hover:text-sidebar-text-light hover:bg-sidebar-hover-bg transition-colors">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right area -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Header -->
+      <header class="h-16 shrink-0 bg-surface border-b border-outline-variant/20 flex items-center justify-between px-6">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50"></i>
+            <input type="text" placeholder="搜索功能、车辆、单证..." class="h-9 w-[280px] rounded-lg border-none bg-surface-container pl-9 pr-3 text-[13px] text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/15 transition-shadow" />
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+            <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent"></span>
+          </button>
+          <button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+            <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
+          </button>
+          <div class="w-px h-6 bg-outline-variant/60 mx-1"></div>
+          <button class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-surface-container transition-colors">
+            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-accent/10">
+              <span class="text-[11px] font-bold text-accent">初</span>
+            </div>
+            <span class="text-[13px] font-medium text-on-surface">小初</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-on-surface-variant"></i>
+          </button>
+        </div>
+      </header>
+
+  <!-- @nav:end 导航组件 -->
+
+  <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6">
+    <!-- @main-content:start -->
+
+    <!-- 页面标题与欢迎语 -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-on-surface">工作台</h1>
+        <p class="text-sm text-on-surface-variant mt-1">下午好，小初，今天有 <span class="text-accent font-medium">5</span> 项待办事项需要处理</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-on-surface-variant">2024年1月15日 星期一</span>
+        <button id="btn-new-order" class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>新建订单
+        </button>
+      </div>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="grid grid-cols-4 gap-5 mb-6">
+      <!-- 统计卡片-本月出口车辆数 -->
+      <div class="bg-surface rounded-lg shadow-card p-5 hover:shadow-float transition-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <i data-lucide="car" class="w-5 h-5 text-primary"></i>
+          </div>
+          <span class="inline-flex items-center gap-1 text-xs font-medium text-success">
+            <i data-lucide="trending-up" class="w-3 h-3"></i>15%
+          </span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-3xl font-bold text-on-surface">12</span>
+          <span class="text-sm text-on-surface-variant ml-1">辆</span>
+        </div>
+        <p class="text-sm text-on-surface-variant mt-1">本月出口车辆数</p>
+      </div>
+
+      <!-- 统计卡片-在途货运 -->
+      <div class="bg-surface rounded-lg shadow-card p-5 hover:shadow-float transition-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
+            <i data-lucide="ship" class="w-5 h-5 text-accent"></i>
+          </div>
+          <span class="inline-flex items-center gap-1 text-xs font-medium text-on-surface-variant">
+            较上月 +1
+          </span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-3xl font-bold text-on-surface">3</span>
+          <span class="text-sm text-on-surface-variant ml-1">批</span>
+        </div>
+        <p class="text-sm text-on-surface-variant mt-1">在途货运</p>
+      </div>
+
+      <!-- 统计卡片-待处理单证 -->
+      <div class="bg-surface rounded-lg shadow-card p-5 hover:shadow-float transition-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
+            <i data-lucide="file-clock" class="w-5 h-5 text-warning"></i>
+          </div>
+          <span class="inline-flex items-center gap-1 text-xs font-medium text-success">
+            <i data-lucide="trending-down" class="w-3 h-3"></i>2份
+          </span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-3xl font-bold text-on-surface">5</span>
+          <span class="text-sm text-on-surface-variant ml-1">份</span>
+        </div>
+        <p class="text-sm text-on-surface-variant mt-1">待处理单证</p>
+      </div>
+
+      <!-- 统计卡片-客户总数 -->
+      <div class="bg-surface rounded-lg shadow-card p-5 hover:shadow-float transition-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+            <i data-lucide="users" class="w-5 h-5 text-success"></i>
+          </div>
+          <span class="inline-flex items-center gap-1 text-xs font-medium text-success">
+            <i data-lucide="trending-up" class="w-3 h-3"></i>+3
+          </span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-3xl font-bold text-on-surface">28</span>
+          <span class="text-sm text-on-surface-variant ml-1">位</span>
+        </div>
+        <p class="text-sm text-on-surface-variant mt-1">客户总数</p>
+      </div>
+    </div>
+
+    <!-- 主内容区两栏布局 -->
+    <div class="grid grid-cols-3 gap-6">
+
+      <!-- 左栏：快捷操作 + 订单列表 -->
+      <div class="col-span-2 space-y-6">
+
+        <!-- 快捷操作区 -->
+        <div>
+          <h2 class="text-base font-semibold text-on-surface mb-4">快捷操作</h2>
+          <div class="grid grid-cols-4 gap-4">
+            <!-- 快捷操作-新建发票 -->
+            <a href="proforma-invoice.html" id="action-invoice" class="flex flex-col items-center gap-2.5 p-5 bg-surface rounded-lg shadow-card hover:shadow-float transition-all group text-center">
+              <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 group-hover:bg-accent/15 transition-colors">
+                <i data-lucide="file-plus" class="w-6 h-6 text-accent"></i>
+              </div>
+              <span class="text-sm font-semibold text-on-surface">新建发票</span>
+              <span class="text-xs text-on-surface-variant">创建出口形式发票</span>
+            </a>
+            <!-- 快捷操作-车辆核验 -->
+            <a href="vin-lookup.html" id="action-vin" class="flex flex-col items-center gap-2.5 p-5 bg-surface rounded-lg shadow-card hover:shadow-float transition-all group text-center">
+              <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                <i data-lucide="search" class="w-6 h-6 text-primary"></i>
+              </div>
+              <span class="text-sm font-semibold text-on-surface">车辆核验</span>
+              <span class="text-xs text-on-surface-variant">VIN 查询与车况检测</span>
+            </a>
+            <!-- 快捷操作-海运跟踪 -->
+            <a href="tracking.html" id="action-tracking" class="flex flex-col items-center gap-2.5 p-5 bg-surface rounded-lg shadow-card hover:shadow-float transition-all group text-center">
+              <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                <i data-lucide="ship" class="w-6 h-6 text-primary"></i>
+              </div>
+              <span class="text-sm font-semibold text-on-surface">海运跟踪</span>
+              <span class="text-xs text-on-surface-variant">实时查看物流状态</span>
+            </a>
+            <!-- 快捷操作-客户管理 -->
+            <a href="customers.html" id="action-customers" class="flex flex-col items-center gap-2.5 p-5 bg-surface rounded-lg shadow-card hover:shadow-float transition-all group text-center">
+              <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 group-hover:bg-success/15 transition-colors">
+                <i data-lucide="user-plus" class="w-6 h-6 text-success"></i>
+              </div>
+              <span class="text-sm font-semibold text-on-surface">客户管理</span>
+              <span class="text-xs text-on-surface-variant">维护海外客户信息</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 最近出口订单 -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-on-surface">最近出口订单</h2>
+            <a href="tracking.html" id="link-view-all-orders" class="text-sm text-primary font-medium hover:underline inline-flex items-center gap-1">
+              查看全部
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+          <div class="bg-surface rounded-lg shadow-card overflow-hidden">
+            <!-- 表头 -->
+            <div class="grid grid-cols-[1.1fr_1.3fr_1.5fr_1.2fr_0.7fr_0.8fr] px-5 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant tracking-wide">
+              <span>订单号</span>
+              <span>买方</span>
+              <span>车辆信息</span>
+              <span>目的港</span>
+              <span>状态</span>
+              <span class="text-right">金额</span>
+            </div>
+            <!-- 表格内容 -->
+            <div class="divide-y divide-outline-variant/50">
+              <!-- 列表-订单1 -->
+              <div class="grid grid-cols-[1.1fr_1.3fr_1.5fr_1.2fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center">
+                <a href="tracking.html?id=EX-2024-0112" class="text-sm font-medium text-primary hover:underline">EX-2024-0112</a>
+                <span class="text-sm text-on-surface truncate pr-2">Dubai Motors LLC</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">2020 Toyota Camry 2.5L</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">杰贝阿里港</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/15 text-success w-fit">已发运</span>
+                <span class="text-sm font-semibold text-on-surface text-right">$18,500</span>
+              </div>
+              <!-- 列表-订单2 -->
+              <div class="grid grid-cols-[1.1fr_1.3fr_1.5fr_1.2fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center">
+                <a href="tracking.html?id=EX-2024-0111" class="text-sm font-medium text-primary hover:underline">EX-2024-0111</a>
+                <span class="text-sm text-on-surface truncate pr-2">Lagos Auto Trade</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">2019 Honda Accord 1.5T</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">阿帕帕港</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/15 text-warning w-fit">待报关</span>
+                <span class="text-sm font-semibold text-on-surface text-right">$15,200</span>
+              </div>
+              <!-- 列表-订单3 -->
+              <div class="grid grid-cols-[1.1fr_1.3fr_1.5fr_1.2fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center">
+                <a href="tracking.html?id=EX-2024-0110" class="text-sm font-medium text-primary hover:underline">EX-2024-0110</a>
+                <span class="text-sm text-on-surface truncate pr-2">Accra Vehicles Inc</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">2021 Hyundai Tucson 1.6T</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">特马港</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary w-fit">已核验</span>
+                <span class="text-sm font-semibold text-on-surface text-right">$22,800</span>
+              </div>
+              <!-- 列表-订单4 -->
+              <div class="grid grid-cols-[1.1fr_1.3fr_1.5fr_1.2fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center">
+                <a href="tracking.html?id=EX-2024-0109" class="text-sm font-medium text-primary hover:underline">EX-2024-0109</a>
+                <span class="text-sm text-on-surface truncate pr-2">Nairobi Car Hub</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">2018 Nissan Altima 2.5L</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">蒙巴萨港</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/15 text-success w-fit">已发运</span>
+                <span class="text-sm font-semibold text-on-surface text-right">$12,600</span>
+              </div>
+              <!-- 列表-订单5 -->
+              <div class="grid grid-cols-[1.1fr_1.3fr_1.5fr_1.2fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center">
+                <a href="tracking.html?id=EX-2024-0108" class="text-sm font-medium text-primary hover:underline">EX-2024-0108</a>
+                <span class="text-sm text-on-surface truncate pr-2">Dar Export Co</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">2022 Kia Sportage 2.0L</span>
+                <span class="text-sm text-on-surface-variant truncate pr-2">达累斯萨拉姆港</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-warning/15 text-warning w-fit">待报关</span>
+                <span class="text-sm font-semibold text-on-surface text-right">$24,500</span>
+              </div>
+            </div>
+            <!-- 表格底部 -->
+            <div class="px-5 py-3 bg-surface-container/30 text-xs text-on-surface-variant flex items-center justify-between border-t border-outline-variant/30">
+              <span>显示最近 5 条，共 23 条订单</span>
+              <a href="tracking.html" class="text-primary font-medium hover:underline inline-flex items-center gap-1">
+                查看全部
+                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 右栏：待办事项 + 政策更新 -->
+      <div class="space-y-6">
+
+        <!-- 待办事项清单 -->
+        <div class="bg-surface rounded-lg shadow-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-on-surface">待办事项</h2>
+            <span class="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-semibold text-on-accent bg-accent rounded-full">5</span>
+          </div>
+          <div id="todo-list" class="space-y-0">
+            <!-- 待办-事项1 -->
+            <div class="todo-item flex items-center gap-3 py-3 border-b border-outline-variant/30 cursor-pointer hover:bg-surface-container/30 transition-colors px-2 -mx-2 rounded-md first:rounded-t-md last:rounded-b-md last:border-0">
+              <div class="todo-check w-4 h-4 rounded-full border border-outline shrink-0 transition-colors"></div>
+              <div class="flex-1 min-w-0">
+                <p class="todo-text text-sm text-on-surface leading-relaxed">审核 EX-2024-0111 报关单据</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">截止：2024-01-16</p>
+              </div>
+              <span class="text-[11px] font-medium text-error bg-error/10 px-1.5 py-0.5 rounded shrink-0">紧急</span>
+            </div>
+            <!-- 待办-事项2 -->
+            <div class="todo-item flex items-center gap-3 py-3 border-b border-outline-variant/30 cursor-pointer hover:bg-surface-container/30 transition-colors px-2 -mx-2 rounded-md">
+              <div class="todo-check w-4 h-4 rounded-full border border-outline shrink-0 transition-colors"></div>
+              <div class="flex-1 min-w-0">
+                <p class="todo-text text-sm text-on-surface leading-relaxed">联系 Dubai Motors 确认收货</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">截止：2024-01-17</p>
+              </div>
+            </div>
+            <!-- 待办-事项3 -->
+            <div class="todo-item flex items-center gap-3 py-3 border-b border-outline-variant/30 cursor-pointer hover:bg-surface-container/30 transition-colors px-2 -mx-2 rounded-md">
+              <div class="todo-check w-4 h-4 rounded-full border border-outline shrink-0 transition-colors"></div>
+              <div class="flex-1 min-w-0">
+                <p class="todo-text text-sm text-on-surface leading-relaxed">更新 Camry 验车报告</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">截止：2024-01-18</p>
+              </div>
+            </div>
+            <!-- 待办-事项4 -->
+            <div class="todo-item flex items-center gap-3 py-3 border-b border-outline-variant/30 cursor-pointer hover:bg-surface-container/30 transition-colors px-2 -mx-2 rounded-md">
+              <div class="todo-check w-4 h-4 rounded-full border border-outline shrink-0 transition-colors"></div>
+              <div class="flex-1 min-w-0">
+                <p class="todo-text text-sm text-on-surface leading-relaxed">跟进 Lagos Auto 尾款支付</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">截止：2024-01-16</p>
+              </div>
+              <span class="text-[11px] font-medium text-error bg-error/10 px-1.5 py-0.5 rounded shrink-0">紧急</span>
+            </div>
+            <!-- 待办-事项5 -->
+            <div class="todo-item flex items-center gap-3 py-3 cursor-pointer hover:bg-surface-container/30 transition-colors px-2 -mx-2 rounded-md">
+              <div class="todo-check w-4 h-4 rounded-full border border-outline shrink-0 transition-colors"></div>
+              <div class="flex-1 min-w-0">
+                <p class="todo-text text-sm text-on-surface leading-relaxed">准备 Accra Vehicles 新订单发票</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">截止：2024-01-19</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 近期政策更新 -->
+        <div class="bg-surface rounded-lg shadow-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-on-surface">政策更新</h2>
+          </div>
+          <div class="space-y-0">
+            <!-- 政策-更新1 -->
+            <div class="flex items-start gap-3 py-3 border-b border-outline-variant/30">
+              <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-error/8 shrink-0 mt-0.5">
+                <i data-lucide="globe" class="w-4 h-4 text-error"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-on-surface leading-relaxed">欧盟发布新版二手车进口排放标准</p>
+                <p class="text-xs text-on-surface-variant mt-1">2024-01-15 · 欧盟委员会</p>
+              </div>
+            </div>
+            <!-- 政策-更新2 -->
+            <div class="flex items-start gap-3 py-3 border-b border-outline-variant/30">
+              <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/8 shrink-0 mt-0.5">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-warning"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-on-surface leading-relaxed">西非多国调整二手车进口年限至 8 年</p>
+                <p class="text-xs text-on-surface-variant mt-1">2024-01-12 · 尼日利亚交通部</p>
+              </div>
+            </div>
+            <!-- 政策-更新3 -->
+            <div class="flex items-start gap-3 py-3">
+              <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/5 shrink-0 mt-0.5">
+                <i data-lucide="file-check" class="w-4 h-4 text-primary"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-on-surface leading-relaxed">海关总署更新出口申报规范公告</p>
+                <p class="text-xs text-on-surface-variant mt-1">2024-01-10 · 中国海关总署</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- @main-content:end -->
+  </main>
+
+  </div><!-- end right-area -->
+  </div><!-- end flex container -->
+
+  <script>
+  $(function() {
+    // 待办事项 - 点击切换完成状态
+    // 1. 点击待办项时，切换完成/未完成状态
+    // 2. 完成状态下文字添加删除线并变灰
+    // 3. 左侧圆形指示器变为绿色表示已完成
+    // 4. 再次点击可恢复为未完成状态
+    $('#todo-list').on('click', '.todo-item', function() {
+      var $item = $(this);
+      $item.find('.todo-text').toggleClass('line-through text-on-surface-variant');
+      $item.find('.todo-check').toggleClass('bg-success border-success bg-transparent border-outline');
+    });
+
+    // 新建订单按钮 - 跳转到形式发票页面
+    $('#btn-new-order').on('click', function() {
+      window.location.href = 'proforma-invoice.html';
+    });
+  });
+  </script>
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

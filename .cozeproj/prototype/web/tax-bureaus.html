@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #0C2D48;
+      --color-primary-container:    #1A5276;
+      --color-on-primary:           #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F7F9FC;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EEF2F7;
+      --color-surface-container-high:     #E8EDF4;
+      --color-surface-container-highest:  #DDE4EE;
+      /* === 文字 === */
+      --color-on-surface:           #2C3E50;
+      --color-on-surface-variant:   #7F8C8D;
+      /* === 功能色 === */
+      --color-success:  #27AE60;
+      --color-error:    #E74C3C;
+      --color-warning:  #E67E22;
+      /* === 边框 === */
+      --color-outline:          #CBD5E1;
+      --color-outline-variant:  #E2E8F0;
+      /* === 圆角 === */
+      --radius-sm:   0.25rem;
+      --radius-md:   0.375rem;
+      --radius-lg:   0.5rem;
+      --radius-xl:   0.75rem;
+      --radius-2xl:  1rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 3px rgba(12,45,72,0.08), 0 1px 2px rgba(12,45,72,0.06);
+      --shadow-float:  0 10px 25px rgba(12,45,72,0.12), 0 4px 10px rgba(12,45,72,0.08);
+      --shadow-dialog: 0 25px 50px rgba(12,45,72,0.18), 0 10px 20px rgba(12,45,72,0.1);
+      /* === 字体 === */
+      --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 400;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans antialiased">
+
+  <!-- @nav:start 导航组件 -->
+  <header class="bg-surface sticky top-0 z-40 h-16 flex items-center justify-between px-6 border-b border-outline-variant/20 shadow-card">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+        <i data-lucide="ship" class="text-on-primary w-5 h-5"></i>
+      </div>
+      <div class="flex flex-col leading-tight">
+        <span class="font-bold text-base text-primary tracking-tight">ExportDrive</span>
+        <span class="text-[11px] text-on-surface-variant -mt-0.5">二手车出口工具平台</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" aria-label="搜索">
+        <i data-lucide="search" class="w-[18px] h-[18px]"></i>
+      </button>
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" aria-label="通知">
+        <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
+        <span class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-warning"></span>
+      </button>
+      <div class="w-px h-6 bg-outline-variant/60 mx-1"></div>
+      <div class="flex items-center gap-2.5 pl-1">
+        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">初</div>
+        <div class="flex flex-col leading-tight hidden sm:flex">
+          <span class="text-sm font-medium text-on-surface">小初</span>
+          <span class="text-[11px] text-on-surface-variant">管理员</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex" style="height: calc(100vh - 4rem)">
+    <aside class="w-60 shrink-0 bg-surface border-r border-outline-variant/20 overflow-y-auto">
+      <nav class="p-3 space-y-0.5">
+        <div class="px-3 pt-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">核心工具</div>
+        <a href="invoice-tax.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="file-text" class="w-4 h-4"></i>发票 / 报税
+        </a>
+        <a href="tax-bureaus.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md bg-primary/10 text-primary font-medium text-sm" aria-current="page">
+          <i data-lucide="landmark" class="w-4 h-4"></i>税务局导航
+        </a>
+        <a href="invoice-titles.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="id-card" class="w-4 h-4"></i>发票抬头
+        </a>
+        <a href="invoice-title-form.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>新增抬头
+        </a>
+
+        <div class="px-3 pt-5 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant/60">其他模块</div>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>工作台
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="car" class="w-4 h-4"></i>车辆核验
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="file-stack" class="w-4 h-4"></i>单证模板
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="anchor" class="w-4 h-4"></i>运费测算
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>海运跟踪
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="book-open" class="w-4 h-4"></i>准入政策
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant/50 font-medium text-sm cursor-not-allowed">
+          <i data-lucide="users" class="w-4 h-4"></i>客户管理
+        </a>
+      </nav>
+    </aside>
+    <!-- @nav:end 导航组件 -->
+
+    <!-- @main-content:start -->
+    <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6 lg:p-8">
+      <!-- 页面标题区 -->
+      <section id="page-header" class="flex items-start justify-between gap-4 flex-wrap">
+        <div class="flex flex-col gap-1">
+          <h1 class="text-2xl font-bold text-on-surface tracking-tight">税务局官网导航</h1>
+          <p class="text-sm text-on-surface-variant">收藏常用税务局与电子税务局入口，一键直达官方办事网站</p>
+        </div>
+        <button id="btn-add-favorite" class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+          <i data-lucide="plus" class="w-4 h-4"></i>添加收藏
+        </button>
+      </section>
+
+      <!-- 搜索与筛选栏 -->
+      <section id="filter-bar" class="mt-6 bg-surface rounded-lg shadow-card p-4 flex items-center gap-3 flex-wrap">
+        <div class="relative flex-1 min-w-[260px]">
+          <i data-lucide="search" class="w-4 h-4 text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input id="input-search" type="text" placeholder="搜索地区或网站名称，如：广东、电子税务局"
+                 class="w-full bg-surface-container border-none rounded-md pl-9 pr-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"/>
+        </div>
+        <div id="category-tabs" class="flex items-center gap-1 bg-surface-container rounded-md p-1">
+          <button data-cat="all" class="cat-tab px-3 py-1.5 rounded text-sm font-medium bg-surface text-on-surface shadow-card">全部</button>
+          <button data-cat="national" class="cat-tab px-3 py-1.5 rounded text-sm font-medium text-on-surface-variant hover:text-on-surface">国家级</button>
+          <button data-cat="province" class="cat-tab px-3 py-1.5 rounded text-sm font-medium text-on-surface-variant hover:text-on-surface">省市电子税务局</button>
+          <button data-cat="export" class="cat-tab px-3 py-1.5 rounded text-sm font-medium text-on-surface-variant hover:text-on-surface">出口退税</button>
+          <button data-cat="invoice" class="cat-tab px-3 py-1.5 rounded text-sm font-medium text-on-surface-variant hover:text-on-surface">发票查验</button>
+        </div>
+        <div class="flex items-center gap-1">
+          <button id="view-card" class="w-9 h-9 rounded-md flex items-center justify-center bg-primary text-on-primary" aria-label="卡片视图">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          </button>
+          <button id="view-list" class="w-9 h-9 rounded-md flex items-center justify-center text-on-surface-variant hover:bg-surface-container" aria-label="列表视图">
+            <i data-lucide="list" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- 提示横幅 -->
+      <section id="tip-banner" class="mt-4 bg-primary/5 border border-primary/15 rounded-lg px-4 py-3 flex items-start gap-3">
+        <i data-lucide="info" class="w-4 h-4 text-primary mt-0.5 shrink-0"></i>
+        <p class="text-sm text-on-surface leading-relaxed">
+          提示：请认准税务局官方域名 <span class="font-mono text-primary font-medium">chinatax.gov.cn</span>，谨防钓鱼网站。建议通过本页收藏入口访问，不要轻信搜索结果中的广告链接。
+        </p>
+      </section>
+
+      <!-- 主体区：左侧地区筛选 + 右侧卡片网格 -->
+      <div class="mt-6 flex gap-6 items-start">
+        <!-- 按地区筛选 -->
+        <aside id="region-filter" class="w-44 shrink-0 bg-surface rounded-lg shadow-card p-4 sticky top-4">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/70 mb-3">按地区筛选</h3>
+          <div class="flex flex-col gap-0.5">
+            <button data-region="all" class="region-item text-left px-3 py-2 rounded-md text-sm font-medium bg-primary/10 text-primary">全部地区</button>
+            <button data-region="全国" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">全国</button>
+            <button data-region="广东" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">广东</button>
+            <button data-region="浙江" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">浙江</button>
+            <button data-region="江苏" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">江苏</button>
+            <button data-region="山东" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">山东</button>
+            <button data-region="上海" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">上海</button>
+            <button data-region="北京" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">北京</button>
+            <button data-region="天津" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">天津</button>
+            <button data-region="福建" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">福建</button>
+            <button data-region="四川" class="region-item text-left px-3 py-2 rounded-md text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">四川</button>
+          </div>
+        </aside>
+
+        <!-- 卡片网格容器 -->
+        <section id="bureau-grid" class="flex-1 min-w-0 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
+
+          <!-- 列表-机构1：国家税务总局（国家级/已收藏） -->
+          <article data-cat="national" data-region="全国" data-fav="1"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-warning hover:bg-warning/10" data-fav="1" aria-label="取消收藏">
+              <i data-lucide="star" class="w-4 h-4 fill-warning"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="landmark" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">国家税务总局</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-primary/10 text-primary">国家级</span>
+                  <span class="text-xs text-on-surface-variant">全国</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">税务总局官方门户，发布税收政策、公告、纳税咨询与全国电子税务局入口。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://www.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">政策查询</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">纳税咨询</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">公告通知</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://www.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://www.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- 列表-机构2：广东省电子税务局（省市/已收藏） -->
+          <article data-cat="province" data-region="广东" data-fav="1"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-warning hover:bg-warning/10" data-fav="1" aria-label="取消收藏">
+              <i data-lucide="star" class="w-4 h-4 fill-warning"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="building-2" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">广东省电子税务局</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-success/15 text-success">省市局</span>
+                  <span class="text-xs text-on-surface-variant">广东省</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">广东省企业网上申报、发票业务、涉税事项办理的统一电子税务局入口。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://etax.guangdong.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">纳税申报</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">发票开具</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">出口退税</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://etax.guangdong.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://etax.guangdong.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- 列表-机构3：浙江省电子税务局（省市/已收藏） -->
+          <article data-cat="province" data-region="浙江" data-fav="1"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-warning hover:bg-warning/10" data-fav="1" aria-label="取消收藏">
+              <i data-lucide="star" class="w-4 h-4 fill-warning"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="building-2" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">浙江省电子税务局</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-success/15 text-success">省市局</span>
+                  <span class="text-xs text-on-surface-variant">浙江省</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">浙江省企业纳税申报、发票领用与出口退税申报的主要网上办税入口。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://etax.zhejiang.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">纳税申报</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">出口退税</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">涉税办理</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://etax.zhejiang.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://etax.zhejiang.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- 列表-机构4：宁波市电子税务局（省市/已收藏） -->
+          <article data-cat="province" data-region="浙江" data-fav="1"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-warning hover:bg-warning/10" data-fav="1" aria-label="取消收藏">
+              <i data-lucide="star" class="w-4 h-4 fill-warning"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="building-2" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">宁波市电子税务局</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-success/15 text-success">省市局</span>
+                  <span class="text-xs text-on-surface-variant">浙江省·宁波市</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">宁波作为计划单列市，拥有独立电子税务局，本地企业申报与退税独立办理。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://etax.ningbo.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">纳税申报</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">出口退税</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">港口业务</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://etax.ningbo.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://etax.ningbo.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- 列表-机构5：深圳市电子税务局（省市/已收藏） -->
+          <article data-cat="province" data-region="广东" data-fav="1"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-warning hover:bg-warning/10" data-fav="1" aria-label="取消收藏">
+              <i data-lucide="star" class="w-4 h-4 fill-warning"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="building-2" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">深圳市电子税务局</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-success/15 text-success">省市局</span>
+                  <span class="text-xs text-on-surface-variant">广东省·深圳市</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">深圳计划单列市电子税务局，华南出口企业高频使用的发票与退税平台。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://etax.shenzhen.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">纳税申报</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">发票开具</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">出口退税</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://etax.shenzhen.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://etax.shenzhen.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- 列表-机构6：山东省电子税务局（省市/已收藏） -->
+          <article data-cat="province" data-region="山东" data-fav="1"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-warning hover:bg-warning/10" data-fav="1" aria-label="取消收藏">
+              <i data-lucide="star" class="w-4 h-4 fill-warning"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="building-2" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">山东省电子税务局</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-success/15 text-success">省市局</span>
+                  <span class="text-xs text-on-surface-variant">山东省</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">山东省企业电子税务局，覆盖纳税申报、发票、出口退税等全部线上办税事项。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://etax.shandong.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">纳税申报</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">发票业务</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">出口退税</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://etax.shandong.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://etax.shandong.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- 列表-机构7：增值税发票综合服务平台（业务系统/已收藏） -->
+          <article data-cat="invoice" data-region="全国" data-fav="1"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-warning hover:bg-warning/10" data-fav="1" aria-label="取消收藏">
+              <i data-lucide="star" class="w-4 h-4 fill-warning"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="file-check-2" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">增值税发票综合服务平台</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-warning/15 text-warning">业务系统</span>
+                  <span class="text-xs text-on-surface-variant">全国</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">全国增值税发票勾选确认、查验与进项抵扣的官方业务系统，企业每月必用。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://fpdk.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">发票查验</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">勾选认证</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">进项抵扣</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://fpdk.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://fpdk.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- 列表-机构8：出口退税申报系统（业务系统/已收藏） -->
+          <article data-cat="export" data-region="全国" data-fav="1"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-warning hover:bg-warning/10" data-fav="1" aria-label="取消收藏">
+              <i data-lucide="star" class="w-4 h-4 fill-warning"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="ship" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">出口退税申报系统</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-warning/15 text-warning">业务系统</span>
+                  <span class="text-xs text-on-surface-variant">全国</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">出口企业在线申报出口退税、报关单与发票数据匹配、退税进度查询。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://ckts.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">出口退税</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">退税申报</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">进度查询</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://ckts.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://ckts.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- 列表-机构9：江苏省电子税务局（推荐/未收藏） -->
+          <article data-cat="province" data-region="江苏" data-fav="0"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant/50 hover:text-warning hover:bg-warning/10" data-fav="0" aria-label="添加收藏">
+              <i data-lucide="star" class="w-4 h-4"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="building-2" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">江苏省电子税务局</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-success/15 text-success">省市局</span>
+                  <span class="text-xs text-on-surface-variant">江苏省</span>
+                  <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-primary/10 text-primary">推荐</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">江苏省电子税务局，支持企业纳税申报、发票开具及出口退税等业务在线办理。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://etax.jiangsu.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">纳税申报</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">发票开具</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">出口退税</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://etax.jiangsu.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://etax.jiangsu.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- 列表-机构10：全国增值税发票查验平台（推荐/未收藏） -->
+          <article data-cat="invoice" data-region="全国" data-fav="0"
+                   class="bureau-card bg-surface rounded-lg shadow-card hover:shadow-float transition-shadow p-5 flex flex-col gap-3 relative">
+            <button class="btn-fav absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant/50 hover:text-warning hover:bg-warning/10" data-fav="0" aria-label="添加收藏">
+              <i data-lucide="star" class="w-4 h-4"></i>
+            </button>
+            <div class="flex items-start gap-3 pr-8">
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i data-lucide="shield-check" class="w-5 h-5 text-primary"></i>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <h3 class="text-base font-semibold text-on-surface truncate">全国增值税发票查验平台</h3>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium bg-warning/15 text-warning">业务系统</span>
+                  <span class="text-xs text-on-surface-variant">全国</span>
+                  <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-primary/10 text-primary">推荐</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">税务总局官方发票真伪查验入口，输入发票代码、号码、金额即可验真。</p>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono bg-surface-container rounded px-2.5 py-1.5 overflow-hidden">
+              <i data-lucide="globe" class="w-3.5 h-3.5 shrink-0"></i>
+              <span class="truncate">https://inv-veri.chinatax.gov.cn</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">发票查验</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">真伪验证</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] bg-surface-container-high text-on-surface-variant">电子发票</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 pt-3 border-t border-outline-variant/30">
+              <button class="btn-visit flex-1 bg-primary text-on-primary px-3 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5" data-url="https://inv-veri.chinatax.gov.cn">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>访问官网
+              </button>
+              <button class="btn-copy-link w-9 h-9 rounded-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center justify-center transition-colors" data-url="https://inv-veri.chinatax.gov.cn" aria-label="复制链接">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </article>
+
+        </section>
+      </div>
+    </main>
+    <!-- @main-content:end -->
+  </div>
+
+  <script>
+    $(function () {
+      // 状态：当前分类 / 地区 / 搜索关键字 / 视图模式
+      let currentCat = 'all';
+      let currentRegion = 'all';
+      let currentKeyword = '';
+      let currentView = 'card';
+
+      // 应用筛选：根据分类、地区、关键字对卡片 show/hide
+      function applyFilter() {
+        const kw = currentKeyword.trim().toLowerCase();
+        $('#bureau-grid .bureau-card').each(function () {
+          const $card = $(this);
+          const cat = $card.data('cat');
+          const region = String($card.data('region'));
+          const text = $card.text().toLowerCase();
+          const catMatch = currentCat === 'all' || cat === currentCat;
+          const regionMatch = currentRegion === 'all' || region === currentRegion;
+          const kwMatch = !kw || text.indexOf(kw) !== -1;
+          if (catMatch && regionMatch && kwMatch) {
+            $card.removeClass('hidden');
+          } else {
+            $card.addClass('hidden');
+          }
+        });
+      }
+
+      // 分类 tabs 切换
+      $('#category-tabs').on('click', '.cat-tab', function () {
+        const $btn = $(this);
+        currentCat = $btn.data('cat');
+        $('#category-tabs .cat-tab')
+          .removeClass('bg-surface text-on-surface shadow-card')
+          .addClass('text-on-surface-variant hover:text-on-surface');
+        $btn
+          .addClass('bg-surface text-on-surface shadow-card')
+          .removeClass('text-on-surface-variant hover:text-on-surface');
+        applyFilter();
+      });
+
+      // 地区筛选切换
+      $('#region-filter').on('click', '.region-item', function () {
+        const $btn = $(this);
+        currentRegion = $btn.data('region');
+        $('#region-filter .region-item')
+          .removeClass('bg-primary/10 text-primary font-medium')
+          .addClass('text-on-surface-variant hover:bg-surface-container hover:text-on-surface');
+        $btn
+          .addClass('bg-primary/10 text-primary font-medium')
+          .removeClass('text-on-surface-variant hover:bg-surface-container hover:text-on-surface');
+        applyFilter();
+      });
+
+      // 搜索输入（即时过滤）
+      $('#input-search').on('input', function () {
+        currentKeyword = $(this).val() || '';
+        applyFilter();
+      });
+
+      // 视图切换：卡片 / 列表
+      // 列表视图下将网格降为单列，卡片内部仍保留原结构（原型简化：仅改列数）
+      $('#view-card').on('click', function () {
+        currentView = 'card';
+        $('#bureau-grid')
+          .removeClass('grid-cols-1')
+          .addClass('xl:grid-cols-2 2xl:grid-cols-3');
+        $('#view-card').addClass('bg-primary text-on-primary').removeClass('text-on-surface-variant hover:bg-surface-container');
+        $('#view-list').removeClass('bg-primary text-on-primary').addClass('text-on-surface-variant hover:bg-surface-container');
+      });
+      $('#view-list').on('click', function () {
+        currentView = 'list';
+        $('#bureau-grid')
+          .addClass('grid-cols-1')
+          .removeClass('xl:grid-cols-2 2xl:grid-cols-3');
+        $('#view-list').addClass('bg-primary text-on-primary').removeClass('text-on-surface-variant hover:bg-surface-container');
+        $('#view-card').removeClass('bg-primary text-on-primary').addClass('text-on-surface-variant hover:bg-surface-container');
+      });
+
+      // 收藏 / 取消收藏：
+      // 1. 切换按钮 data-fav 与图标 fill 状态
+      // 2. 切换卡片 data-fav 与"推荐"徽标显隐
+      // 3. 真实实现应调用后端 POST /favorites 持久化
+      $('#bureau-grid').on('click', '.btn-fav', function () {
+        const $btn = $(this);
+        const $card = $btn.closest('.bureau-card');
+        const fav = $btn.data('fav') === 1 ? 0 : 1;
+        $btn.data('fav', fav);
+        $card.data('fav', fav);
+        if (fav === 1) {
+          $btn.addClass('text-warning').removeClass('text-on-surface-variant/50 hover:text-warning');
+          $btn.find('i').attr('data-lucide', 'star').addClass('fill-warning');
+          $card.find('.recommend-tag').remove();
+          $btn.attr('aria-label', '取消收藏');
+        } else {
+          $btn.removeClass('text-warning').addClass('text-on-surface-variant/50 hover:text-warning');
+          $btn.find('i').attr('data-lucide', 'star').removeClass('fill-warning');
+          $btn.attr('aria-label', '添加收藏');
+        }
+        lucide.createIcons();
+      });
+
+      // 访问官网按钮：原型阶段仅在新窗口打开对应 URL
+      // 真实环境应记录访问日志（最近访问、点击统计），然后 window.open
+      $('#bureau-grid').on('click', '.btn-visit', function () {
+        const url = $(this).data('url');
+        console.log('访问税务局官网:', url);
+        window.open(url, '_blank', 'noopener');
+      });
+
+      // 复制链接：调用 navigator.clipboard.writeText，成功后短暂切换为"已复制"
+      // 若浏览器不支持 clipboard，则降级为创建临时 textarea 并执行 execCommand('copy')
+      $('#bureau-grid').on('click', '.btn-copy-link', function () {
+        const $btn = $(this);
+        const url = String($btn.data('url') || '');
+        const $icon = $btn.find('i');
+        const showCopied = function () {
+          $icon.attr('data-lucide', 'check');
+          $btn.addClass('text-success');
+          lucide.createIcons();
+          setTimeout(function () {
+            $icon.attr('data-lucide', 'link');
+            $btn.removeClass('text-success');
+            lucide.createIcons();
+          }, 1500);
+        };
+        if (navigator.clipbar && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(showCopied).catch(function () {
+            console.log('复制失败:', url);
+          });
+        } else {
+          const $ta = $('<textarea>').val(url).appendTo('body').select();
+          try { document.execCommand('copy'); showCopied(); } catch (e) { console.log('复制失败:', url); }
+          $ta.remove();
+        }
+      });
+
+      // 添加收藏按钮 - 点击后应实现：
+      // 1. 弹出模态框，表单字段：机构名称、官网URL、地区、机构类型、常用业务标签
+      // 2. 表单校验：名称必填、URL 必须以 https:// 开头且域名包含 chinatax.gov.cn（安全提示）
+      // 3. 提交后调用 POST /api/tax-bureaus/favorites，成功后在卡片网格顶部插入新卡片
+      // 4. 失败时在模态框顶部显示错误信息，不关闭模态框
+      // 5. 支持手动录入与"从官方列表选择"两种模式
+      $('#btn-add-favorite').on('click', function () {
+        console.log('打开添加税务局收藏模态框');
+        window.alert('添加收藏（原型）：将弹出表单填写机构名称、官网 URL、地区与类型。');
+      });
+    });
+  </script>
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

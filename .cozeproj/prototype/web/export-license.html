@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://lf-code-agent.coze.cn/obj/x-ai-cn/fonts/google/google-all-fonts.css" rel="stylesheet"/>
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #2F6BFF;
+      --color-primary-container:    #DBE4FF;
+      --color-on-primary:           #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F6F8FB;
+      --color-surface-container-lowest:   #F0F2F6;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EDF0F5;
+      --color-surface-container-high:     #E5E9F0;
+      --color-surface-container-highest:  #DDE2EA;
+      /* === 文字 === */
+      --color-on-surface:           #152033;
+      --color-on-surface-variant:   #637089;
+      /* === 功能色 === */
+      --color-success:  #16A37B;
+      --color-error:    #ef4444;
+      --color-warning:  #f59e0b;
+      /* === 边框 === */
+      --color-outline:          #E6EAF2;
+      --color-outline-variant:  #E6EAF2;
+      /* === 圆角 === */
+      --radius-sm:   0.25rem;
+      --radius-md:   0.375rem;
+      --radius-lg:   0.5rem;
+      --radius-xl:   0.75rem;
+      --radius-2xl:  1rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 2px 8px rgba(0,0,0,0.06);
+      --shadow-float:  0 10px 25px rgba(0,0,0,0.08);
+      --shadow-dialog: 0 25px 50px rgba(0,0,0,0.12);
+      /* === 字体 === */
+      --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- @nav:start 导航组件 -->
+  <header class="bg-surface border-b border-outline/20 sticky top-0 z-40 h-14 flex items-center justify-between px-5">
+    <div class="flex items-center gap-2.5">
+      <i data-lucide="anchor" class="text-primary w-5 h-5"></i>
+      <span class="font-bold text-base tracking-tight">ExportDrive</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="flex items-center gap-1.5 text-xs text-on-surface-variant hover:text-on-surface transition-colors px-2.5 py-1.5 rounded-md hover:bg-surface-container">
+        <i data-lucide="sun" class="w-3.5 h-3.5"></i>
+        <span>亮色</span>
+      </button>
+      <div class="flex items-center gap-2 pl-3 border-l border-outline/20">
+        <div class="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-semibold">初</div>
+        <span class="text-xs font-medium text-on-surface">小初</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex" style="height: calc(100vh - 3.5rem)">
+    <aside class="w-56 shrink-0 bg-surface border-r border-outline/20 overflow-y-auto">
+      <div class="p-3 space-y-4">
+        <div>
+          <p class="px-2.5 py-1 text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">工作台</p>
+          <div class="space-y-0.5 mt-0.5">
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>工作台
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <p class="px-2.5 py-1 text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">出口流程</p>
+          <div class="space-y-0.5 mt-0.5">
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="calculator" class="w-4 h-4"></i>报价计算器
+            </a>
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="file-text" class="w-4 h-4"></i>形式发票
+            </a>
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="arrow-left-right" class="w-4 h-4"></i>出口待转移
+            </a>
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="folder-open" class="w-4 h-4"></i>发票合同装箱单
+            </a>
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="anchor" class="w-4 h-4"></i>报关预录
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <p class="px-2.5 py-1 text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">出口许可证</p>
+          <div class="space-y-0.5 mt-0.5">
+            <a href="export-license.html" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md bg-primary/10 text-primary text-[13px] font-medium" aria-current="page">
+              <i data-lucide="file-check" class="w-4 h-4"></i>出口许可证
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <p class="px-2.5 py-1 text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">单证工具</p>
+          <div class="space-y-0.5 mt-0.5">
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="search" class="w-4 h-4"></i>单证检索
+            </a>
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="stamp" class="w-4 h-4"></i>印章工具
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <p class="px-2.5 py-1 text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">资料中心</p>
+          <div class="space-y-0.5 mt-0.5">
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="users" class="w-4 h-4"></i>客户管理
+            </a>
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="truck" class="w-4 h-4"></i>海运跟踪
+            </a>
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-[13px] font-medium transition-colors">
+              <i data-lucide="book-open" class="w-4 h-4"></i>准入政策
+            </a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- @main-content:start -->
+    <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6">
+
+      <!-- 页面标题区 -->
+      <div class="flex items-center justify-between mb-2">
+        <h1 class="text-2xl font-bold text-on-surface">出口许可证</h1>
+        <button id="btn-upload-issued" class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium
+                   hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i>上传已签发许可证
+        </button>
+      </div>
+
+      <p class="text-sm text-on-surface-variant mb-6">二手车出口 · 草单制作 → 商务部提交 → 归档管理</p>
+
+      <!-- Tab 切换按钮组 -->
+      <div id="tab-group" class="flex items-center gap-1 mb-6 bg-surface-container rounded-lg p-1 w-fit">
+        <button id="tab-draft" class="px-4 py-2 rounded-md text-sm font-medium transition-all bg-primary text-on-primary shadow-sm">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5 inline-block mr-1.5"></i>草单制作
+        </button>
+        <button id="tab-commerce" class="px-4 py-2 rounded-md text-sm font-medium transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high">
+          <i data-lucide="building-2" class="w-3.5 h-3.5 inline-block mr-1.5"></i>商务部入口
+        </button>
+        <button id="tab-archive" class="px-4 py-2 rounded-md text-sm font-medium transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high">
+          <i data-lucide="archive" class="w-3.5 h-3.5 inline-block mr-1.5"></i>已签发归档
+        </button>
+      </div>
+
+      <!-- ========== Tab 1：草单制作 ========== -->
+      <div id="panel-draft">
+        <!-- 操作栏 -->
+        <div class="flex items-center justify-between mb-4 gap-4">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="relative flex-1 max-w-md">
+              <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-on-surface-variant/50 pointer-events-none"></i>
+              <input id="input-search-draft" type="text" class="w-full bg-surface-container border-none rounded-md pl-9 pr-3 py-2 text-sm
+                     text-on-surface placeholder:text-on-surface-variant/50
+                     focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" placeholder="搜索草单编号 / 出口商 / 合同号">
+            </div>
+            <button id="btn-create-draft" class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium
+                       hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>新建草单
+            </button>
+          </div>
+        </div>
+
+        <!-- 从本地迁移提示条 -->
+        <div id="migrate-tip" class="flex items-center justify-between bg-warning/10 border border-warning/20 rounded-lg px-4 py-2.5 mb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-warning shrink-0"></i>
+            <span class="text-sm text-on-surface">您有历史草单数据在本地？<a href="#" class="text-primary font-medium hover:underline ml-1">从本地迁移</a></span>
+          </div>
+          <button id="btn-close-tip" class="text-on-surface-variant/60 hover:text-on-surface transition-colors">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- 草单列表表格 -->
+        <div class="bg-surface rounded-lg shadow-card overflow-hidden">
+          <div class="grid grid-cols-8 px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+            <span>草单编号</span>
+            <span>出口商</span>
+            <span>进口国</span>
+            <span>合同号</span>
+            <span class="text-center">车辆数</span>
+            <span class="text-right">总金额(USD)</span>
+            <span>更新时间</span>
+            <span class="text-center">操作</span>
+          </div>
+          <div id="draft-table-body" class="divide-y divide-outline-variant/50">
+
+            <!-- 列表-草单1 -->
+            <div class="grid grid-cols-8 px-4 py-3 hover:bg-surface-container/50 transition-colors items-center">
+              <span class="text-sm font-mono text-primary font-medium">DR-2025-0001</span>
+              <span class="text-sm text-on-surface">广州鑫远汽车贸易有限公司</span>
+              <span class="text-sm text-on-surface">阿联酋</span>
+              <span class="text-sm text-on-surface">CT-2025-UAE-089</span>
+              <span class="text-sm text-on-surface text-center">12</span>
+              <span class="text-sm text-on-surface text-right font-medium">$ 156,800.00</span>
+              <span class="text-xs text-on-surface-variant">2025-01-15 14:30</span>
+              <div class="flex items-center justify-center gap-2">
+                <button class="btn-edit-draft text-primary text-sm font-medium hover:underline">编辑</button>
+                <button class="btn-copy-draft text-on-surface-variant text-sm hover:text-primary transition-colors">复制</button>
+                <button class="btn-delete-draft text-error/70 text-sm hover:text-error transition-colors">删除</button>
+              </div>
+            </div>
+
+            <!-- 列表-草单2 -->
+            <div class="grid grid-cols-8 px-4 py-3 hover:bg-surface-container/50 transition-colors items-center">
+              <span class="text-sm font-mono text-primary font-medium">DR-2025-0002</span>
+              <span class="text-sm text-on-surface">上海飞驰进出口有限公司</span>
+              <span class="text-sm text-on-surface">沙特阿拉伯</span>
+              <span class="text-sm text-on-surface">CT-2025-KSA-045</span>
+              <span class="text-sm text-on-surface text-center">8</span>
+              <span class="text-sm text-on-surface text-right font-medium">$ 98,500.00</span>
+              <span class="text-xs text-on-surface-variant">2025-01-13 09:15</span>
+              <div class="flex items-center justify-center gap-2">
+                <button class="btn-edit-draft text-primary text-sm font-medium hover:underline">编辑</button>
+                <button class="btn-copy-draft text-on-surface-variant text-sm hover:text-primary transition-colors">复制</button>
+                <button class="btn-delete-draft text-error/70 text-sm hover:text-error transition-colors">删除</button>
+              </div>
+            </div>
+
+            <!-- 列表-草单3 -->
+            <div class="grid grid-cols-8 px-4 py-3 hover:bg-surface-container/50 transition-colors items-center">
+              <span class="text-sm font-mono text-primary font-medium">DR-2025-0003</span>
+              <span class="text-sm text-on-surface">深圳鹏程汽车销售有限公司</span>
+              <span class="text-sm text-on-surface">约旦</span>
+              <span class="text-sm text-on-surface">CT-2025-JOR-112</span>
+              <span class="text-sm text-on-surface text-center">15</span>
+              <span class="text-sm text-on-surface text-right font-medium">$ 212,300.00</span>
+              <span class="text-xs text-on-surface-variant">2025-01-10 16:45</span>
+              <div class="flex items-center justify-center gap-2">
+                <button class="btn-edit-draft text-primary text-sm font-medium hover:underline">编辑</button>
+                <button class="btn-copy-draft text-on-surface-variant text-sm hover:text-primary transition-colors">复制</button>
+                <button class="btn-delete-draft text-error/70 text-sm hover:text-error transition-colors">删除</button>
+              </div>
+            </div>
+
+            <!-- 列表-草单4 -->
+            <div class="grid grid-cols-8 px-4 py-3 hover:bg-surface-container/50 transition-colors items-center">
+              <span class="text-sm font-mono text-primary font-medium">DR-2025-0004</span>
+              <span class="text-sm text-on-surface">天津港国际汽车贸易有限公司</span>
+              <span class="text-sm text-on-surface">吉尔吉斯斯坦</span>
+              <span class="text-sm text-on-surface">CT-2025-KGZ-078</span>
+              <span class="text-sm text-on-surface text-center">22</span>
+              <span class="text-sm text-on-surface text-right font-medium">$ 287,000.00</span>
+              <span class="text-xs text-on-surface-variant">2025-01-08 11:20</span>
+              <div class="flex items-center justify-center gap-2">
+                <button class="btn-edit-draft text-primary text-sm font-medium hover:underline">编辑</button>
+                <button class="btn-copy-draft text-on-surface-variant text-sm hover:text-primary transition-colors">复制</button>
+                <button class="btn-delete-draft text-error/70 text-sm hover:text-error transition-colors">删除</button>
+              </div>
+            </div>
+
+            <!-- 列表-草单5 -->
+            <div class="grid grid-cols-8 px-4 py-3 hover:bg-surface-container/50 transition-colors items-center">
+              <span class="text-sm font-mono text-primary font-medium">DR-2025-0005</span>
+              <span class="text-sm text-on-surface">宁波远洋汽车出口有限公司</span>
+              <span class="text-sm text-on-surface">哈萨克斯坦</span>
+              <span class="text-sm text-on-surface">CT-2025-KAZ-203</span>
+              <span class="text-sm text-on-surface text-center">6</span>
+              <span class="text-sm text-on-surface text-right font-medium">$ 74,200.00</span>
+              <span class="text-xs text-on-surface-variant">2025-01-05 08:50</span>
+              <div class="flex items-center justify-center gap-2">
+                <button class="btn-edit-draft text-primary text-sm font-medium hover:underline">编辑</button>
+                <button class="btn-copy-draft text-on-surface-variant text-sm hover:text-primary transition-colors">复制</button>
+                <button class="btn-delete-draft text-error/70 text-sm hover:text-error transition-colors">删除</button>
+              </div>
+            </div>
+
+          </div>
+          <div class="px-4 py-2.5 bg-surface-container-lowest border-t border-outline-variant/20 text-xs text-on-surface-variant">
+            共 <span id="draft-count" class="font-medium text-on-surface">5</span> 份草单
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Tab 2：商务部入口 ========== -->
+      <div id="panel-commerce" class="hidden">
+        <!-- 两张并排卡片 -->
+        <div class="grid grid-cols-2 gap-5 mb-8">
+          <!-- 卡片1：市场准入声明 -->
+          <div class="bg-surface rounded-lg shadow-card overflow-hidden flex">
+            <div class="w-1 bg-orange-500 shrink-0"></div>
+            <div class="p-5 flex-1">
+              <div class="flex items-center gap-2 mb-3">
+                <i data-lucide="clipboard-check" class="w-5 h-5 text-orange-500"></i>
+                <h3 class="text-base font-semibold text-on-surface">市场准入声明</h3>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-orange-500/10 text-orange-600">随附材料</span>
+              </div>
+              <p class="text-sm text-on-surface-variant mb-4">根据商务部要求，出口二手车需制作市场准入声明文件，包含企业信息和车辆清单。</p>
+              <div class="flex items-center gap-2 mb-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs bg-surface-container text-on-surface-variant">企业信息</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs bg-surface-container text-on-surface-variant">车辆清单</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs bg-surface-container text-on-surface-variant">A4/PDF</span>
+              </div>
+              <button id="btn-compliance-declaration" class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium
+                         hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+                <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>制作声明
+              </button>
+            </div>
+          </div>
+
+          <!-- 卡片2：商务部统一平台 -->
+          <div class="bg-surface rounded-lg shadow-card overflow-hidden flex">
+            <div class="w-1 bg-blue-500 shrink-0"></div>
+            <div class="p-5 flex-1">
+              <div class="flex items-center gap-2 mb-3">
+                <i data-lucide="globe" class="w-5 h-5 text-blue-500"></i>
+                <h3 class="text-base font-semibold text-on-surface">商务部统一平台</h3>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-blue-500/10 text-blue-600">官方网站</span>
+              </div>
+              <p class="text-sm text-on-surface-variant mb-4">登录商务部业务系统统一平台，在线提交出口许可证申请，跟踪审批进度。</p>
+              <div class="flex items-center gap-2 mb-4">
+                <span class="text-sm text-on-surface-variant font-mono">ecomp.mofcom.gov.cn</span>
+              </div>
+              <button id="btn-goto-mofcom" class="bg-surface-container text-on-surface px-4 py-2 rounded-md text-sm font-medium
+                         hover:bg-surface-container-high active:scale-[0.98] transition-all inline-flex items-center gap-2">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>前往官网
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 申请流程指引 -->
+        <div class="bg-surface rounded-lg shadow-card p-6">
+          <h3 class="text-base font-semibold text-on-surface mb-5">申请流程指引</h3>
+          <div class="grid grid-cols-4 gap-6">
+            <!-- 步骤1 -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
+              </div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-2">步骤 1</span>
+              <span class="text-sm font-medium text-on-surface mb-1">准备材料</span>
+              <span class="text-xs text-on-surface-variant leading-relaxed">整理出口合同、发票、车辆信息表、企业资质证明等</span>
+            </div>
+            <!-- 步骤2 -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                <i data-lucide="log-in" class="w-5 h-5 text-primary"></i>
+              </div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-2">步骤 2</span>
+              <span class="text-sm font-medium text-on-surface mb-1">登录商务部平台</span>
+              <span class="text-xs text-on-surface-variant leading-relaxed">使用电子钥匙登录 ecomp.mofcom.gov.cn 统一平台</span>
+            </div>
+            <!-- 步骤3 -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                <i data-lucide="send" class="w-5 h-5 text-primary"></i>
+              </div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-2">步骤 3</span>
+              <span class="text-sm font-medium text-on-surface mb-1">提交申请</span>
+              <span class="text-xs text-on-surface-variant leading-relaxed">在线填写申请表并上传随附材料，提交至主管部门审核</span>
+            </div>
+            <!-- 步骤4 -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center mb-3">
+                <i data-lucide="archive" class="w-5 h-5 text-success"></i>
+              </div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/10 text-success mb-2">步骤 4</span>
+              <span class="text-sm font-medium text-on-surface mb-1">归档许可证</span>
+              <span class="text-xs text-on-surface-variant leading-relaxed">审批通过后下载许可证，上传至本平台归档管理</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Tab 3：已签发归档 ========== -->
+      <div id="panel-archive" class="hidden">
+        <!-- 操作栏 -->
+        <div class="flex items-center justify-between mb-4 gap-4">
+          <div class="relative flex-1 max-w-lg">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-on-surface-variant/50 pointer-events-none"></i>
+            <input id="input-search-archive" type="text" class="w-full bg-surface-container border-none rounded-md pl-9 pr-3 py-2 text-sm
+                   text-on-surface placeholder:text-on-surface-variant/50
+                   focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" placeholder="搜索 VIN / 许可证号 / 出口商 / 文件名">
+          </div>
+          <button id="btn-upload-archive" class="bg-surface-container text-on-surface px-4 py-2 rounded-md text-sm font-medium
+                     hover:bg-surface-container-high active:scale-[0.98] transition-all inline-flex items-center gap-2">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i>上传
+          </button>
+        </div>
+
+        <!-- 许可证列表表格 -->
+        <div class="bg-surface rounded-lg shadow-card overflow-hidden">
+          <div class="grid grid-cols-9 px-4 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+            <span>备注</span>
+            <span>许可证号</span>
+            <span>出口商</span>
+            <span>关联车架号 VIN</span>
+            <span>发证日期</span>
+            <span>文件</span>
+            <span>上传时间</span>
+            <span class="text-center col-span-2">操作</span>
+          </div>
+          <div id="archive-table-body" class="divide-y divide-outline-variant/50">
+
+            <!-- 列表-许可证1 -->
+            <div class="grid grid-cols-9 px-4 py-3 hover:bg-surface-container/50 transition-colors items-center">
+              <span class="text-sm text-on-surface">2025年首批出口阿联酋</span>
+              <span class="text-sm font-mono text-primary font-medium">EL-2025-0001</span>
+              <span class="text-sm text-on-surface">广州鑫远汽车贸易有限公司</span>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">LSVA341G9N2A00001</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">LSVA341G9N2A00002</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">LSVA341G9N2A00003</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">+9</span>
+              </div>
+              <span class="text-xs text-on-surface-variant">2025-01-20</span>
+              <div class="flex items-center gap-1.5">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error">PDF</span>
+                <span class="text-xs text-on-surface-variant">出口许可证-阿联酋-2025...</span>
+                <span class="text-[10px] text-on-surface-variant/60">(2.3MB)</span>
+              </div>
+              <span class="text-xs text-on-surface-variant">2025-01-21 10:30</span>
+              <div class="flex items-center justify-center gap-2 col-span-2">
+                <button class="btn-edit-archive text-primary text-sm font-medium hover:underline">编辑</button>
+                <button class="btn-preview-archive text-on-surface-variant text-sm hover:text-primary transition-colors">预览</button>
+                <button class="btn-download-archive text-on-surface-variant text-sm hover:text-primary transition-colors">下载</button>
+                <button class="btn-delete-archive text-error/70 text-sm hover:text-error transition-colors">删除</button>
+              </div>
+            </div>
+
+            <!-- 列表-许可证2 -->
+            <div class="grid grid-cols-9 px-4 py-3 hover:bg-surface-container/50 transition-colors items-center">
+              <span class="text-sm text-on-surface">沙特批量出口</span>
+              <span class="text-sm font-mono text-primary font-medium">EL-2025-0002</span>
+              <span class="text-sm text-on-surface">上海飞驰进出口有限公司</span>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">WDDGF8AB9EA000045</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">WDDGF8AB9EA000046</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">WDDGF8AB9EA000047</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">+5</span>
+              </div>
+              <span class="text-xs text-on-surface-variant">2025-01-18</span>
+              <div class="flex items-center gap-1.5">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error">PDF</span>
+                <span class="text-xs text-on-surface-variant">出口许可证-沙特-2025-...</span>
+                <span class="text-[10px] text-on-surface-variant/60">(1.8MB)</span>
+              </div>
+              <span class="text-xs text-on-surface-variant">2025-01-19 14:15</span>
+              <div class="flex items-center justify-center gap-2 col-span-2">
+                <button class="btn-edit-archive text-primary text-sm font-medium hover:underline">编辑</button>
+                <button class="btn-preview-archive text-on-surface-variant text-sm hover:text-primary transition-colors">预览</button>
+                <button class="btn-download-archive text-on-surface-variant text-sm hover:text-primary transition-colors">下载</button>
+                <button class="btn-delete-archive text-error/70 text-sm hover:text-error transition-colors">删除</button>
+              </div>
+            </div>
+
+            <!-- 列表-许可证3 -->
+            <div class="grid grid-cols-9 px-4 py-3 hover:bg-surface-container/50 transition-colors items-center">
+              <span class="text-sm text-on-surface">吉尔吉斯斯坦中亚线</span>
+              <span class="text-sm font-mono text-primary font-medium">EL-2025-0003</span>
+              <span class="text-sm text-on-surface">天津港国际汽车贸易有限公司</span>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">JTHBJ46G882000078</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">JTHBJ46G882000079</span>
+              </div>
+              <span class="text-xs text-on-surface-variant">2025-01-15</span>
+              <div class="flex items-center gap-1.5">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary">IMG</span>
+                <span class="text-xs text-on-surface-variant">许可证扫描件-20250115...</span>
+                <span class="text-[10px] text-on-surface-variant/60">(4.1MB)</span>
+              </div>
+              <span class="text-xs text-on-surface-variant">2025-01-16 09:00</span>
+              <div class="flex items-center justify-center gap-2 col-span-2">
+                <button class="btn-edit-archive text-primary text-sm font-medium hover:underline">编辑</button>
+                <button class="btn-preview-archive text-on-surface-variant text-sm hover:text-primary transition-colors">预览</button>
+                <button class="btn-download-archive text-on-surface-variant text-sm hover:text-primary transition-colors">下载</button>
+                <button class="btn-delete-archive text-error/70 text-sm hover:text-error transition-colors">删除</button>
+              </div>
+            </div>
+
+            <!-- 列表-许可证4 -->
+            <div class="grid grid-cols-9 px-4 py-3 hover:bg-surface-container/50 transition-colors items-center">
+              <span class="text-sm text-on-surface">约旦首批新能源车</span>
+              <span class="text-sm font-mono text-primary font-medium">EL-2025-0004</span>
+              <span class="text-sm text-on-surface">深圳鹏程汽车销售有限公司</span>
+              <div class="flex items-center gap-1 flex-wrap">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">LGBF5AE04MR000112</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">LGBF5AE04MR000113</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-mono bg-surface-container text-on-surface-variant">LGBF5AE04MR000114</span>
+              </div>
+              <span class="text-xs text-on-surface-variant">2025-01-10</span>
+              <div class="flex items-center gap-1.5">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error">PDF</span>
+                <span class="text-xs text-on-surface-variant">出口许可证-约旦-2025-...</span>
+                <span class="text-[10px] text-on-surface-variant/60">(3.5MB)</span>
+              </div>
+              <span class="text-xs text-on-surface-variant">2025-01-11 16:45</span>
+              <div class="flex items-center justify-center gap-2 col-span-2">
+                <button class="btn-edit-archive text-primary text-sm font-medium hover:underline">编辑</button>
+                <button class="btn-preview-archive text-on-surface-variant text-sm hover:text-primary transition-colors">预览</button>
+                <button class="btn-download-archive text-on-surface-variant text-sm hover:text-primary transition-colors">下载</button>
+                <button class="btn-delete-archive text-error/70 text-sm hover:text-error transition-colors">删除</button>
+              </div>
+            </div>
+
+          </div>
+          <div class="px-4 py-2.5 bg-surface-container-lowest border-t border-outline-variant/20 text-xs text-on-surface-variant">
+            共 <span id="archive-count" class="font-medium text-on-surface">4</span> 份许可证，<span id="vin-count" class="font-medium text-on-surface">31</span> 个车架号已归档
+          </div>
+        </div>
+      </div>
+
+    </main>
+    <!-- @main-content:end -->
+  </div>
+
+  <script>
+    $(function() {
+
+      // ========== Tab 切换 ==========
+      $('#tab-draft').on('click', function() {
+        // 激活当前tab
+        $('#tab-draft').removeClass('text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high')
+                       .addClass('bg-primary text-on-primary shadow-sm');
+        $('#tab-commerce').removeClass('bg-primary text-on-primary shadow-sm')
+                          .addClass('text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high');
+        $('#tab-archive').removeClass('bg-primary text-on-primary shadow-sm')
+                         .addClass('text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high');
+        // 切换面板
+        $('#panel-draft').removeClass('hidden');
+        $('#panel-commerce').addClass('hidden');
+        $('#panel-archive').addClass('hidden');
+        // 刷新图标
+        lucide.createIcons();
+      });
+
+      $('#tab-commerce').on('click', function() {
+        $('#tab-commerce').removeClass('text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high')
+                          .addClass('bg-primary text-on-primary shadow-sm');
+        $('#tab-draft').removeClass('bg-primary text-on-primary shadow-sm')
+                       .addClass('text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high');
+        $('#tab-archive').removeClass('bg-primary text-on-primary shadow-sm')
+                         .addClass('text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high');
+        $('#panel-draft').addClass('hidden');
+        $('#panel-commerce').removeClass('hidden');
+        $('#panel-archive').addClass('hidden');
+        lucide.createIcons();
+      });
+
+      $('#tab-archive').on('click', function() {
+        $('#tab-archive').removeClass('text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high')
+                         .addClass('bg-primary text-on-primary shadow-sm');
+        $('#tab-draft').removeClass('bg-primary text-on-primary shadow-sm')
+                       .addClass('text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high');
+        $('#tab-commerce').removeClass('bg-primary text-on-primary shadow-sm')
+                          .addClass('text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high');
+        $('#panel-draft').addClass('hidden');
+        $('#panel-commerce').addClass('hidden');
+        $('#panel-archive').removeClass('hidden');
+        lucide.createIcons();
+      });
+
+      // ========== 关闭迁移提示条 ==========
+      $('#btn-close-tip').on('click', function() {
+        $('#migrate-tip').slideUp(200);
+      });
+
+      // ========== 草单操作 ==========
+
+      // 新建草单
+      $('#btn-create-draft').on('click', function() {
+        // 跳转到新建草单页面（后续实现）
+        console.log('跳转到新建草单页面');
+        alert('跳转到新建草单页面');
+      });
+
+      // 编辑草单 - 点击后应实现：
+      // 1. 跳转到草单编辑页面，通过 URL 参数传递草单编号
+      // 2. 编辑页面根据草单编号加载对应数据
+      // 3. 支持修改出口商、进口国、合同号、车辆数、总金额等字段
+      // 4. 保存后返回列表并刷新对应行数据
+      $('#draft-table-body').on('click', '.btn-edit-draft', function() {
+        var draftNo = $(this).closest('.grid').find('span:first').text().trim();
+        console.log('编辑草单:', draftNo);
+      });
+
+      // 复制草单 - 点击后应实现：
+      // 1. 复制当前草单的所有数据（除编号外）
+      // 2. 生成新的草单编号（如 DR-2025-XXXX）
+      // 3. 将新草单插入到列表顶部
+      // 4. 更新草单计数
+      $('#draft-table-body').on('click', '.btn-copy-draft', function() {
+        var draftNo = $(this).closest('.grid').find('span:first').text().trim();
+        console.log('复制草单:', draftNo);
+      });
+
+      // 删除草单 - 点击后应实现：
+      // 1. 弹出确认对话框（"确定要删除该草单吗？"）
+      // 2. 确认后从 DOM 中移除该行
+      // 3. 更新草单计数（减1）
+      // 4. 若列表为空，展示空状态提示
+      $('#draft-table-body').on('click', '.btn-delete-draft', function() {
+        var $row = $(this).closest('.grid');
+        var draftNo = $row.find('span:first').text().trim();
+        console.log('删除草单:', draftNo);
+        $row.fadeOut(200, function() {
+          $(this).remove();
+          var count = $('#draft-table-body .grid').length;
+          $('#draft-count').text(count);
+        });
+      });
+
+      // 搜索草单
+      $('#input-search-draft').on('keyup', function() {
+        var keyword = $(this).val().toLowerCase();
+        $('#draft-table-body .grid').each(function() {
+          var text = $(this).text().toLowerCase();
+          $(this).toggle(text.indexOf(keyword) > -1);
+        });
+      });
+
+      // ========== 商务部入口操作 ==========
+
+      // 制作声明 - 跳转到市场准入声明制作页面
+      $('#btn-compliance-declaration').on('click', function() {
+        console.log('跳转到市场准入声明页面');
+        window.location.href = 'export-license.html';
+      });
+
+      // 前往商务部官网 - 外链
+      $('#btn-goto-mofcom').on('click', function() {
+        console.log('需要调用第三方接口：打开商务部统一平台外链 ecomp.mofcom.gov.cn');
+        window.open('https://ecomp.mofcom.gov.cn', '_blank');
+      });
+
+      // ========== 已签发归档操作 ==========
+
+      // 上传已签发许可证（顶部按钮）
+      $('#btn-upload-issued').on('click', function() {
+        // 切换到已签发归档tab并触发上传
+        console.log('上传已签发许可证');
+        $('#tab-archive').trigger('click');
+      });
+
+      // 上传许可证（归档tab内）
+      $('#btn-upload-archive').on('click', function() {
+        // 上传文件：应实现文件选择对话框，支持 PDF/图片格式
+        // 1. 弹出文件选择器，过滤 .pdf / .jpg / .png
+        // 2. 选择文件后展示预览和备注输入框
+        // 3. 确认上传后将新行插入到列表顶部
+        // 4. 更新许可证计数和VIN计数
+        console.log('上传许可证文件');
+      });
+
+      // 编辑归档 - 点击后应实现：
+      // 1. 弹出编辑模态框，可修改备注、出口商、关联VIN等字段
+      // 2. 保存后更新对应行数据
+      // 3. 关闭模态框
+      $('#archive-table-body').on('click', '.btn-edit-archive', function() {
+        var licenseNo = $(this).closest('.grid').find('span:eq(1)').text().trim();
+        console.log('编辑归档:', licenseNo);
+      });
+
+      // 预览 - 点击后应实现：
+      // 1. 弹出模态框展示 PDF 预览或图片预览
+      // 2. 支持缩放和翻页（PDF多页时）
+      // 3. 关闭按钮关闭预览
+      $('#archive-table-body').on('click', '.btn-preview-archive', function() {
+        var licenseNo = $(this).closest('.grid').find('span:eq(1)').text().trim();
+        console.log('预览许可证:', licenseNo);
+      });
+
+      // 下载 - 点击后触发浏览器下载
+      $('#archive-table-body').on('click', '.btn-download-archive', function() {
+        var licenseNo = $(this).closest('.grid').find('span:eq(1)').text().trim();
+        console.log('下载许可证:', licenseNo);
+      });
+
+      // 删除归档
+      $('#archive-table-body').on('click', '.btn-delete-archive', function() {
+        var $row = $(this).closest('.grid');
+        var licenseNo = $row.find('span:eq(1)').text().trim();
+        console.log('删除归档:', licenseNo);
+        $row.fadeOut(200, function() {
+          $(this).remove();
+          var count = $('#archive-table-body .grid').length;
+          $('#archive-count').text(count);
+        });
+      });
+
+      // 搜索归档
+      $('#input-search-archive').on('keyup', function() {
+        var keyword = $(this).val().toLowerCase();
+        $('#archive-table-body .grid').each(function() {
+          var text = $(this).text().toLowerCase();
+          $(this).toggle(text.indexOf(keyword) > -1);
+        });
+      });
+
+      // 初始化图标
+      lucide.createIcons();
+    });
+  </script>
+</body>
+
+</html>

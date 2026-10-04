@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://lf-code-agent.coze.cn/obj/x-ai-cn/fonts/google/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #162033;
+      --color-primary-container:    #FEF7E8;
+      --color-on-primary:           #ffffff;
+      /* === 强调色 - 金色 === */
+      --color-accent:               #C4963C;
+      --color-accent-light:         #D4AA5C;
+      --color-on-accent:            #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F4F5F7;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EBEDF1;
+      --color-surface-container-high:     #E0E3E9;
+      --color-surface-container-highest:  #D5D9E1;
+      /* === 文字 === */
+      --color-on-surface:           #0F172A;
+      --color-on-surface-variant:   #64748B;
+      /* === 功能色 === */
+      --color-success:  #16A34A;
+      --color-error:    #DC2626;
+      --color-warning:  #F59E0B;
+      /* === 边框 === */
+      --color-outline:          #CBD5E1;
+      --color-outline-variant:  #E2E8F0;
+      /* === 侧边栏 === */
+      --color-sidebar-bg:           #0A0F1A;
+      --color-sidebar-text:         #8892A6;
+      --color-sidebar-text-light:   #C8D0E0;
+      --color-sidebar-active-bg:    rgba(196, 150, 60, 0.10);
+      --color-sidebar-hover-bg:     rgba(255, 255, 255, 0.05);
+      --color-sidebar-border:       rgba(255, 255, 255, 0.06);
+      /* === 圆角 === */
+      --radius-sm:   0.375rem;
+      --radius-md:   0.5rem;
+      --radius-lg:   0.75rem;
+      --radius-xl:   1rem;
+      --radius-2xl:  1.25rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-float:  0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-dialog: 0 20px 60px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.06);
+      /* === 字体 === */
+      --font-sans: "Inter", "Noto Sans SC", system-ui, sans-serif;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- @nav:start 导航组件 -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[252px] shrink-0 bg-sidebar-bg flex flex-col h-full overflow-hidden">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 px-5 h-16 border-b border-outline-variant/15">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent shadow-sm">
+          <i data-lucide="anchor" class="h-4.5 w-4.5 text-on-accent"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 class="text-[14px] font-bold text-white tracking-wide leading-tight">ExportDrive</h1>
+          <p class="text-[10px] text-sidebar-text leading-tight mt-0.5">二手车出口工具平台</p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 overflow-y-auto py-4 px-3">
+        <!-- 车辆服务 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">车辆服务</p>
+          <div class="space-y-0.5">
+            <a href="vin-lookup.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="car" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>车辆核验</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 单证中心 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">单证中心</p>
+          <div class="space-y-0.5">
+            <a href="proforma-invoice.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-sidebar-active-bg text-accent font-semibold text-[13.5px]" aria-current="page">
+              <i data-lucide="file-text" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>形式发票</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 物流跟踪 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">物流跟踪</p>
+          <div class="space-y-0.5">
+            <a href="tracking.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="ship" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>海运跟踪</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 客户与记录 -->
+        <div class="mb-4">
+          <p class="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-sidebar-text/60">客户与记录</p>
+          <div class="space-y-0.5">
+            <a href="customers.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-text-light transition-colors text-[13.5px] font-medium">
+              <i data-lucide="users" class="w-[18px] h-[18px] shrink-0"></i>
+              <span>客户管理</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- User Footer -->
+      <div class="border-t border-outline-variant/15 px-3 py-3">
+        <div class="flex items-center gap-2.5 px-2">
+          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15 ring-1 ring-accent/25">
+            <span class="text-[12px] font-bold text-accent">初</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[12.5px] font-medium text-white/90 truncate">小初</p>
+            <p class="text-[10px] text-sidebar-text truncate">xiaochu@export.com</p>
+          </div>
+          <button class="p-1.5 rounded-md text-sidebar-text hover:text-sidebar-text-light hover:bg-sidebar-hover-bg transition-colors">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right area -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Header -->
+      <header class="h-16 shrink-0 bg-surface border-b border-outline-variant/20 flex items-center justify-between px-6">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50"></i>
+            <input type="text" placeholder="搜索功能、车辆、单证..." class="h-9 w-[280px] rounded-lg border-none bg-surface-container pl-9 pr-3 text-[13px] text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary/15 transition-shadow" />
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+            <i data-lucide="bell" class="w-[18px] h-[18px]"></i>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent"></span>
+          </button>
+          <button class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+            <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
+          </button>
+          <div class="w-px h-6 bg-outline-variant/60 mx-1"></div>
+          <button class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-surface-container transition-colors">
+            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-accent/10">
+              <span class="text-[11px] font-bold text-accent">初</span>
+            </div>
+            <span class="text-[13px] font-medium text-on-surface">小初</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-on-surface-variant"></i>
+          </button>
+        </div>
+      </header>
+
+  <!-- @nav:end 导航组件 -->
+
+  <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6">
+    <!-- @main-content:start -->
+
+    <!-- 页面标题栏 -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-on-surface">形式发票</h1>
+        <p class="text-sm text-on-surface-variant mt-1">创建和编辑 Proforma Invoice，实时预览发票效果</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="btn-save-draft" class="bg-surface-container text-on-surface border-none px-4 py-2 rounded-md text-sm font-medium hover:bg-surface-container-high active:scale-[0.98] transition-all inline-flex items-center gap-2">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i>保存草稿
+        </button>
+        <button id="btn-preview-pdf" class="bg-surface-container text-on-surface border-none px-4 py-2 rounded-md text-sm font-medium hover:bg-surface-container-high active:scale-[0.98] transition-all inline-flex items-center gap-2">
+          <i data-lucide="eye" class="w-3.5 h-3.5"></i>预览 PDF
+        </button>
+        <button id="btn-export" class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>导出
+        </button>
+      </div>
+    </div>
+
+    <!-- 左右分栏布局 -->
+    <div class="flex gap-6" style="height: calc(100vh - 10rem);">
+
+      <!-- 左侧编辑区 (40%) -->
+      <div class="w-[40%] shrink-0 overflow-y-auto pr-2 space-y-5">
+
+        <!-- 买方信息卡片 -->
+        <div class="bg-surface rounded-lg shadow-card p-5">
+          <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="building-2" class="w-4 h-4 text-accent"></i>
+            <h2 class="text-base font-semibold text-on-surface">买方信息</h2>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-medium text-on-surface-variant mb-1.5">公司名称 *</label>
+              <input id="input-company" type="text" value="Al-Futtaim Auto Trading LLC" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-on-surface-variant mb-1.5">联系人</label>
+                <input id="input-contact" type="text" value="Ahmed Hassan" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-on-surface-variant mb-1.5">电话</label>
+                <input id="input-phone" type="text" value="+971-4-321-5678" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-on-surface-variant mb-1.5">地址</label>
+              <input id="input-address" type="text" value="P.O. Box 45678, Dubai, UAE" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-on-surface-variant mb-1.5">邮箱</label>
+              <input id="input-email" type="email" value="ahmed.hassan@alfuttaim.ae" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 车辆清单卡片 -->
+        <div class="bg-surface rounded-lg shadow-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <i data-lucide="car" class="w-4 h-4 text-accent"></i>
+              <h2 class="text-base font-semibold text-on-surface">车辆清单</h2>
+            </div>
+            <button id="btn-add-vehicle" class="bg-primary text-on-primary px-3 py-1.5 rounded-md text-xs font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-3 h-3"></i>添加车辆
+            </button>
+          </div>
+
+          <!-- 车辆表格 -->
+          <div class="rounded-lg border border-outline-variant/20 overflow-hidden">
+            <div class="grid grid-cols-[1fr_1.2fr_0.6fr_0.8fr_0.3fr] gap-2 px-3 py-2.5 bg-surface-container text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">
+              <span>品牌型号</span>
+              <span>VIN 码</span>
+              <span>年份</span>
+              <span>单价 (USD)</span>
+              <span></span>
+            </div>
+            <div id="vehicle-list" class="divide-y divide-outline-variant/20">
+              <!-- 车辆1：丰田凯美瑞 -->
+              <div class="vehicle-row grid grid-cols-[1fr_1.2fr_0.6fr_0.8fr_0.3fr] gap-2 px-3 py-2.5 items-center hover:bg-surface-container/30 transition-colors" data-index="0">
+                <input type="text" value="Toyota Camry" class="bg-transparent border-none text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />
+                <input type="text" value="JTNBE46K903012456" class="bg-transparent border-none text-sm text-on-surface font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />
+                <input type="text" value="2020" class="bg-transparent border-none text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />
+                <input type="text" value="12,000" class="bg-transparent border-none text-sm text-on-surface font-medium focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />
+                <button class="btn-remove-vehicle p-1 rounded text-on-surface-variant/40 hover:text-error hover:bg-error/10 transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+              <!-- 车辆2：本田雅阁 -->
+              <div class="vehicle-row grid grid-cols-[1fr_1.2fr_0.6fr_0.8fr_0.3fr] gap-2 px-3 py-2.5 items-center hover:bg-surface-container/30 transition-colors" data-index="1">
+                <input type="text" value="Honda Accord" class="bg-transparent border-none text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />
+                <input type="text" value="1HGCV2F54LA003789" class="bg-transparent border-none text-sm text-on-surface font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />
+                <input type="text" value="2019" class="bg-transparent border-none text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />
+                <input type="text" value="10,500" class="bg-transparent border-none text-sm text-on-surface font-medium focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />
+                <button class="btn-remove-vehicle p-1 rounded text-on-surface-variant/40 hover:text-error hover:bg-error/10 transition-colors" title="删除">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 金额汇总 & 备注 -->
+        <div class="bg-surface rounded-lg shadow-card p-5">
+          <div class="flex items-center gap-2 mb-4">
+            <i data-lucide="calculator" class="w-4 h-4 text-accent"></i>
+            <h2 class="text-base font-semibold text-on-surface">金额汇总</h2>
+          </div>
+          <div class="space-y-2 mb-4">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-on-surface-variant">小计</span>
+              <span id="summary-subtotal" class="font-medium text-on-surface">$22,500.00</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-on-surface-variant">运费 (FOB)</span>
+              <span id="summary-shipping" class="font-medium text-on-surface">$1,800.00</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-on-surface-variant">保险</span>
+              <span id="summary-insurance" class="font-medium text-on-surface">$450.00</span>
+            </div>
+            <div class="border-t border-outline-variant/20 pt-2 mt-2 flex items-center justify-between">
+              <span class="text-sm font-semibold text-on-surface">总计</span>
+              <span id="summary-total" class="text-lg font-bold text-accent">$24,750.00</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5">备注</label>
+            <textarea id="input-remarks" rows="3" class="w-full bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors resize-none" placeholder="输入发票备注信息...">Payment terms: 30% T/T in advance, 70% before shipment. All vehicles inspected and certified by third-party inspection agency.</textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 右侧预览区 (60%) -->
+      <div class="flex-1 min-w-0 flex items-start justify-center overflow-y-auto">
+        <!-- A4 纸张预览 -->
+        <div id="invoice-preview" class="bg-surface-container-lowest rounded-lg shadow-float w-full max-w-[680px] p-10 my-2" style="aspect-ratio: 210/297; box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);">
+
+          <!-- 发票头部 -->
+          <div class="flex items-start justify-between mb-8 pb-6 border-b border-outline-variant/20">
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-accent shadow-sm">
+                <i data-lucide="anchor" class="h-5 w-5 text-on-accent"></i>
+              </div>
+              <div>
+                <h2 class="text-base font-bold text-on-surface tracking-wide">ExportDrive</h2>
+                <p class="text-[10px] text-on-surface-variant">Used Car Export Platform</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <h1 class="text-xl font-bold text-primary tracking-wider">PROFORMA INVOICE</h1>
+              <p class="text-[10px] text-on-surface-variant mt-1">形式发票</p>
+            </div>
+          </div>
+
+          <!-- 发票编号 & 日期 -->
+          <div class="grid grid-cols-3 gap-4 mb-8">
+            <div>
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Invoice No.</p>
+              <p class="text-sm font-semibold text-on-surface">PI-2024-00156</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Date</p>
+              <p class="text-sm font-medium text-on-surface">Jan 20, 2024</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Valid Until</p>
+              <p class="text-sm font-medium text-on-surface">Feb 19, 2024</p>
+            </div>
+          </div>
+
+          <!-- 买方信息 -->
+          <div class="mb-8">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Buyer Information</p>
+            <div class="bg-surface-container/50 rounded-lg p-4 border border-outline-variant/10">
+              <p class="text-sm font-semibold text-on-surface" id="preview-company">Al-Futtaim Auto Trading LLC</p>
+              <p class="text-xs text-on-surface-variant mt-1">Attn: <span id="preview-contact">Ahmed Hassan</span></p>
+              <p class="text-xs text-on-surface-variant" id="preview-address">P.O. Box 45678, Dubai, UAE</p>
+              <p class="text-xs text-on-surface-variant">Tel: <span id="preview-phone">+971-4-321-5678</span> | Email: <span id="preview-email">ahmed.hassan@alfuttaim.ae</span></p>
+            </div>
+          </div>
+
+          <!-- 卖方信息 -->
+          <div class="mb-8">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Seller Information</p>
+            <div class="bg-surface-container/50 rounded-lg p-4 border border-outline-variant/10">
+              <p class="text-sm font-semibold text-on-surface">ExportDrive International Trade Co., Ltd</p>
+              <p class="text-xs text-on-surface-variant mt-1">No. 88 Tongzilin Road, Chaoyang District, Beijing, China</p>
+              <p class="text-xs text-on-surface-variant">Tel: +86-10-8888-6666 | Email: trade@exportdrive.com</p>
+            </div>
+          </div>
+
+          <!-- 车辆清单表格 -->
+          <div class="mb-6">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Vehicle Details</p>
+            <div class="rounded-lg border border-outline-variant/20 overflow-hidden">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="bg-surface-container text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">
+                    <th class="px-3 py-2.5 w-8">No.</th>
+                    <th class="px-3 py-2.5">Make & Model</th>
+                    <th class="px-3 py-2.5">VIN</th>
+                    <th class="px-3 py-2.5 w-14">Year</th>
+                    <th class="px-3 py-2.5 text-right">Unit Price</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/10">
+                  <!-- 预览-车辆1 -->
+                  <tr class="text-xs">
+                    <td class="px-3 py-2.5 text-on-surface-variant">1</td>
+                    <td class="px-3 py-2.5 font-medium text-on-surface" id="preview-v1-model">Toyota Camry</td>
+                    <td class="px-3 py-2.5 font-mono text-on-surface-variant text-[11px]" id="preview-v1-vin">JTNBE46K903012456</td>
+                    <td class="px-3 py-2.5 text-on-surface" id="preview-v1-year">2020</td>
+                    <td class="px-3 py-2.5 text-right font-medium text-on-surface" id="preview-v1-price">$12,000.00</td>
+                  </tr>
+                  <!-- 预览-车辆2 -->
+                  <tr class="text-xs">
+                    <td class="px-3 py-2.5 text-on-surface-variant">2</td>
+                    <td class="px-3 py-2.5 font-medium text-on-surface" id="preview-v2-model">Honda Accord</td>
+                    <td class="px-3 py-2.5 font-mono text-on-surface-variant text-[11px]" id="preview-v2-vin">1HGCV2F54LA003789</td>
+                    <td class="px-3 py-2.5 text-on-surface" id="preview-v2-year">2019</td>
+                    <td class="px-3 py-2.5 text-right font-medium text-on-surface" id="preview-v2-price">$10,500.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 金额汇总 -->
+          <div class="flex justify-end mb-8">
+            <div class="w-64 space-y-1.5">
+              <div class="flex justify-between text-xs">
+                <span class="text-on-surface-variant">Subtotal</span>
+                <span class="font-medium text-on-surface" id="preview-subtotal">$22,500.00</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-on-surface-variant">Shipping (FOB)</span>
+                <span class="font-medium text-on-surface" id="preview-shipping">$1,800.00</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-on-surface-variant">Insurance</span>
+                <span class="font-medium text-on-surface" id="preview-insurance">$450.00</span>
+              </div>
+              <div class="border-t border-outline-variant/20 pt-1.5 mt-1.5 flex justify-between">
+                <span class="text-sm font-bold text-on-surface">TOTAL</span>
+                <span class="text-sm font-bold text-accent" id="preview-total">$24,750.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 备注 -->
+          <div class="mb-8">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Remarks</p>
+            <p class="text-xs text-on-surface-variant leading-relaxed" id="preview-remarks">Payment terms: 30% T/T in advance, 70% before shipment. All vehicles inspected and certified by third-party inspection agency.</p>
+          </div>
+
+          <!-- 签章区域 -->
+          <div class="border-t border-outline-variant/20 pt-6 mt-8">
+            <div class="grid grid-cols-2 gap-8">
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-8">Seller's Signature & Stamp</p>
+                <div class="border-b border-outline-variant/30 pb-2">
+                  <p class="text-xs text-on-surface-variant">Authorized Representative</p>
+                </div>
+              </div>
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant mb-8">Buyer's Signature & Stamp</p>
+                <div class="border-b border-outline-variant/30 pb-2">
+                  <p class="text-xs text-on-surface-variant">Authorized Representative</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- @main-content:end -->
+  </main>
+
+  </div><!-- end right-area -->
+  </div><!-- end flex container -->
+
+  <script>
+  $(function() {
+    lucide.createIcons();
+
+    // 保存草稿
+    $('#btn-save-draft').on('click', function() {
+      console.log('保存草稿：收集表单数据并保存到本地');
+      $(this).html('<i data-lucide="check" class="w-3.5 h-3.5"></i>已保存').addClass('text-success');
+      lucide.createIcons();
+      setTimeout(function() {
+        $('#btn-save-draft').html('<i data-lucide="save" class="w-3.5 h-3.5"></i>保存草稿').removeClass('text-success');
+        lucide.createIcons();
+      }, 2000);
+    });
+
+    // 预览 PDF - 打开新窗口展示预览
+    $('#btn-preview-pdf').on('click', function() {
+      console.log('预览PDF：应将当前发票内容渲染为PDF并在新窗口展示');
+      // 后续应实现：使用 html2pdf 或 jsPDF 将 #invoice-preview 区域渲染为 PDF 并在新标签页打开
+    });
+
+    // 导出
+    $('#btn-export').on('click', function() {
+      console.log('导出：应将发票导出为PDF文件下载');
+      // 后续应实现：使用 html2pdf 将 #invoice-preview 渲染为 PDF 并触发下载，文件名格式为 PI-2024-00156.pdf
+    });
+
+    // 添加车辆 - 复杂交互：点击后应在车辆清单表格中新增一行空白行
+    // 1. 在 #vehicle-list 末尾追加新的 .vehicle-row 节点
+    // 2. 新行包含4个空输入框（品牌型号、VIN码、年份、单价）和1个删除按钮
+    // 3. 自动聚焦到品牌型号输入框
+    // 4. 同步更新右侧预览区的车辆表格，新增对应行
+    // 5. 重新计算金额汇总
+    $('#btn-add-vehicle').on('click', function() {
+      var index = $('#vehicle-list .vehicle-row').length;
+      var newRow = '<div class="vehicle-row grid grid-cols-[1fr_1.2fr_0.6fr_0.8fr_0.3fr] gap-2 px-3 py-2.5 items-center hover:bg-surface-container/30 transition-colors" data-index="' + index + '">' +
+        '<input type="text" placeholder="Brand & Model" class="bg-transparent border-none text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />' +
+        '<input type="text" placeholder="VIN Number" class="bg-transparent border-none text-sm text-on-surface font-mono text-xs focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />' +
+        '<input type="text" placeholder="Year" class="bg-transparent border-none text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />' +
+        '<input type="text" placeholder="0" class="bg-transparent border-none text-sm text-on-surface font-medium focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 py-0.5" />' +
+        '<button class="btn-remove-vehicle p-1 rounded text-on-surface-variant/40 hover:text-error hover:bg-error/10 transition-colors" title="删除"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' +
+        '</div>';
+      $('#vehicle-list').append(newRow);
+      lucide.createIcons();
+    });
+
+    // 删除车辆
+    $('#vehicle-list').on('click', '.btn-remove-vehicle', function() {
+      if ($('#vehicle-list .vehicle-row').length <= 1) {
+        return;
+      }
+      $(this).closest('.vehicle-row').remove();
+      // 后续应实现：同步更新右侧预览区车辆表格并重新计算金额汇总
+    });
+
+    // 编辑区输入变化时同步预览 - 买方信息
+    $('#input-company').on('input', function() {
+      $('#preview-company').text($(this).val() || '—');
+    });
+    $('#input-contact').on('input', function() {
+      $('#preview-contact').text($(this).val() || '—');
+    });
+    $('#input-address').on('input', function() {
+      $('#preview-address').text($(this).val() || '—');
+    });
+    $('#input-phone').on('input', function() {
+      $('#preview-phone').text($(this).val() || '—');
+    });
+    $('#input-email').on('input', function() {
+      $('#preview-email').text($(this).val() || '—');
+    });
+    $('#input-remarks').on('input', function() {
+      $('#preview-remarks').text($(this).val() || '—');
+    });
+  });
+  </script>
+</body>
+
+</html>

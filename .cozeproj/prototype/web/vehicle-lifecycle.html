@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色（企业风：navy 主色 + orange 强调） === */
+      --color-primary:              #1A2A4A;
+      --color-primary-container:    #E8EDF6;
+      --color-on-primary:           #ffffff;
+      --color-accent:               #F48120;
+      --color-accent-container:     #FEEFDF;
+      --color-on-accent:            #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F6F8FB;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FFFFFF;
+      --color-surface-container:          #EEF1F6;
+      --color-surface-container-high:     #E6EAF2;
+      --color-surface-container-highest:  #DBE1EC;
+      /* === 文字 === */
+      --color-on-surface:           #152033;
+      --color-on-surface-variant:   #637089;
+      /* === 功能色（业务状态：阻断=红 风险=橙 关注=蓝 正常=绿） === */
+      --color-success:  #16A37B;
+      --color-error:    #DC2626;
+      --color-warning:  #F59E0B;
+      --color-info:     #3B82F6;
+      /* === 边框 === */
+      --color-outline:          #CBD3E1;
+      --color-outline-variant:  #E6EAF2;
+      /* === 圆角 === */
+      --radius-sm:   0.25rem;
+      --radius-md:   0.375rem;
+      --radius-lg:   0.5rem;
+      --radius-xl:   0.75rem;
+      --radius-2xl:  1rem;
+      --radius-full: 9999px;
+      /* === 阴影（background ≈ surface，opacity ≥ 0.08） === */
+      --shadow-card:   0 1px 3px rgba(21,32,51,0.08), 0 1px 2px rgba(21,32,51,0.04);
+      --shadow-float:  0 10px 25px rgba(21,32,51,0.10);
+      --shadow-dialog: 0 25px 50px rgba(21,32,51,0.18);
+      /* === 字体 === */
+      --font-sans: "Inter", "Noto Sans SC", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- @nav:start -->
+  <header class="bg-surface sticky top-0 z-40 h-16 flex items-center justify-between px-6 border-b border-outline-variant/30">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+        <i data-lucide="car-front" class="w-4.5 h-4.5 text-on-primary"></i>
+      </div>
+      <span class="font-bold text-base text-on-surface">ExportDrive</span>
+      <span class="w-px h-5 bg-outline-variant"></span>
+      <span class="text-sm text-on-surface-variant font-medium">车辆生命周期管理</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors">
+        <i data-lucide="bell" class="w-4.5 h-4.5"></i>
+      </button>
+      <div class="flex items-center gap-2 pl-3 border-l border-outline-variant/30">
+        <div class="w-8 h-8 rounded-full bg-primary-container text-primary flex items-center justify-center text-sm font-semibold">初</div>
+        <span class="text-sm font-medium text-on-surface">小初</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex" style="height: calc(100vh - 4rem)">
+    <aside class="w-60 shrink-0 bg-surface border-r border-outline-variant/30 overflow-y-auto">
+      <div class="p-3 space-y-0.5">
+        <div class="px-3 pt-2 pb-1.5 text-xs font-semibold text-on-surface-variant/70 tracking-wide">车辆生命周期</div>
+        <a href="vehicle-lifecycle.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md bg-primary/10 text-primary font-medium text-sm" aria-current="page">
+          <i data-lucide="route" class="w-4 h-4"></i>车辆总览
+        </a>
+        <a href="vehicle-lifecycle-new.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="file-plus" class="w-4 h-4"></i>新建建档
+        </a>
+        <a href="vehicle-lifecycle-settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium text-sm transition-colors">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>阶段字段设置
+        </a>
+      </div>
+    </aside>
+    <!-- @nav:end -->
+
+    <!-- @main-content:start -->
+    <main class="flex-1 min-w-0 overflow-y-auto bg-background p-6">
+
+      <!-- ====== 1. 页头区 ====== -->
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-on-surface">车辆生命周期总览</h1>
+          <p class="text-sm text-on-surface-variant mt-1">以车架号为主线，跟踪每辆车的出口全流程推进与资料完备情况</p>
+        </div>
+        <a href="vehicle-lifecycle-new.html" id="btn-new-vehicle" class="bg-primary text-on-primary px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center gap-2">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>新建车辆建档
+        </a>
+      </div>
+
+      <!-- ====== 2. 指标卡片行 ====== -->
+      <div class="grid grid-cols-5 gap-4 mb-6">
+        <!-- 卡片-全部车辆 -->
+        <div class="bg-surface rounded-xl shadow-card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <i data-lucide="car" class="w-5 h-5 text-primary"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-on-surface">12</div>
+            <div class="text-xs text-on-surface-variant">全部车辆</div>
+          </div>
+        </div>
+        <!-- 卡片-进行中 -->
+        <div class="bg-surface rounded-xl shadow-card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center shrink-0">
+            <i data-lucide="loader" class="w-5 h-5 text-info"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-on-surface">6</div>
+            <div class="text-xs text-on-surface-variant">进行中</div>
+          </div>
+        </div>
+        <!-- 卡片-阻断 -->
+        <div class="bg-surface rounded-xl shadow-card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center shrink-0">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-error"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-on-surface">1</div>
+            <div class="text-xs text-on-surface-variant">阻断</div>
+          </div>
+        </div>
+        <!-- 卡片-存在缺失资料 -->
+        <div class="bg-surface rounded-xl shadow-card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+            <i data-lucide="file-warning" class="w-5 h-5 text-warning"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-on-surface">4</div>
+            <div class="text-xs text-on-surface-variant">存在缺失资料</div>
+          </div>
+        </div>
+        <!-- 卡片-已完成出口 -->
+        <div class="bg-surface rounded-xl shadow-card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
+            <i data-lucide="check-circle" class="w-5 h-5 text-success"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-on-surface">5</div>
+            <div class="text-xs text-on-surface-variant">已完成出口</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== 3. 筛选工具栏 ====== -->
+      <div class="bg-surface rounded-xl shadow-card p-4 mb-6 flex items-center gap-4 flex-wrap">
+        <!-- 搜索框 -->
+        <div class="relative w-72">
+          <i data-lucide="search" class="w-4 h-4 text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input id="filter-search" type="text" placeholder="搜索 VIN / 车型 / 买方"
+            class="w-full bg-surface-container border-none rounded-md pl-9 pr-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+        </div>
+        <!-- 阶段下拉 -->
+        <select id="filter-stage" class="bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors">
+          <option value="">全部阶段</option>
+          <option value="建立车辆档案">① 建立车辆档案</option>
+          <option value="制作形式发票">② 制作形式发票</option>
+          <option value="完成车辆采购">③ 完成车辆采购</option>
+          <option value="出口待转移">④ 出口待转移</option>
+          <option value="合同/发票/装箱单">⑤ 合同/发票/装箱单</option>
+          <option value="制定出口许可证">⑥ 制定出口许可证</option>
+          <option value="出口报关单">⑦ 出口报关单</option>
+          <option value="提单">⑧ 提单</option>
+        </select>
+        <!-- 目的国下拉 -->
+        <select id="filter-country" class="bg-surface-container border-none rounded-md px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors">
+          <option value="">全部目的国</option>
+          <option value="阿联酋">阿联酋</option>
+          <option value="尼日利亚">尼日利亚</option>
+          <option value="巴西">巴西</option>
+          <option value="俄罗斯">俄罗斯</option>
+          <option value="沙特阿拉伯">沙特阿拉伯</option>
+        </select>
+        <!-- 状态 tabs -->
+        <div class="flex items-center gap-1 ml-auto bg-surface-container rounded-lg p-1">
+          <button id="tab-all" class="status-tab px-3 py-1.5 rounded-md text-xs font-medium bg-primary/10 text-primary transition-colors" data-status="all">全部</button>
+          <button id="tab-progress" class="status-tab px-3 py-1.5 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-status="进行中">进行中</button>
+          <button id="tab-blocked" class="status-tab px-3 py-1.5 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-status="阻断">阻断</button>
+          <button id="tab-completed" class="status-tab px-3 py-1.5 rounded-md text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-status="已完成">已完成</button>
+        </div>
+      </div>
+
+      <!-- ====== 4. 车辆表格 ====== -->
+      <div class="bg-surface rounded-xl shadow-card overflow-hidden">
+        <!-- 表头 -->
+        <div class="grid grid-cols-[1fr_1fr_0.8fr_1.1fr_1fr_0.7fr_0.7fr_0.7fr_0.8fr] px-5 py-3 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
+          <span>VIN码</span>
+          <span>车型</span>
+          <span>目的国</span>
+          <span>当前阶段</span>
+          <span>阶段进度</span>
+          <span>缺失资料</span>
+          <span>状态</span>
+          <span>更新时间</span>
+          <span>操作</span>
+        </div>
+        <!-- 表格数据行 -->
+        <div id="vehicle-table-body" class="divide-y divide-outline-variant/20">
+
+          <!-- 列表-车辆1：丰田凯美瑞 -->
+          <div class="vehicle-row grid grid-cols-[1fr_1fr_0.8fr_1.1fr_1fr_0.7fr_0.7fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center"
+               data-vin="LFV3A23C8N3012345" data-model="丰田 凯美瑞 2.5 混动" data-country="阿联酋" data-stage="制定出口许可证" data-status="进行中">
+            <span class="font-mono font-medium text-sm text-on-surface hover:text-primary cursor-pointer transition-colors">
+              <a href="vehicle-lifecycle-detail.html?vin=LFV3A23C8N3012345" class="hover:text-primary transition-colors">LFV3A23C8N3012345</a>
+            </span>
+            <span class="text-sm text-on-surface">丰田 凯美瑞 2.5 混动</span>
+            <span class="text-sm text-on-surface-variant">阿联酋·迪拜</span>
+            <span class="text-sm text-on-surface">⑥ 制定出口许可证</span>
+            <!-- 进度条 5/8 -->
+            <div class="flex items-center gap-1.5">
+              <div class="flex gap-0.5 flex-1">
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-info animate-pulse opacity-70"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+              </div>
+              <span class="text-xs text-on-surface-variant whitespace-nowrap">5/8</span>
+            </div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/15 text-error w-fit">2 项</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-info/15 text-info w-fit">进行中</span>
+            <span class="text-sm text-on-surface-variant">2025-12-08</span>
+            <div class="flex items-center gap-3">
+              <a href="vehicle-lifecycle-detail.html?vin=LFV3A23C8N3012345" class="text-primary text-sm font-medium hover:underline">详情</a>
+              <a href="vehicle-lifecycle-stage.html?vin=LFV3A23C8N3012345" class="text-primary text-sm font-medium hover:underline">去填写</a>
+            </div>
+          </div>
+
+          <!-- 列表-车辆2：本田CR-V -->
+          <div class="vehicle-row grid grid-cols-[1fr_1fr_0.8fr_1.1fr_1fr_0.7fr_0.7fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center"
+               data-vin="LSVAU2180N2087654" data-model="本田 CR-V 240TURBO" data-country="尼日利亚" data-stage="合同/发票/装箱单" data-status="阻断">
+            <span class="font-mono font-medium text-sm text-on-surface">
+              <a href="vehicle-lifecycle-detail.html?vin=LSVAU2180N2087654" class="hover:text-primary transition-colors">LSVAU2180N2087654</a>
+            </span>
+            <span class="text-sm text-on-surface">本田 CR-V 240TURBO</span>
+            <span class="text-sm text-on-surface-variant">尼日利亚·拉各斯</span>
+            <span class="text-sm text-on-surface">⑤ 合同/发票/装箱单</span>
+            <!-- 进度条 4/8 -->
+            <div class="flex items-center gap-1.5">
+              <div class="flex gap-0.5 flex-1">
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-error animate-pulse opacity-70"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+              </div>
+              <span class="text-xs text-on-surface-variant whitespace-nowrap">4/8</span>
+            </div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/15 text-error w-fit">3 项</span>
+            <div class="flex flex-col">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/15 text-error w-fit">阻断</span>
+              <span class="text-[10px] text-error/80 mt-0.5">等待买方水单</span>
+            </div>
+            <span class="text-sm text-on-surface-variant">2025-12-07</span>
+            <div class="flex items-center gap-3">
+              <a href="vehicle-lifecycle-detail.html?vin=LSVAU2180N2087654" class="text-primary text-sm font-medium hover:underline">详情</a>
+              <a href="vehicle-lifecycle-stage.html?vin=LSVAU2180N2087654" class="text-primary text-sm font-medium hover:underline">去填写</a>
+            </div>
+          </div>
+
+          <!-- 列表-车辆3：比亚迪汉EV -->
+          <div class="vehicle-row grid grid-cols-[1fr_1fr_0.8fr_1.1fr_1fr_0.7fr_0.7fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center"
+               data-vin="LGBH12E27NY123789" data-model="比亚迪 汉EV 长续航" data-country="巴西" data-stage="提单" data-status="已完成">
+            <span class="font-mono font-medium text-sm text-on-surface">
+              <a href="vehicle-lifecycle-detail.html?vin=LGBH12E27NY123789" class="hover:text-primary transition-colors">LGBH12E27NY123789</a>
+            </span>
+            <span class="text-sm text-on-surface">比亚迪 汉EV 长续航</span>
+            <span class="text-sm text-on-surface-variant">巴西·圣保罗</span>
+            <span class="text-sm text-on-surface">⑧ 提单</span>
+            <!-- 进度条 8/8 全绿 -->
+            <div class="flex items-center gap-1.5">
+              <div class="flex gap-0.5 flex-1">
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+              </div>
+              <span class="text-xs text-on-surface-variant whitespace-nowrap">8/8</span>
+            </div>
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-success w-fit">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>资料齐全
+            </span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-success/15 text-success w-fit">已完成</span>
+            <span class="text-sm text-on-surface-variant">2025-12-05</span>
+            <div class="flex items-center gap-3">
+              <a href="vehicle-lifecycle-detail.html?vin=LGBH12E27NY123789" class="text-primary text-sm font-medium hover:underline">详情</a>
+            </div>
+          </div>
+
+          <!-- 列表-车辆4：大众高尔夫8 -->
+          <div class="vehicle-row grid grid-cols-[1fr_1fr_0.8fr_1.1fr_1fr_0.7fr_0.7fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center"
+               data-vin="WVWZZZ1KZAW234567" data-model="大众 高尔夫 8" data-country="俄罗斯" data-stage="出口待转移" data-status="进行中">
+            <span class="font-mono font-medium text-sm text-on-surface">
+              <a href="vehicle-lifecycle-detail.html?vin=WVWZZZ1KZAW234567" class="hover:text-primary transition-colors">WVWZZZ1KZAW234567</a>
+            </span>
+            <span class="text-sm text-on-surface">大众 高尔夫 8</span>
+            <span class="text-sm text-on-surface-variant">俄罗斯·莫斯科</span>
+            <span class="text-sm text-on-surface">④ 出口待转移</span>
+            <!-- 进度条 3/8 -->
+            <div class="flex items-center gap-1.5">
+              <div class="flex gap-0.5 flex-1">
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-info animate-pulse opacity-70"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+              </div>
+              <span class="text-xs text-on-surface-variant whitespace-nowrap">3/8</span>
+            </div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/15 text-error w-fit">1 项</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-info/15 text-info w-fit">进行中</span>
+            <span class="text-sm text-on-surface-variant">2025-12-08</span>
+            <div class="flex items-center gap-3">
+              <a href="vehicle-lifecycle-detail.html?vin=WVWZZZ1KZAW234567" class="text-primary text-sm font-medium hover:underline">详情</a>
+              <a href="vehicle-lifecycle-stage.html?vin=WVWZZZ1KZAW234567" class="text-primary text-sm font-medium hover:underline">去填写</a>
+            </div>
+          </div>
+
+          <!-- 列表-车辆5：吉利星越L -->
+          <div class="vehicle-row grid grid-cols-[1fr_1fr_0.8fr_1.1fr_1fr_0.7fr_0.7fr_0.7fr_0.8fr] px-5 py-3.5 hover:bg-surface-container/50 transition-colors items-center"
+               data-vin="LBECF12K5N1098765" data-model="吉利 星越 L" data-country="沙特阿拉伯" data-stage="制作形式发票" data-status="进行中">
+            <span class="font-mono font-medium text-sm text-on-surface">
+              <a href="vehicle-lifecycle-detail.html?vin=LBECF12K5N1098765" class="hover:text-primary transition-colors">LBECF12K5N1098765</a>
+            </span>
+            <span class="text-sm text-on-surface">吉利 星越 L</span>
+            <span class="text-sm text-on-surface-variant">沙特阿拉伯·利雅得</span>
+            <span class="text-sm text-on-surface">② 制作形式发票</span>
+            <!-- 进度条 1/8 -->
+            <div class="flex items-center gap-1.5">
+              <div class="flex gap-0.5 flex-1">
+                <div class="h-1.5 flex-1 rounded-full bg-success"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-info animate-pulse opacity-70"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+                <div class="h-1.5 flex-1 rounded-full bg-surface-container-highest"></div>
+              </div>
+              <span class="text-xs text-on-surface-variant whitespace-nowrap">1/8</span>
+            </div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-error/15 text-error w-fit">1 项</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-info/15 text-info w-fit">进行中</span>
+            <span class="text-sm text-on-surface-variant">2025-12-06</span>
+            <div class="flex items-center gap-3">
+              <a href="vehicle-lifecycle-detail.html?vin=LBECF12K5N1098765" class="text-primary text-sm font-medium hover:underline">详情</a>
+              <a href="vehicle-lifecycle-stage.html?vin=LBECF12K5N1098765" class="text-primary text-sm font-medium hover:underline">去填写</a>
+            </div>
+          </div>
+
+          <!-- 无结果提示行（默认隐藏） -->
+          <div id="no-results-row" class="hidden px-5 py-10 text-center">
+            <div class="flex flex-col items-center gap-2 text-on-surface-variant">
+              <i data-lucide="search-x" class="w-8 h-8 text-on-surface-variant/40"></i>
+              <span class="text-sm">未找到匹配车辆</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 表格底部 -->
+        <div class="flex items-center justify-between px-5 py-3 border-t border-outline-variant/20">
+          <span class="text-xs text-on-surface-variant">共 12 辆车 · 显示 5 辆</span>
+          <div class="flex items-center gap-1">
+            <button id="btn-prev-page" class="px-2.5 py-1 rounded-md text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-40" disabled>上一页</button>
+            <button class="px-2.5 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary">1</button>
+            <button class="px-2.5 py-1 rounded-md text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">2</button>
+            <button class="px-2.5 py-1 rounded-md text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">3</button>
+            <button id="btn-next-page" class="px-2.5 py-1 rounded-md text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">下一页</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+    <!-- @main-content:end -->
+  </div>
+
+  <script>
+    $(function () {
+      // ====== 筛选逻辑 ======
+      var currentStatus = 'all';
+
+      function applyFilters() {
+        var searchVal = $('#filter-search').val().toLowerCase().trim();
+        var stageVal = $('#filter-stage').val();
+        var countryVal = $('#filter-country').val();
+        var visibleCount = 0;
+
+        $('.vehicle-row').each(function () {
+          var $row = $(this);
+          var vin = ($row.data('vin') || '').toString().toLowerCase();
+          var model = ($row.data('model') || '').toString().toLowerCase();
+          var country = ($row.data('country') || '').toString();
+          var stage = ($row.data('stage') || '').toString();
+          var status = ($row.data('status') || '').toString();
+
+          // 搜索过滤：匹配 VIN / 车型 / 目的国
+          var matchSearch = !searchVal || vin.indexOf(searchVal) !== -1 || model.indexOf(searchVal) !== -1 || country.toLowerCase().indexOf(searchVal) !== -1;
+
+          // 阶段过滤
+          var matchStage = !stageVal || stage === stageVal;
+
+          // 目的国过滤
+          var matchCountry = !countryVal || country === countryVal;
+
+          // 状态过滤
+          var matchStatus = currentStatus === 'all' || status === currentStatus;
+
+          if (matchSearch && matchStage && matchCountry && matchStatus) {
+            $row.removeClass('hidden');
+            visibleCount++;
+          } else {
+            $row.addClass('hidden');
+          }
+        });
+
+        // 无结果提示
+        if (visibleCount === 0) {
+          $('#no-results-row').removeClass('hidden');
+        } else {
+          $('#no-results-row').addClass('hidden');
+        }
+      }
+
+      // 搜索框实时过滤
+      $('#filter-search').on('input', function () {
+        applyFilters();
+      });
+
+      // 阶段下拉过滤
+      $('#filter-stage').on('change', function () {
+        applyFilters();
+      });
+
+      // 目的国下拉过滤
+      $('#filter-country').on('change', function () {
+        applyFilters();
+      });
+
+      // 状态 tabs 切换
+      $('.status-tab').on('click', function () {
+        var status = $(this).data('status');
+        currentStatus = status;
+
+        // 更新 tab 样式
+        $('.status-tab').removeClass('bg-primary/10 text-primary').addClass('text-on-surface-variant');
+        $(this).removeClass('text-on-surface-variant').addClass('bg-primary/10 text-primary');
+
+        applyFilters();
+      });
+
+      // 分页按钮（原型仅做交互入口，不实现真实分页）
+      $('#btn-next-page').on('click', function () {
+        console.log('翻页：跳转到第 2 页，需后端接口支持分页查询');
+      });
+
+      $('#btn-prev-page').on('click', function () {
+        console.log('翻页：返回上一页，需后端接口支持分页查询');
+      });
+    });
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>
