@@ -1,5 +1,7 @@
 # projects
 
+开发前阅读 [Agent 规划、部署与备份约定](AGENTS.md)。这些约定区分实现要求与当前部署能力；修改时保留本项目原有业务和数据边界。
+
 这是一个基于 [Next.js 16](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com) 的全栈应用项目，由扣子编程 CLI 创建。
 
 ## 快速开始
