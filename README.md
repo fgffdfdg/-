@@ -1,5 +1,7 @@
 # projects
 
+**发布前必读：** [部署、发行保留与回滚规范](docs/deployment-retention-policy.md)。每次部署、发行、重试、清理、回滚以及 AI 临时命令／CI／手工步骤都必须遵循；归档在未来启用时按实际平台适配。MD 不代表脚本或生产已自动生效。
+
 开发前阅读 [Agent 规划、部署与备份约定](AGENTS.md)。这些约定区分实现要求与当前部署能力；修改时保留本项目原有业务和数据边界。
 
 这是一个基于 [Next.js 16](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com) 的全栈应用项目，由扣子编程 CLI 创建。
